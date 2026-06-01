@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="./assets/reliakit-logo.png" alt="Reliakit" width="520">
+</p>
+
 # Reliakit
 
 Reusable Rust primitives and utility crates for building correct, safe, and reliable libraries and applications.
@@ -134,6 +138,8 @@ reliakit/
 Experimental. APIs may change before stable releases.
 
 The current focus is a small, well-tested `reliakit-primitives` crate before adding more workspace crates.
+
+Logo assets are stored under [`assets/`](./assets/).
 
 ## Roadmap
 
