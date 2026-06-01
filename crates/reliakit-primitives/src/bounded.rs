@@ -1,0 +1,170 @@
+use crate::{PrimitiveError, PrimitiveResult};
+use alloc::string::String;
+use core::{fmt, hash::Hash, ops::Deref};
+
+/// Owned string constrained by inclusive character length bounds.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct BoundedStr<const MIN: usize, const MAX: usize>(String);
+
+impl<const MIN: usize, const MAX: usize> BoundedStr<MIN, MAX> {
+    /// Creates a new bounded string.
+    ///
+    /// Length is measured in Unicode scalar values via `chars().count()`, not
+    /// bytes. If `MIN > MAX`, construction returns `OutOfRange`.
+    pub fn new(value: impl Into<String>) -> PrimitiveResult<Self> {
+        let value = value.into();
+        let actual = value.chars().count();
+
+        if MIN > MAX {
+            return Err(PrimitiveError::OutOfRange {
+                min: MIN as u128,
+                max: MAX as u128,
+                actual: actual as u128,
+            });
+        }
+
+        if MIN > 0 && value.trim().is_empty() {
+            return Err(PrimitiveError::Empty);
+        }
+
+        if actual < MIN {
+            return Err(PrimitiveError::TooShort { min: MIN, actual });
+        }
+
+        if actual > MAX {
+            return Err(PrimitiveError::TooLong { max: MAX, actual });
+        }
+
+        Ok(Self(value))
+    }
+
+    /// Returns the underlying string slice.
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+
+    /// Returns the owned inner string.
+    pub fn into_inner(self) -> String {
+        self.0
+    }
+
+    /// Returns the character length of the inner string.
+    pub fn len(&self) -> usize {
+        self.0.chars().count()
+    }
+
+    /// Returns whether the inner string is empty.
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+
+    /// Returns the minimum allowed character length.
+    pub fn min_len(&self) -> usize {
+        MIN
+    }
+
+    /// Returns the maximum allowed character length.
+    pub fn max_len(&self) -> usize {
+        MAX
+    }
+}
+
+impl<const MIN: usize, const MAX: usize> fmt::Display for BoundedStr<MIN, MAX> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(&self.0)
+    }
+}
+
+impl<const MIN: usize, const MAX: usize> AsRef<str> for BoundedStr<MIN, MAX> {
+    fn as_ref(&self) -> &str {
+        self.as_str()
+    }
+}
+
+impl<const MIN: usize, const MAX: usize> Deref for BoundedStr<MIN, MAX> {
+    type Target = str;
+
+    fn deref(&self) -> &Self::Target {
+        self.as_str()
+    }
+}
+
+impl<const MIN: usize, const MAX: usize> TryFrom<String> for BoundedStr<MIN, MAX> {
+    type Error = PrimitiveError;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        Self::new(value)
+    }
+}
+
+impl<const MIN: usize, const MAX: usize> TryFrom<&str> for BoundedStr<MIN, MAX> {
+    type Error = PrimitiveError;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        Self::new(value)
+    }
+}
+
+impl<const MIN: usize, const MAX: usize> From<BoundedStr<MIN, MAX>> for String {
+    fn from(value: BoundedStr<MIN, MAX>) -> Self {
+        value.into_inner()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::BoundedStr;
+    use crate::PrimitiveError;
+
+    #[test]
+    fn accepts_valid_length() {
+        let value = BoundedStr::<3, 12>::new("service").unwrap();
+        assert_eq!(value.as_str(), "service");
+        assert_eq!(value.len(), 7);
+        assert_eq!(value.min_len(), 3);
+        assert_eq!(value.max_len(), 12);
+    }
+
+    #[test]
+    fn rejects_too_short() {
+        assert_eq!(
+            BoundedStr::<3, 12>::new("ab").unwrap_err(),
+            PrimitiveError::TooShort { min: 3, actual: 2 }
+        );
+    }
+
+    #[test]
+    fn rejects_too_long() {
+        assert_eq!(
+            BoundedStr::<3, 5>::new("service").unwrap_err(),
+            PrimitiveError::TooLong { max: 5, actual: 7 }
+        );
+    }
+
+    #[test]
+    fn counts_unicode_chars() {
+        let value = BoundedStr::<2, 2>::new("éå").unwrap();
+        assert_eq!(value.len(), 2);
+        assert_eq!(value.as_str().len(), 4);
+    }
+
+    #[test]
+    fn rejects_whitespace_only_when_min_positive() {
+        assert_eq!(
+            BoundedStr::<1, 5>::new("  ").unwrap_err(),
+            PrimitiveError::Empty
+        );
+    }
+
+    #[test]
+    fn handles_invalid_bounds() {
+        assert_eq!(
+            BoundedStr::<5, 3>::new("abcd").unwrap_err(),
+            PrimitiveError::OutOfRange {
+                min: 5,
+                max: 3,
+                actual: 4
+            }
+        );
+    }
+}

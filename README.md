@@ -1,19 +1,31 @@
 # Reliakit
 
-Reusable Rust reliability primitives and utility crates.
+Reusable Rust primitives and utility crates for building correct, safe, and reliable libraries and applications.
 
 [![Crates.io](https://img.shields.io/crates/v/reliakit.svg)](https://crates.io/crates/reliakit)
 [![Docs.rs](https://docs.rs/reliakit/badge.svg)](https://docs.rs/reliakit)
 [![CI](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml/badge.svg)](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Reliakit is a Rust workspace for reusable reliability primitives and utility crates. It focuses on small, composable building blocks for writing correct, safe, and reliable Rust libraries and applications.
+Reliakit is a Rust workspace for reusable reliability primitives and utility crates.
 
-The workspace is intended to provide type-safe primitives, validation-oriented utility types, secret-safe wrappers, and small foundational crates with minimal dependencies and optional feature flags where appropriate. Each crate is designed to be usable independently.
+It focuses on small, composable building blocks for writing correct, safe, and reliable Rust libraries and applications.
 
-Reliakit is experimental. The initial workspace crates are planned, but this repository does not yet contain crate manifests or public source APIs. This README describes the intended workspace shape without claiming that unpublished crates or APIs are available.
+Each crate is designed to be usable independently.
 
 ## Crates
+
+### `reliakit-primitives`
+
+Type-safe primitives for constrained values such as non-empty strings, bounded strings, percentages, ports, and byte sizes.
+
+Implemented types:
+
+- `NonEmptyStr`
+- `BoundedStr`
+- `Percent`
+- `Port`
+- `ByteSize`
 
 ### `reliakit-core`
 
@@ -21,46 +33,11 @@ Planned.
 
 Shared core types, traits, and errors used across Reliakit crates.
 
-Possible contents:
-
-- common error types,
-- result aliases,
-- validation traits,
-- shared utility traits.
-
-No public API is documented here yet because the crate source has not landed.
-
-### `reliakit-primitives`
-
-Planned.
-
-Reusable type-safe primitives for representing constrained values.
-
-Possible contents:
-
-- `NonEmptyStr`,
-- `BoundedStr`,
-- `BoundedVec`,
-- `Percent`,
-- `Port`,
-- `ByteSize`.
-
-These names describe the intended direction. They are not documented as implemented APIs until the crate source exists.
-
 ### `reliakit-secret`
 
 Planned.
 
 Secret-safe wrappers for values that should not leak through `Debug`, logs, reports, or diagnostic output.
-
-Possible contents:
-
-- `Secret<T>`,
-- `Redacted<T>`,
-- explicit secret exposure APIs,
-- redaction helpers.
-
-These APIs are planned. The final names and behavior may change before the first release.
 
 ### `reliakit-collections`
 
@@ -79,6 +56,34 @@ General validation helpers and traits.
 Planned.
 
 Derive macros for validation and constrained types.
+
+## Installation
+
+After publishing:
+
+```toml
+[dependencies]
+reliakit-primitives = "0.1"
+```
+
+Until then, use the Git repository:
+
+```toml
+[dependencies]
+reliakit-primitives = { git = "https://github.com/satyakwok/reliakit", package = "reliakit-primitives" }
+```
+
+## Example
+
+```rust
+use reliakit_primitives::{BoundedStr, Percent, Port};
+
+type ServiceName = BoundedStr<3, 32>;
+
+let name = ServiceName::new("api-service")?;
+let success_rate = Percent::new(99)?;
+let port = Port::new(8080)?;
+```
 
 ## Design Goals
 
@@ -111,72 +116,37 @@ Reliakit is not:
 
 Reliakit is intended to provide focused primitives and utility crates, not replace mature ecosystem foundations.
 
-## Installation
-
-The crates are not published yet. Once the root crate is available on crates.io:
-
-```toml
-[dependencies]
-reliakit = "0.1"
-```
-
-Individual crates will be usable independently:
-
-```toml
-[dependencies]
-reliakit-core = "0.1"
-reliakit-primitives = "0.1"
-reliakit-secret = "0.1"
-```
-
-Before publication, Git dependencies may be used after the corresponding crate directories and manifests exist:
-
-```toml
-[dependencies]
-reliakit-secret = { git = "https://github.com/satyakwok/reliakit", package = "reliakit-secret" }
-```
-
 ## Workspace Layout
-
-Planned workspace layout:
 
 ```text
 reliakit/
 |-- crates/
-|   |-- reliakit-core/
-|   |-- reliakit-primitives/
-|   |-- reliakit-secret/
-|   |-- reliakit-collections/
-|   |-- reliakit-validate/
-|   `-- reliakit-derive/
+|   `-- reliakit-primitives/
 |-- examples/
 |-- Cargo.toml
 |-- README.md
 `-- LICENSE
 ```
 
-## Repository Status
+## Status
 
-This repository currently contains the README and license. The Rust workspace, crate manifests, source files, crate-level READMEs, examples, CI, and tests still need to be added.
+Experimental. APIs may change before stable releases.
 
-When crate directories are introduced, each crate should include its own README describing only the APIs implemented by that crate.
+The current focus is a small, well-tested `reliakit-primitives` crate before adding more workspace crates.
 
 ## Roadmap
 
-Initial workspace:
+Current:
+
+- `reliakit-primitives`
+
+Planned:
 
 - `reliakit-core`
-- `reliakit-primitives`
 - `reliakit-secret`
-
-Later:
-
 - `reliakit-collections`
 - `reliakit-validate`
 - `reliakit-derive`
-- crate-level examples
-- CI and documentation checks
-- crate-level README files derived from implemented APIs
 
 ## License
 

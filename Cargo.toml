@@ -1,0 +1,15 @@
+[workspace]
+members = [
+    "crates/reliakit-primitives",
+]
+resolver = "2"
+
+[workspace.package]
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/satyakwok/reliakit"
+homepage = "https://github.com/satyakwok/reliakit"
+readme = "README.md"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
