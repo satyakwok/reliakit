@@ -11,6 +11,9 @@ Reusable Rust primitives and utility crates for building correct, safe, and reli
 [![CI](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml/badge.svg)](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/satyakwok/reliakit/branch/main/graph/badge.svg)](https://codecov.io/gh/satyakwok/reliakit)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/satyakwok/reliakit?style=flat)](https://github.com/satyakwok/reliakit/stargazers)
+[![GitHub issues](https://img.shields.io/github/issues/satyakwok/reliakit)](https://github.com/satyakwok/reliakit/issues)
+[![Last commit](https://img.shields.io/github/last-commit/satyakwok/reliakit)](https://github.com/satyakwok/reliakit/commits/main)
 
 Reliakit is a Rust workspace for reusable reliability primitives and utility crates.
 
@@ -154,6 +157,18 @@ Planned:
 - `reliakit-collections`
 - `reliakit-validate`
 - `reliakit-derive`
+
+## Contributing
+
+Contributions are welcome. Please open an issue before submitting a pull request for non-trivial changes so the direction can be discussed first.
+
+- Keep each crate minimal and focused.
+- Add tests for any new public API surface.
+- Run `cargo fmt`, `cargo clippy`, and `cargo test` before submitting.
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=satyakwok/reliakit&type=Date)](https://star-history.com/#satyakwok/reliakit&Date)
 
 ## License
 

@@ -1,10 +1,16 @@
+<p align="center">
+  <img src="../../assets/reliakit-logo.png" alt="Reliakit" width="400">
+</p>
+
 # reliakit-primitives
 
 Type-safe primitives for constrained and reliability-oriented Rust values.
 
 [![Crates.io](https://img.shields.io/crates/v/reliakit-primitives.svg)](https://crates.io/crates/reliakit-primitives)
+[![Crates.io Downloads](https://img.shields.io/crates/d/reliakit-primitives.svg)](https://crates.io/crates/reliakit-primitives)
 [![Docs.rs](https://docs.rs/reliakit-primitives/badge.svg)](https://docs.rs/reliakit-primitives)
 [![CI](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml/badge.svg)](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/satyakwok/reliakit/branch/main/graph/badge.svg)](https://codecov.io/gh/satyakwok/reliakit)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](../../LICENSE)
 
 `reliakit-primitives` provides small owned wrapper types for values that should satisfy common constraints before they move through an application or library boundary.
