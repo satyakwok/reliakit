@@ -29,9 +29,9 @@ impl NonEmptyStr {
         self.0
     }
 
-    /// Returns the byte length of the inner string.
+    /// Returns the character length of the inner string (Unicode scalar values).
     pub fn len(&self) -> usize {
-        self.0.len()
+        self.0.chars().count()
     }
 
     /// Always returns `false`.
@@ -120,9 +120,11 @@ mod tests {
     }
 
     #[test]
-    fn len_returns_byte_length() {
+    fn len_returns_char_count() {
         let value = NonEmptyStr::new("hello").unwrap();
         assert_eq!(value.len(), 5);
+        let unicode = NonEmptyStr::new("éàü").unwrap();
+        assert_eq!(unicode.len(), 3);
     }
 
     #[test]

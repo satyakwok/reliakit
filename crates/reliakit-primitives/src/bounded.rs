@@ -23,16 +23,16 @@ impl<const MIN: usize, const MAX: usize> BoundedStr<MIN, MAX> {
             });
         }
 
-        if MIN > 0 && value.trim().is_empty() {
-            return Err(PrimitiveError::Empty);
-        }
-
         if actual < MIN {
             return Err(PrimitiveError::TooShort { min: MIN, actual });
         }
 
         if actual > MAX {
             return Err(PrimitiveError::TooLong { max: MAX, actual });
+        }
+
+        if MIN > 0 && value.trim().is_empty() {
+            return Err(PrimitiveError::Empty);
         }
 
         Ok(Self(value))

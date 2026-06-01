@@ -106,7 +106,7 @@ This crate forbids unsafe code.
 
 ## Status
 
-Experimental. APIs may change before stable releases.
+Active. The `0.1.x` API is considered stable for the current set of types.
 
 ## License
 

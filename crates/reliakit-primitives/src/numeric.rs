@@ -108,23 +108,25 @@ impl ByteSize {
         Self(bytes)
     }
 
-    /// Creates a size from kibibytes.
+    /// Creates a size from kibibytes (1 KiB = 1024 bytes).
+    ///
+    /// Saturates to `u64::MAX` on overflow instead of panicking.
     pub const fn from_kb(kb: u64) -> Self {
         Self(kb.saturating_mul(1024))
     }
 
-    /// Creates a size from mebibytes.
+    /// Creates a size from mebibytes (1 MiB = 1024 KiB).
+    ///
+    /// Saturates to `u64::MAX` on overflow instead of panicking.
     pub const fn from_mb(mb: u64) -> Self {
-        Self(mb.saturating_mul(1024).saturating_mul(1024))
+        Self(mb.saturating_mul(1024 * 1024))
     }
 
-    /// Creates a size from gibibytes.
+    /// Creates a size from gibibytes (1 GiB = 1024 MiB).
+    ///
+    /// Saturates to `u64::MAX` on overflow instead of panicking.
     pub const fn from_gb(gb: u64) -> Self {
-        Self(
-            gb.saturating_mul(1024)
-                .saturating_mul(1024)
-                .saturating_mul(1024),
-        )
+        Self(gb.saturating_mul(1024 * 1024 * 1024))
     }
 
     /// Returns the size in bytes.
