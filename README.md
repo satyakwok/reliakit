@@ -5,6 +5,7 @@ Reusable Rust primitives and utility crates for building correct, safe, and reli
 [![Crates.io](https://img.shields.io/crates/v/reliakit.svg)](https://crates.io/crates/reliakit)
 [![Docs.rs](https://docs.rs/reliakit/badge.svg)](https://docs.rs/reliakit)
 [![CI](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml/badge.svg)](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/satyakwok/reliakit/branch/main/graph/badge.svg)](https://codecov.io/gh/satyakwok/reliakit)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 Reliakit is a Rust workspace for reusable reliability primitives and utility crates.

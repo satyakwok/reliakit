@@ -1,0 +1,19 @@
+name: Publish Dry Run
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  publish-dry-run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install stable Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Publish dry run
+        run: cargo publish -p reliakit-primitives --dry-run
