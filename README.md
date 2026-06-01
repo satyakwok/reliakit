@@ -1,146 +1,96 @@
 # Reliakit
 
-Reliable Rust utilities for CLIs, backend services, bots, and infrastructure tooling.
+Reusable Rust reliability primitives and utility crates.
 
 [![Crates.io](https://img.shields.io/crates/v/reliakit.svg)](https://crates.io/crates/reliakit)
 [![Docs.rs](https://docs.rs/reliakit/badge.svg)](https://docs.rs/reliakit)
 [![CI](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml/badge.svg)](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Rust](https://img.shields.io/badge/rust-stable-orange.svg)](https://www.rust-lang.org)
 
-Reliakit provides practical Rust utilities for reliability-oriented applications. It is intended for CLIs, backend services, bots, RPC tools, automation scripts, and infrastructure tooling that need predictable startup checks, safe diagnostics, retries, and structured reports.
+Reliakit is a Rust workspace for reusable reliability primitives and utility crates. It focuses on small, composable building blocks for writing correct, safe, and reliable Rust libraries and applications.
 
-Reliakit is not a framework. Each crate should remain focused, composable, and usable independently, so applications can adopt only the pieces they need.
+The workspace is intended to provide type-safe primitives, validation-oriented utility types, secret-safe wrappers, and small foundational crates with minimal dependencies and optional feature flags where appropriate. Each crate is designed to be usable independently.
 
-The project is experimental. APIs may change while the crate boundaries, examples, and tests are being refined.
-
-## What Reliakit Provides
-
-- Environment validation for startup configuration.
-- Secret redaction for logs, errors, config dumps, and diagnostic output.
-- Retry and backoff helpers for fallible sync and async operations.
-- Health checks for HTTP, TCP, and JSON-RPC endpoints. Planned.
-- CLI-friendly errors for startup and operational failures. Planned.
-- Machine-readable reports for CLIs, CI, and monitoring tools. Planned.
+Reliakit is experimental. The initial workspace crates are planned, but this repository does not yet contain crate manifests or public source APIs. This README describes the intended workspace shape without claiming that unpublished crates or APIs are available.
 
 ## Crates
 
-### `reliakit-redact`
+### `reliakit-core`
 
-Redacts secrets from logs, errors, config dumps, and diagnostic output.
+Planned.
 
-Examples of secrets include API keys, bearer tokens, private keys, passwords, and database URLs.
+Shared core types, traits, and errors used across Reliakit crates.
 
-### `reliakit-env`
+Possible contents:
 
-Validates required and optional environment variables with clear startup errors.
+- common error types,
+- result aliases,
+- validation traits,
+- shared utility traits.
 
-Planned features include required variables, optional defaults, typed parsing, and secret-aware output.
+No public API is documented here yet because the crate source has not landed.
 
-### `reliakit-retry`
+### `reliakit-primitives`
 
-Retries fallible sync and async operations.
+Planned.
 
-Planned features include max attempts, fixed delay, exponential backoff, jitter, and retryable error classification.
+Reusable type-safe primitives for representing constrained values.
 
-### `reliakit-health`
+Possible contents:
 
-Planned crate for HTTP, TCP, and JSON-RPC health checks.
+- `NonEmptyStr`,
+- `BoundedStr`,
+- `BoundedVec`,
+- `Percent`,
+- `Port`,
+- `ByteSize`.
 
-### `reliakit-report`
+These names describe the intended direction. They are not documented as implemented APIs until the crate source exists.
 
-Planned crate for terminal and JSON reports for CLIs, CI, and monitoring tools.
+### `reliakit-secret`
 
-## Examples
+Planned.
 
-The APIs below show the intended direction. They may change while Reliakit is experimental.
+Secret-safe wrappers for values that should not leak through `Debug`, logs, reports, or diagnostic output.
 
-### Secret Redaction
+Possible contents:
 
-```rust
-use reliakit_redact::redact;
+- `Secret<T>`,
+- `Redacted<T>`,
+- explicit secret exposure APIs,
+- redaction helpers.
 
-let input = "DATABASE_URL=postgres://user:password@localhost:5432/app";
-let output = redact(input);
+These APIs are planned. The final names and behavior may change before the first release.
 
-println!("{output}");
-```
+### `reliakit-collections`
 
-### Environment Validation
+Planned.
 
-```rust
-use reliakit_env::EnvSchema;
+Bounded and reliability-oriented collection utilities.
 
-let env = EnvSchema::new()
-    .required("DATABASE_URL")
-    .required("RPC_URL")
-    .optional("PORT", "3000")
-    .secret("PRIVATE_KEY")
-    .load()?;
-```
+### `reliakit-validate`
 
-### Retry Helper
+Planned.
 
-```rust
-use reliakit_retry::Retry;
+General validation helpers and traits.
 
-let result = Retry::new()
-    .attempts(5)
-    .run(|| async { call_external_service().await })
-    .await?;
-```
+### `reliakit-derive`
 
-## Installation
+Planned.
 
-After publishing, the workspace meta crate can be installed from crates.io:
-
-```toml
-[dependencies]
-reliakit = "0.1"
-```
-
-Individual crates can be used directly:
-
-```toml
-[dependencies]
-reliakit-redact = "0.1"
-reliakit-env = "0.1"
-reliakit-retry = "0.1"
-```
-
-Before crates are published, use a Git dependency:
-
-```toml
-[dependencies]
-reliakit-redact = { git = "https://github.com/satyakwok/reliakit", package = "reliakit-redact" }
-```
-
-## Workspace Layout
-
-Planned workspace layout:
-
-```text
-reliakit/
-├── crates/
-│   ├── reliakit-redact/
-│   ├── reliakit-env/
-│   ├── reliakit-retry/
-│   ├── reliakit-health/
-│   └── reliakit-report/
-├── examples/
-├── Cargo.toml
-├── README.md
-└── LICENSE
-```
+Derive macros for validation and constrained types.
 
 ## Design Goals
 
-- Focused APIs.
+- Reusable library primitives.
+- Clear type semantics.
 - Minimal dependencies.
-- Useful defaults.
-- Clear error messages.
+- No hidden runtime.
+- No framework lock-in.
+- Optional feature flags.
+- `no_std` support where practical.
 - Safe diagnostic output.
-- Machine-readable reports.
+- Stable, documented APIs.
 - Composable crates.
 
 ## Non-Goals
@@ -151,28 +101,82 @@ Reliakit is not:
 - a web framework,
 - an ORM,
 - a logging framework,
-- a full observability platform,
-- a replacement for Tokio, Serde, Clap, Tracing, Anyhow, or Thiserror.
+- a replacement for `serde`,
+- a replacement for `tokio`,
+- a replacement for `clap`,
+- a replacement for `anyhow`,
+- a replacement for `thiserror`,
+- a replacement for `hashbrown`,
+- a replacement for `syn`.
 
-## Status
+Reliakit is intended to provide focused primitives and utility crates, not replace mature ecosystem foundations.
 
-Reliakit is experimental. APIs may change before stable releases. Initial focus is correctness, tests, examples, and clear crate boundaries.
+## Installation
+
+The crates are not published yet. Once the root crate is available on crates.io:
+
+```toml
+[dependencies]
+reliakit = "0.1"
+```
+
+Individual crates will be usable independently:
+
+```toml
+[dependencies]
+reliakit-core = "0.1"
+reliakit-primitives = "0.1"
+reliakit-secret = "0.1"
+```
+
+Before publication, Git dependencies may be used after the corresponding crate directories and manifests exist:
+
+```toml
+[dependencies]
+reliakit-secret = { git = "https://github.com/satyakwok/reliakit", package = "reliakit-secret" }
+```
+
+## Workspace Layout
+
+Planned workspace layout:
+
+```text
+reliakit/
+|-- crates/
+|   |-- reliakit-core/
+|   |-- reliakit-primitives/
+|   |-- reliakit-secret/
+|   |-- reliakit-collections/
+|   |-- reliakit-validate/
+|   `-- reliakit-derive/
+|-- examples/
+|-- Cargo.toml
+|-- README.md
+`-- LICENSE
+```
+
+## Repository Status
+
+This repository currently contains the README and license. The Rust workspace, crate manifests, source files, crate-level READMEs, examples, CI, and tests still need to be added.
+
+When crate directories are introduced, each crate should include its own README describing only the APIs implemented by that crate.
 
 ## Roadmap
 
-v0.1:
+Initial workspace:
 
-- `reliakit-redact`
-- `reliakit-env`
-- `reliakit-retry`
+- `reliakit-core`
+- `reliakit-primitives`
+- `reliakit-secret`
 
 Later:
 
-- `reliakit-health`
-- `reliakit-report`
-- JSON output
-- CI-friendly reports
-- Examples for bots, CLIs, and infrastructure tools
+- `reliakit-collections`
+- `reliakit-validate`
+- `reliakit-derive`
+- crate-level examples
+- CI and documentation checks
+- crate-level README files derived from implemented APIs
 
 ## License
 
