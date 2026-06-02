@@ -17,6 +17,35 @@ Type-safe primitives for constrained and reliability-oriented Rust values.
 
 The crate has no dependencies and forbids unsafe code.
 
+The goal is not to parse every domain-specific format perfectly. The goal is to
+make common invariants explicit in types, keep validation close to input
+boundaries, and avoid passing unchecked strings and numbers through public APIs.
+
+## What This Crate Does
+
+This crate turns common validated values into explicit Rust types.
+
+Instead of passing unchecked `String`, `u16`, `u64`, or `f64` values through
+your code, construct a primitive once and let function signatures carry the
+invariant:
+
+```rust
+use reliakit_primitives::{Email, NonEmptyStr, Port};
+
+fn configure_service(name: NonEmptyStr, contact: Email, port: Port) {
+    // These values have already passed their basic validation rules.
+}
+
+let name = NonEmptyStr::new("api")?;
+let contact = Email::new("ops@example.com")?;
+let port = Port::new(8080)?;
+
+configure_service(name, contact, port);
+```
+
+This is useful at boundaries such as configuration loading, request parsing,
+CLI input, test fixtures, and library APIs.
+
 ## When To Use It
 
 Use this crate when a value has simple validity rules that should be checked once and then carried as a typed value:
@@ -33,6 +62,10 @@ Use this crate when a value has simple validity rules that should be checked onc
 ## When Not To Use It
 
 Do not use this crate as a replacement for domain-specific validation, parsing, serialization, or schema libraries. The types here are intentionally small and general.
+
+For example, `Email` is a basic structural validator, not a full RFC 5321 or
+deliverability checker. `HttpUrl` checks for an HTTP(S) scheme and a non-empty
+host, but it is not a complete URL parser.
 
 ## Installation
 
@@ -76,6 +109,45 @@ use reliakit_primitives::{ByteSize, Percent, Port};
 let limit = ByteSize::from_mb(10);
 let threshold = Percent::new(80)?;
 let port = Port::new(3000)?;
+```
+
+### Text primitives
+
+```rust
+use reliakit_primitives::{Email, HttpUrl, Slug};
+
+let slug = Slug::new("service-api")?;
+let email = Email::new("ops@example.com")?;
+let url = HttpUrl::new("https://example.com/health")?;
+
+assert_eq!(email.domain(), "example.com");
+assert!(url.is_https());
+```
+
+### Structured values
+
+```rust
+use reliakit_primitives::{HumanDuration, SemVer, Uuid};
+
+let version = SemVer::parse("1.2.3-beta.1+build.5")?;
+let request_id = Uuid::parse("550e8400-e29b-41d4-a716-446655440000")?;
+let timeout = HumanDuration::parse("1m30s")?;
+
+assert!(version.is_pre_release());
+assert_eq!(request_id.version(), 4);
+assert_eq!(timeout.as_duration().as_secs(), 90);
+```
+
+### Error handling
+
+All fallible constructors return `PrimitiveResult<T>`, an alias for
+`Result<T, PrimitiveError>`.
+
+```rust
+use reliakit_primitives::{NonEmptyStr, PrimitiveError};
+
+let err = NonEmptyStr::new("   ").unwrap_err();
+assert_eq!(err, PrimitiveError::Empty);
 ```
 
 ## Available Types
@@ -127,6 +199,10 @@ let port = Port::new(3000)?;
 
 The crate supports `no_std` environments when `std` feature is disabled and `alloc` is available.
 
+String-backed and vector-backed primitives require allocation. Use
+`default-features = false, features = ["alloc"]` for allocation-backed types
+without `std`.
+
 ## Safety
 
 This crate is `#![forbid(unsafe_code)]`.
@@ -137,7 +213,9 @@ Rust stable. No nightly features are used.
 
 ## Status
 
-Active. The `0.2.x` API is considered stable for the current set of types.
+Active. The crate is published for real use and follows normal Rust crate
+versioning. APIs may still receive compatible refinements before a `1.0`
+release.
 
 ## Contributing
 

@@ -128,7 +128,7 @@ Reliakit is intended to provide focused primitives and utility crates, not repla
 reliakit/
 |-- crates/
 |   `-- reliakit-primitives/
-|-- examples/
+|       `-- examples/
 |-- Cargo.toml
 |-- README.md
 `-- LICENSE
@@ -136,9 +136,11 @@ reliakit/
 
 ## Status
 
-Experimental. APIs may change before stable releases.
+Active. Reliakit is published as a real Rust library workspace and follows
+normal Rust crate versioning.
 
-The current focus is a small, well-tested `reliakit-primitives` crate before adding more workspace crates.
+The current focus is a small, well-tested `reliakit-primitives` crate before
+adding more workspace crates.
 
 Logo assets are stored under [`assets/`](./assets/).
 
