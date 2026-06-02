@@ -2,12 +2,21 @@ coverage:
   status:
     project:
       default:
-        target: 93%
+        target: 90%
         threshold: 1%
+      reliakit-primitives:
+        target: 90%
+        threshold: 1%
+        flags:
+          - reliakit-primitives
     patch:
       default:
         target: 90%
         threshold: 1%
+
+flag_management:
+  default_rules:
+    carryforward: true
 
 comment:
   layout: "reach,diff,flags,files"

@@ -65,14 +65,14 @@ Derive macros for validation and constrained types.
 
 ## Installation
 
-After publishing:
+From crates.io:
 
 ```toml
 [dependencies]
-reliakit-primitives = "0.1"
+reliakit-primitives = "0.2"
 ```
 
-Until then, use the Git repository:
+Or depend on the Git repository directly:
 
 ```toml
 [dependencies]

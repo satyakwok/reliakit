@@ -36,16 +36,12 @@ impl SemVer {
 
         let (s, build) = if let Some(idx) = s.find('+') {
             let b = s[idx + 1..].to_string();
-            if b.is_empty() {
-                return Err(PrimitiveError::Invalid {
-                    message: "build metadata must not be empty after '+'",
-                });
-            }
             if b.contains('+') {
                 return Err(PrimitiveError::Invalid {
                     message: "build metadata must not contain '+'",
                 });
             }
+            validate_identifier_set(&b, IdentifierKind::Build)?;
             (&s[..idx], Some(b))
         } else {
             (s, None)
@@ -53,11 +49,7 @@ impl SemVer {
 
         let (s, pre) = if let Some(idx) = s.find('-') {
             let p = s[idx + 1..].to_string();
-            if p.is_empty() {
-                return Err(PrimitiveError::Invalid {
-                    message: "pre-release identifier must not be empty after '-'",
-                });
-            }
+            validate_identifier_set(&p, IdentifierKind::PreRelease)?;
             (&s[..idx], Some(p))
         } else {
             (s, None)
@@ -130,11 +122,88 @@ fn parse_u64(s: &str) -> Option<u64> {
         return None;
     }
     let mut result: u64 = 0;
-    for c in s.chars() {
-        let digit = c.to_digit(10)? as u64;
+    for b in s.bytes() {
+        if !b.is_ascii_digit() {
+            return None;
+        }
+        let digit = (b - b'0') as u64;
         result = result.checked_mul(10)?.checked_add(digit)?;
     }
     Some(result)
+}
+
+#[derive(Copy, Clone)]
+enum IdentifierKind {
+    PreRelease,
+    Build,
+}
+
+fn validate_identifier_set(s: &str, kind: IdentifierKind) -> PrimitiveResult<()> {
+    if s.is_empty() {
+        return Err(PrimitiveError::Invalid {
+            message: match kind {
+                IdentifierKind::PreRelease => "pre-release identifier must not be empty after '-'",
+                IdentifierKind::Build => "build metadata must not be empty after '+'",
+            },
+        });
+    }
+
+    for identifier in s.split('.') {
+        if identifier.is_empty() {
+            return Err(PrimitiveError::Invalid {
+                message: "semver identifiers must not be empty",
+            });
+        }
+
+        if !identifier
+            .bytes()
+            .all(|b| b.is_ascii_alphanumeric() || b == b'-')
+        {
+            return Err(PrimitiveError::Invalid {
+                message: "semver identifiers must contain only ASCII alphanumerics and hyphens",
+            });
+        }
+
+        if matches!(kind, IdentifierKind::PreRelease)
+            && is_numeric_identifier(identifier)
+            && identifier.len() > 1
+            && identifier.starts_with('0')
+        {
+            return Err(PrimitiveError::Invalid {
+                message: "numeric pre-release identifiers must not have leading zeros",
+            });
+        }
+    }
+
+    Ok(())
+}
+
+fn is_numeric_identifier(s: &str) -> bool {
+    s.bytes().all(|b| b.is_ascii_digit())
+}
+
+fn compare_numeric_identifier(a: &str, b: &str) -> core::cmp::Ordering {
+    a.len().cmp(&b.len()).then_with(|| a.cmp(b))
+}
+
+fn compare_pre_release(a: &str, b: &str) -> core::cmp::Ordering {
+    for (left, right) in a.split('.').zip(b.split('.')) {
+        let left_numeric = is_numeric_identifier(left);
+        let right_numeric = is_numeric_identifier(right);
+
+        let ordering = match (left_numeric, right_numeric) {
+            (true, true) => compare_numeric_identifier(left, right),
+            (true, false) => core::cmp::Ordering::Less,
+            (false, true) => core::cmp::Ordering::Greater,
+            (false, false) => left.cmp(right),
+        };
+
+        if ordering != core::cmp::Ordering::Equal {
+            return ordering;
+        }
+    }
+
+    a.split('.').count().cmp(&b.split('.').count())
 }
 
 impl fmt::Display for SemVer {
@@ -167,7 +236,7 @@ impl Ord for SemVer {
             (None, None) => core::cmp::Ordering::Equal,
             (Some(_), None) => core::cmp::Ordering::Less,
             (None, Some(_)) => core::cmp::Ordering::Greater,
-            (Some(a), Some(b)) => a.cmp(b),
+            (Some(a), Some(b)) => compare_pre_release(a, b),
         }
     }
 }
@@ -249,6 +318,19 @@ mod tests {
     }
 
     #[test]
+    fn rejects_invalid_pre_release_identifiers() {
+        assert!(SemVer::parse("1.0.0-alpha..1").is_err());
+        assert!(SemVer::parse("1.0.0-alpha_1").is_err());
+        assert!(SemVer::parse("1.0.0-01").is_err());
+    }
+
+    #[test]
+    fn rejects_invalid_build_identifiers() {
+        assert!(SemVer::parse("1.0.0+build..1").is_err());
+        assert!(SemVer::parse("1.0.0+build_1").is_err());
+    }
+
+    #[test]
     fn display() {
         assert_eq!(SemVer::parse("1.2.3").unwrap().to_string(), "1.2.3");
         assert_eq!(
@@ -294,5 +376,26 @@ mod tests {
         let alpha = SemVer::parse("1.0.0-alpha").unwrap();
         let beta = SemVer::parse("1.0.0-beta").unwrap();
         assert!(alpha < beta);
+    }
+
+    #[test]
+    fn pre_release_numeric_identifiers_compare_numerically() {
+        let two = SemVer::parse("1.0.0-alpha.2").unwrap();
+        let ten = SemVer::parse("1.0.0-alpha.10").unwrap();
+        assert!(two < ten);
+    }
+
+    #[test]
+    fn pre_release_numeric_identifier_comparison_does_not_overflow() {
+        let smaller = SemVer::parse("1.0.0-alpha.999999999999999999999999999999").unwrap();
+        let larger = SemVer::parse("1.0.0-alpha.1000000000000000000000000000000").unwrap();
+        assert!(smaller < larger);
+    }
+
+    #[test]
+    fn pre_release_numeric_identifiers_sort_before_non_numeric() {
+        let numeric = SemVer::parse("1.0.0-1").unwrap();
+        let alpha = SemVer::parse("1.0.0-alpha").unwrap();
+        assert!(numeric < alpha);
     }
 }

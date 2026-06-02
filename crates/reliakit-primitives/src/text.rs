@@ -197,7 +197,8 @@ impl HttpUrl {
                 message: "URL must start with http:// or https://",
             });
         };
-        if after_scheme.is_empty() || after_scheme.chars().all(|c| c.is_whitespace()) {
+        let host = after_scheme.split(['/', '?', '#']).next().unwrap_or("");
+        if host.is_empty() || host.chars().all(|c| c.is_whitespace()) {
             return Err(PrimitiveError::Invalid {
                 message: "URL must have a non-empty host",
             });
@@ -459,6 +460,11 @@ mod tests {
     #[test]
     fn url_rejects_empty_host() {
         assert!(HttpUrl::new("https://").is_err());
+    }
+
+    #[test]
+    fn url_rejects_missing_host_before_path() {
+        assert!(HttpUrl::new("https:///path").is_err());
     }
 
     #[test]

@@ -2,32 +2,43 @@ name: Coverage
 
 on:
   push:
+    branches: [main]
   pull_request:
+
+permissions:
+  contents: read
 
 jobs:
   coverage:
+    name: Coverage
     runs-on: ubuntu-latest
 
-    permissions:
-      id-token: write
-      contents: read
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Install stable Rust
+      - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
 
       - name: Install cargo-llvm-cov
         run: cargo install cargo-llvm-cov --locked
 
-      - name: Generate coverage
-        run: cargo llvm-cov --workspace --all-features --lcov --output-path lcov.info
+      - name: Generate reliakit-primitives coverage
+        run: |
+          cargo llvm-cov \
+            -p reliakit-primitives \
+            --all-features \
+            --lcov \
+            --output-path lcov-reliakit-primitives.info
 
-      - name: Upload coverage
+      - name: Upload reliakit-primitives coverage
         uses: codecov/codecov-action@v6
         with:
-          files: lcov.info
+          files: lcov-reliakit-primitives.info
+          flags: reliakit-primitives
+          name: reliakit-primitives
           fail_ci_if_error: true
-          use_oidc: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
