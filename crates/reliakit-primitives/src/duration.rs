@@ -34,7 +34,6 @@ impl HumanDuration {
 
         let mut total_nanos: u128 = 0;
         let mut last_rank: u8 = u8::MAX;
-        let mut found_any = false;
         let mut pos = 0;
         let bytes = s.as_bytes();
 
@@ -92,17 +91,12 @@ impl HumanDuration {
                 .ok_or(PrimitiveError::Invalid {
                     message: "duration overflow",
                 })?;
-
-            found_any = true;
         }
 
-        if !found_any {
-            return Err(PrimitiveError::Invalid {
-                message: "no duration components found",
-            });
-        }
-
-        let secs = (total_nanos / 1_000_000_000) as u64;
+        let secs =
+            u64::try_from(total_nanos / 1_000_000_000).map_err(|_| PrimitiveError::Invalid {
+                message: "duration overflow: total duration exceeds maximum representable value",
+            })?;
         let nanos = (total_nanos % 1_000_000_000) as u32;
         Ok(Self(Duration::new(secs, nanos)))
     }
@@ -299,6 +293,12 @@ mod tests {
     #[test]
     fn display_millis_only() {
         assert_eq!(HumanDuration::parse("500ms").unwrap().to_string(), "500ms");
+    }
+
+    #[test]
+    fn rejects_duration_that_overflows_u64_seconds() {
+        // u64::MAX hours * 3600 seconds/hour >> u64::MAX seconds
+        assert!(HumanDuration::parse("18446744073709551615h").is_err());
     }
 
     #[test]

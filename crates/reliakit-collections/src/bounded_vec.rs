@@ -43,7 +43,7 @@ impl<T, const MIN: usize, const MAX: usize> BoundedVec<T, MIN, MAX> {
         if self.0.len() >= MAX {
             return Err(CollectionError::TooMany {
                 max: MAX,
-                actual: self.0.len() + 1,
+                actual: self.0.len().saturating_add(1),
             });
         }
         self.0.push(item);
