@@ -6,7 +6,7 @@ This project follows normal Rust crate versioning. Crate releases may use a
 workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 `CRATE-vMAJOR.MINOR.PATCH`.
 
-## Unreleased
+## reliakit-primitives 0.2.2 - 2026-06-02
 
 ### Added
 
