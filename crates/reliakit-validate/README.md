@@ -6,6 +6,9 @@
 
 Composable validation traits and error types for Rust structs and values.
 
+[![Crates.io](https://img.shields.io/crates/v/reliakit-validate.svg)](https://crates.io/crates/reliakit-validate)
+[![Crates.io Downloads](https://img.shields.io/crates/d/reliakit-validate.svg)](https://crates.io/crates/reliakit-validate)
+[![Docs.rs](https://docs.rs/reliakit-validate/badge.svg)](https://docs.rs/reliakit-validate)
 [![CI](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml/badge.svg)](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/satyakwok/reliakit/branch/main/graph/badge.svg)](https://codecov.io/gh/satyakwok/reliakit)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/satyakwok/reliakit/blob/main/LICENSE)
@@ -147,7 +150,7 @@ Rust 1.85 stable. No nightly features are used.
 
 ## Status
 
-Active. Not yet published to crates.io.
+Active. The `0.1.x` API is considered stable.
 
 ## Contributing
 
