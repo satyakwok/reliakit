@@ -21,11 +21,7 @@ Each crate is designed to be usable independently.
 
 ## Crates
 
-### `reliakit-primitives`
-
-[![Crates.io](https://img.shields.io/crates/v/reliakit-primitives.svg)](https://crates.io/crates/reliakit-primitives)
-[![Crates.io Downloads](https://img.shields.io/crates/d/reliakit-primitives.svg)](https://crates.io/crates/reliakit-primitives)
-[![Docs.rs](https://docs.rs/reliakit-primitives/badge.svg)](https://docs.rs/reliakit-primitives)
+### `reliakit-primitives` — [crates.io](https://crates.io/crates/reliakit-primitives) · [docs.rs](https://docs.rs/reliakit-primitives)
 
 Type-safe primitives for constrained values such as non-empty strings, bounded strings, percentages, ports, and byte sizes.
 
