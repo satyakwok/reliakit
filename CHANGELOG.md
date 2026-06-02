@@ -2,8 +2,32 @@
 
 All notable changes to this workspace are documented here.
 
-This project follows normal Rust crate versioning. Crate releases are tagged as
-`vMAJOR.MINOR.PATCH`.
+This project follows normal Rust crate versioning. Crate releases may use a
+workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
+`CRATE-vMAJOR.MINOR.PATCH`.
+
+## Unreleased
+
+### Added
+
+- Added `FromStr` implementations for string-backed and parsed primitives:
+  - `NonEmptyStr`
+  - `BoundedStr<MIN, MAX>`
+  - `Slug`
+  - `Email`
+  - `HttpUrl`
+  - `HexString`
+  - `SemVer`
+  - `Uuid`
+  - `HumanDuration`
+- Added direct comparisons against `str`, `&str`, `String`, and `&String` for
+  the same primitive types.
+
+### Changed
+
+- Enabled `missing_docs` warnings for `reliakit-primitives`.
+- Made additional infallible or validation-only constructors `const fn` where
+  supported by the current MSRV.
 
 ## reliakit-secret 0.1.0 - 2026-06-02
 
