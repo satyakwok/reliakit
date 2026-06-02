@@ -1,0 +1,22 @@
+[package]
+name = "reliakit-validate"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme = "README.md"
+description = "Composable validation traits and error types for Rust structs and values."
+keywords = ["validation", "validate", "rules", "constraints", "no-std"]
+categories = ["data-structures", "rust-patterns", "no-std"]
+
+[features]
+default = ["std"]
+std = []
+alloc = []
+
+[dependencies]
+
+[lints]
+workspace = true

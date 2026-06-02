@@ -20,3 +20,9 @@ jobs:
 
       - name: Verify reliakit-secret package
         run: cargo publish -p reliakit-secret --dry-run
+
+      - name: Verify reliakit-validate package
+        run: cargo publish -p reliakit-validate --dry-run
+
+      - name: Verify reliakit-collections package
+        run: cargo publish -p reliakit-collections --dry-run

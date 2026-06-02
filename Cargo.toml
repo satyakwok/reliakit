@@ -2,6 +2,8 @@
 members = [
     "crates/reliakit-primitives",
     "crates/reliakit-secret",
+    "crates/reliakit-validate",
+    "crates/reliakit-collections",
 ]
 resolver = "2"
 

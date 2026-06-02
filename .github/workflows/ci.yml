@@ -42,3 +42,21 @@ jobs:
 
       - name: Check MSRV
         run: cargo check --workspace --all-features
+
+  no-std:
+    name: no_std
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install stable Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Check no_std (alloc only)
+        run: |
+          cargo check -p reliakit-primitives --no-default-features --features alloc
+          cargo check -p reliakit-secret --no-default-features --features alloc
+          cargo check -p reliakit-validate --no-default-features --features alloc
+          cargo check -p reliakit-collections --no-default-features --features alloc

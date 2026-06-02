@@ -46,13 +46,7 @@ Implemented types:
 - `Uuid`
 - `HumanDuration`
 
-### `reliakit-core`
-
-Planned.
-
-Shared core types, traits, and errors used across Reliakit crates.
-
-### `reliakit-secret`
+### `reliakit-secret` — [crates.io](https://crates.io/crates/reliakit-secret) · [docs.rs](https://docs.rs/reliakit-secret)
 
 Secret-safe wrappers for values that should not leak through `Debug`, `Display`,
 logs, reports, or diagnostic output.
@@ -64,17 +58,30 @@ Implemented types:
 - `ExposeSecret<T>`
 - `ExposeSecretMut<T>`
 
-### `reliakit-collections`
+### `reliakit-validate` — [crates.io](https://crates.io/crates/reliakit-validate) · [docs.rs](https://docs.rs/reliakit-validate)
+
+Composable validation traits and error types for Rust structs and values.
+
+Implemented types:
+
+- `Validate` trait
+- `Valid<T>`
+- `ValidationError`
+- `Violation`
+
+### `reliakit-collections` — [crates.io](https://crates.io/crates/reliakit-collections) · [docs.rs](https://docs.rs/reliakit-collections)
+
+Bounded and reliability-oriented collection types.
+
+Implemented types:
+
+- `BoundedVec<T, MIN, MAX>`
+
+### `reliakit-core`
 
 Planned.
 
-Bounded and reliability-oriented collection utilities.
-
-### `reliakit-validate`
-
-Planned.
-
-General validation helpers and traits.
+Shared core types, traits, and errors used across Reliakit crates.
 
 ### `reliakit-derive`
 
