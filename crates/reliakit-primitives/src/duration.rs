@@ -1,5 +1,6 @@
 use crate::{PrimitiveError, PrimitiveResult};
-use core::{fmt, time::Duration};
+use alloc::string::String;
+use core::{fmt, str::FromStr, time::Duration};
 
 /// Human-readable duration parsed from strings like `1h`, `30m`, `45s`,
 /// `500ms`, or combinations such as `1h30m45s`.
@@ -167,6 +168,38 @@ impl fmt::Display for HumanDuration {
     }
 }
 
+impl FromStr for HumanDuration {
+    type Err = PrimitiveError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Self::parse(s)
+    }
+}
+
+impl PartialEq<str> for HumanDuration {
+    fn eq(&self, other: &str) -> bool {
+        Self::parse(other).is_ok_and(|other| self == &other)
+    }
+}
+
+impl PartialEq<&str> for HumanDuration {
+    fn eq(&self, other: &&str) -> bool {
+        self.eq(*other)
+    }
+}
+
+impl PartialEq<String> for HumanDuration {
+    fn eq(&self, other: &String) -> bool {
+        self.eq(other.as_str())
+    }
+}
+
+impl PartialEq<&String> for HumanDuration {
+    fn eq(&self, other: &&String) -> bool {
+        self.eq(other.as_str())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::HumanDuration;
@@ -266,5 +299,14 @@ mod tests {
     #[test]
     fn display_millis_only() {
         assert_eq!(HumanDuration::parse("500ms").unwrap().to_string(), "500ms");
+    }
+
+    #[test]
+    fn from_str_and_string_comparisons() {
+        let duration = "1m30s".parse::<HumanDuration>().unwrap();
+        let owned = "90s".to_string();
+        assert_eq!(duration, "1m30s");
+        assert_eq!(duration, owned);
+        assert!("1s1m".parse::<HumanDuration>().is_err());
     }
 }

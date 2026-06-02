@@ -6,11 +6,13 @@ use core::fmt;
 pub struct Percent(u8);
 
 impl Percent {
+    /// Minimum allowed integer percentage.
     pub const MIN: u8 = 0;
+    /// Maximum allowed integer percentage.
     pub const MAX: u8 = 100;
 
     /// Creates a new percentage value.
-    pub fn new(value: u8) -> PrimitiveResult<Self> {
+    pub const fn new(value: u8) -> PrimitiveResult<Self> {
         if value > Self::MAX {
             return Err(PrimitiveError::OutOfRange {
                 min: Self::MIN as u128,
@@ -57,12 +59,14 @@ impl From<Percent> for u8 {
 pub struct Port(u16);
 
 impl Port {
+    /// Minimum allowed TCP/UDP port.
     pub const MIN: u16 = 1;
+    /// Maximum allowed TCP/UDP port.
     pub const MAX: u16 = 65535;
 
     /// Creates a new port.
-    pub fn new(value: u16) -> PrimitiveResult<Self> {
-        if !(Self::MIN..=Self::MAX).contains(&value) {
+    pub const fn new(value: u16) -> PrimitiveResult<Self> {
+        if value < Self::MIN {
             return Err(PrimitiveError::OutOfRange {
                 min: Self::MIN as u128,
                 max: Self::MAX as u128,
@@ -174,7 +178,7 @@ pub struct PositiveInt(u64);
 
 impl PositiveInt {
     /// Creates a `PositiveInt`. Returns `OutOfRange` if `value` is zero.
-    pub fn new(value: u64) -> PrimitiveResult<Self> {
+    pub const fn new(value: u64) -> PrimitiveResult<Self> {
         if value == 0 {
             return Err(PrimitiveError::OutOfRange {
                 min: 1,
@@ -185,6 +189,7 @@ impl PositiveInt {
         Ok(Self(value))
     }
 
+    /// Returns the positive integer value.
     pub const fn get(self) -> u64 {
         self.0
     }
@@ -228,6 +233,7 @@ impl PositiveFloat {
         Ok(Self(value))
     }
 
+    /// Returns the positive floating-point value.
     pub fn get(self) -> f64 {
         self.0
     }
@@ -257,7 +263,9 @@ impl TryFrom<f64> for PositiveFloat {
 pub struct PercentageF64(f64);
 
 impl PercentageF64 {
+    /// Minimum allowed floating-point percentage.
     pub const MIN: f64 = 0.0;
+    /// Maximum allowed floating-point percentage.
     pub const MAX: f64 = 100.0;
 
     /// Creates a `PercentageF64`. Returns `Invalid` if `value` is not finite
@@ -271,6 +279,7 @@ impl PercentageF64 {
         Ok(Self(value))
     }
 
+    /// Returns the floating-point percentage value.
     pub fn get(self) -> f64 {
         self.0
     }

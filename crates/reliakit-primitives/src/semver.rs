@@ -1,6 +1,6 @@
 use crate::{PrimitiveError, PrimitiveResult};
 use alloc::string::{String, ToString};
-use core::fmt;
+use core::{fmt, str::FromStr};
 
 /// Semantic version in the form `MAJOR.MINOR.PATCH` with optional pre-release
 /// and build metadata identifiers.
@@ -18,7 +18,7 @@ pub struct SemVer {
 
 impl SemVer {
     /// Creates a `SemVer` with no pre-release or build metadata.
-    pub fn new(major: u64, minor: u64, patch: u64) -> Self {
+    pub const fn new(major: u64, minor: u64, patch: u64) -> Self {
         Self {
             major,
             minor,
@@ -75,12 +75,15 @@ impl SemVer {
         })
     }
 
+    /// Returns the major version component.
     pub fn major(&self) -> u64 {
         self.major
     }
+    /// Returns the minor version component.
     pub fn minor(&self) -> u64 {
         self.minor
     }
+    /// Returns the patch version component.
     pub fn patch(&self) -> u64 {
         self.patch
     }
@@ -216,6 +219,38 @@ impl fmt::Display for SemVer {
             write!(f, "+{build}")?;
         }
         Ok(())
+    }
+}
+
+impl FromStr for SemVer {
+    type Err = PrimitiveError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Self::parse(s)
+    }
+}
+
+impl PartialEq<str> for SemVer {
+    fn eq(&self, other: &str) -> bool {
+        Self::parse(other).is_ok_and(|other| self == &other)
+    }
+}
+
+impl PartialEq<&str> for SemVer {
+    fn eq(&self, other: &&str) -> bool {
+        self.eq(*other)
+    }
+}
+
+impl PartialEq<String> for SemVer {
+    fn eq(&self, other: &String) -> bool {
+        self.eq(other.as_str())
+    }
+}
+
+impl PartialEq<&String> for SemVer {
+    fn eq(&self, other: &&String) -> bool {
+        self.eq(other.as_str())
     }
 }
 
@@ -397,5 +432,14 @@ mod tests {
         let numeric = SemVer::parse("1.0.0-1").unwrap();
         let alpha = SemVer::parse("1.0.0-alpha").unwrap();
         assert!(numeric < alpha);
+    }
+
+    #[test]
+    fn from_str_and_string_comparisons() {
+        let version = "1.2.3-beta.1".parse::<SemVer>().unwrap();
+        let owned = "1.2.3-beta.1".to_string();
+        assert_eq!(version, "1.2.3-beta.1");
+        assert_eq!(version, owned);
+        assert!("1.2".parse::<SemVer>().is_err());
     }
 }

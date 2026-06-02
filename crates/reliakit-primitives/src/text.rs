@@ -1,6 +1,6 @@
 use crate::{PrimitiveError, PrimitiveResult};
 use alloc::string::String;
-use core::{fmt, ops::Deref};
+use core::{fmt, ops::Deref, str::FromStr};
 
 // ── Slug ─────────────────────────────────────────────────────────────────────
 
@@ -26,10 +26,12 @@ impl Slug {
         Ok(Self(value))
     }
 
+    /// Returns the underlying slug string slice.
     pub fn as_str(&self) -> &str {
         &self.0
     }
 
+    /// Consumes the wrapper and returns the inner string.
     pub fn into_inner(self) -> String {
         self.0
     }
@@ -88,6 +90,38 @@ impl TryFrom<String> for Slug {
     }
 }
 
+impl FromStr for Slug {
+    type Err = PrimitiveError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Self::new(s)
+    }
+}
+
+impl PartialEq<str> for Slug {
+    fn eq(&self, other: &str) -> bool {
+        self.as_str() == other
+    }
+}
+
+impl PartialEq<&str> for Slug {
+    fn eq(&self, other: &&str) -> bool {
+        self.as_str() == *other
+    }
+}
+
+impl PartialEq<String> for Slug {
+    fn eq(&self, other: &String) -> bool {
+        self.as_str() == other.as_str()
+    }
+}
+
+impl PartialEq<&String> for Slug {
+    fn eq(&self, other: &&String) -> bool {
+        self.as_str() == other.as_str()
+    }
+}
+
 // ── Email ─────────────────────────────────────────────────────────────────────
 
 /// Email address with basic structural validation.
@@ -113,10 +147,12 @@ impl Email {
         Ok(Self(value))
     }
 
+    /// Returns the underlying email string slice.
     pub fn as_str(&self) -> &str {
         &self.0
     }
 
+    /// Consumes the wrapper and returns the inner string.
     pub fn into_inner(self) -> String {
         self.0
     }
@@ -172,6 +208,38 @@ impl TryFrom<&str> for Email {
     }
 }
 
+impl FromStr for Email {
+    type Err = PrimitiveError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Self::new(s)
+    }
+}
+
+impl PartialEq<str> for Email {
+    fn eq(&self, other: &str) -> bool {
+        self.as_str() == other
+    }
+}
+
+impl PartialEq<&str> for Email {
+    fn eq(&self, other: &&str) -> bool {
+        self.as_str() == *other
+    }
+}
+
+impl PartialEq<String> for Email {
+    fn eq(&self, other: &String) -> bool {
+        self.as_str() == other.as_str()
+    }
+}
+
+impl PartialEq<&String> for Email {
+    fn eq(&self, other: &&String) -> bool {
+        self.as_str() == other.as_str()
+    }
+}
+
 // ── HttpUrl ───────────────────────────────────────────────────────────────────
 
 /// HTTP or HTTPS URL with scheme validation.
@@ -212,10 +280,12 @@ impl HttpUrl {
         Ok(Self(value))
     }
 
+    /// Returns the underlying URL string slice.
     pub fn as_str(&self) -> &str {
         &self.0
     }
 
+    /// Consumes the wrapper and returns the inner string.
     pub fn into_inner(self) -> String {
         self.0
     }
@@ -243,6 +313,38 @@ impl TryFrom<&str> for HttpUrl {
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         Self::new(value)
+    }
+}
+
+impl FromStr for HttpUrl {
+    type Err = PrimitiveError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Self::new(s)
+    }
+}
+
+impl PartialEq<str> for HttpUrl {
+    fn eq(&self, other: &str) -> bool {
+        self.as_str() == other
+    }
+}
+
+impl PartialEq<&str> for HttpUrl {
+    fn eq(&self, other: &&str) -> bool {
+        self.as_str() == *other
+    }
+}
+
+impl PartialEq<String> for HttpUrl {
+    fn eq(&self, other: &String) -> bool {
+        self.as_str() == other.as_str()
+    }
+}
+
+impl PartialEq<&String> for HttpUrl {
+    fn eq(&self, other: &&String) -> bool {
+        self.as_str() == other.as_str()
     }
 }
 
@@ -277,10 +379,12 @@ impl HexString {
         Ok(Self(value))
     }
 
+    /// Returns the underlying hex string slice.
     pub fn as_str(&self) -> &str {
         &self.0
     }
 
+    /// Consumes the wrapper and returns the inner string.
     pub fn into_inner(self) -> String {
         self.0
     }
@@ -316,6 +420,38 @@ impl TryFrom<&str> for HexString {
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         Self::new(value)
+    }
+}
+
+impl FromStr for HexString {
+    type Err = PrimitiveError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Self::new(s)
+    }
+}
+
+impl PartialEq<str> for HexString {
+    fn eq(&self, other: &str) -> bool {
+        self.as_str() == other
+    }
+}
+
+impl PartialEq<&str> for HexString {
+    fn eq(&self, other: &&str) -> bool {
+        self.as_str() == *other
+    }
+}
+
+impl PartialEq<String> for HexString {
+    fn eq(&self, other: &String) -> bool {
+        self.as_str() == other.as_str()
+    }
+}
+
+impl PartialEq<&String> for HexString {
+    fn eq(&self, other: &&String) -> bool {
+        self.as_str() == other.as_str()
     }
 }
 
@@ -374,6 +510,15 @@ mod tests {
     fn slug_deref() {
         let s = Slug::new("hello").unwrap();
         assert_eq!(&*s, "hello");
+    }
+
+    #[test]
+    fn slug_from_str_and_string_comparisons() {
+        let slug = "hello".parse::<Slug>().unwrap();
+        let owned = String::from("hello");
+        assert_eq!(slug, "hello");
+        assert_eq!(slug, owned);
+        assert!("Hello".parse::<Slug>().is_err());
     }
 
     // Email
@@ -442,6 +587,15 @@ mod tests {
         assert_eq!(Email::new("a@b.com").unwrap().to_string(), "a@b.com");
     }
 
+    #[test]
+    fn email_from_str_and_string_comparisons() {
+        let email = "a@b.com".parse::<Email>().unwrap();
+        let owned = String::from("a@b.com");
+        assert_eq!(email, "a@b.com");
+        assert_eq!(email, owned);
+        assert!("bad".parse::<Email>().is_err());
+    }
+
     // HttpUrl
     #[test]
     fn url_accepts_http() {
@@ -494,6 +648,15 @@ mod tests {
         assert!(!u.is_https());
     }
 
+    #[test]
+    fn url_from_str_and_string_comparisons() {
+        let url = "https://example.com".parse::<HttpUrl>().unwrap();
+        let owned = String::from("https://example.com");
+        assert_eq!(url, "https://example.com");
+        assert_eq!(url, owned);
+        assert!("ftp://example.com".parse::<HttpUrl>().is_err());
+    }
+
     // HexString
     #[test]
     fn hex_accepts_plain() {
@@ -533,5 +696,14 @@ mod tests {
     fn hex_display() {
         use alloc::string::ToString;
         assert_eq!(HexString::new("ff00").unwrap().to_string(), "ff00");
+    }
+
+    #[test]
+    fn hex_from_str_and_string_comparisons() {
+        let hex = "ff00".parse::<HexString>().unwrap();
+        let owned = String::from("ff00");
+        assert_eq!(hex, "ff00");
+        assert_eq!(hex, owned);
+        assert!("xyz".parse::<HexString>().is_err());
     }
 }

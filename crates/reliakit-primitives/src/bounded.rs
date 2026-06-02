@@ -1,6 +1,6 @@
 use crate::{PrimitiveError, PrimitiveResult};
 use alloc::string::String;
-use core::{fmt, hash::Hash, ops::Deref};
+use core::{fmt, hash::Hash, ops::Deref, str::FromStr};
 
 /// Owned string constrained by inclusive character length bounds.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -105,9 +105,41 @@ impl<const MIN: usize, const MAX: usize> TryFrom<&str> for BoundedStr<MIN, MAX> 
     }
 }
 
+impl<const MIN: usize, const MAX: usize> FromStr for BoundedStr<MIN, MAX> {
+    type Err = PrimitiveError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Self::new(s)
+    }
+}
+
 impl<const MIN: usize, const MAX: usize> From<BoundedStr<MIN, MAX>> for String {
     fn from(value: BoundedStr<MIN, MAX>) -> Self {
         value.into_inner()
+    }
+}
+
+impl<const MIN: usize, const MAX: usize> PartialEq<str> for BoundedStr<MIN, MAX> {
+    fn eq(&self, other: &str) -> bool {
+        self.as_str() == other
+    }
+}
+
+impl<const MIN: usize, const MAX: usize> PartialEq<&str> for BoundedStr<MIN, MAX> {
+    fn eq(&self, other: &&str) -> bool {
+        self.as_str() == *other
+    }
+}
+
+impl<const MIN: usize, const MAX: usize> PartialEq<String> for BoundedStr<MIN, MAX> {
+    fn eq(&self, other: &String) -> bool {
+        self.as_str() == other.as_str()
+    }
+}
+
+impl<const MIN: usize, const MAX: usize> PartialEq<&String> for BoundedStr<MIN, MAX> {
+    fn eq(&self, other: &&String) -> bool {
+        self.as_str() == other.as_str()
     }
 }
 
@@ -223,5 +255,14 @@ mod tests {
     fn allows_zero_min_whitespace_only() {
         let value = BoundedStr::<0, 5>::new("   ").unwrap();
         assert_eq!(value.as_str(), "   ");
+    }
+
+    #[test]
+    fn from_str_and_string_comparisons() {
+        let value = "hello".parse::<BoundedStr<3, 10>>().unwrap();
+        let owned = String::from("hello");
+        assert_eq!(value, "hello");
+        assert_eq!(value, owned);
+        assert!("hi".parse::<BoundedStr<3, 10>>().is_err());
     }
 }

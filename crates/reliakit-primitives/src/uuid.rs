@@ -1,5 +1,6 @@
 use crate::{PrimitiveError, PrimitiveResult};
-use core::fmt;
+use alloc::string::String;
+use core::{fmt, str::FromStr};
 
 /// UUID in canonical `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx` format.
 ///
@@ -80,6 +81,38 @@ impl fmt::Display for Uuid {
     }
 }
 
+impl FromStr for Uuid {
+    type Err = PrimitiveError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Self::parse(s)
+    }
+}
+
+impl PartialEq<str> for Uuid {
+    fn eq(&self, other: &str) -> bool {
+        Self::parse(other).is_ok_and(|other| self == &other)
+    }
+}
+
+impl PartialEq<&str> for Uuid {
+    fn eq(&self, other: &&str) -> bool {
+        self.eq(*other)
+    }
+}
+
+impl PartialEq<String> for Uuid {
+    fn eq(&self, other: &String) -> bool {
+        self.eq(other.as_str())
+    }
+}
+
+impl PartialEq<&String> for Uuid {
+    fn eq(&self, other: &&String) -> bool {
+        self.eq(other.as_str())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::Uuid;
@@ -138,5 +171,14 @@ mod tests {
         let upper = "550E8400-E29B-41D4-A716-446655440000";
         let u = Uuid::parse(upper).unwrap();
         assert_eq!(u.to_string(), upper.to_lowercase());
+    }
+
+    #[test]
+    fn from_str_and_string_comparisons() {
+        let uuid = SAMPLE.parse::<Uuid>().unwrap();
+        let owned = SAMPLE.to_string();
+        assert_eq!(uuid, SAMPLE);
+        assert_eq!(uuid, owned);
+        assert!("not-a-uuid".parse::<Uuid>().is_err());
     }
 }

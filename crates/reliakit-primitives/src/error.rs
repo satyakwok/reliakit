@@ -7,13 +7,33 @@ pub enum PrimitiveError {
     /// The value was empty or contained only whitespace.
     Empty,
     /// The value was shorter than the minimum allowed length.
-    TooShort { min: usize, actual: usize },
+    TooShort {
+        /// Minimum allowed length.
+        min: usize,
+        /// Actual observed length.
+        actual: usize,
+    },
     /// The value was longer than the maximum allowed length.
-    TooLong { max: usize, actual: usize },
+    TooLong {
+        /// Maximum allowed length.
+        max: usize,
+        /// Actual observed length.
+        actual: usize,
+    },
     /// The value was outside the inclusive allowed range.
-    OutOfRange { min: u128, max: u128, actual: u128 },
+    OutOfRange {
+        /// Minimum allowed value.
+        min: u128,
+        /// Maximum allowed value.
+        max: u128,
+        /// Actual observed value.
+        actual: u128,
+    },
     /// The value did not match the expected format or pattern.
-    Invalid { message: &'static str },
+    Invalid {
+        /// Static validation message describing why the value is invalid.
+        message: &'static str,
+    },
 }
 
 /// Result alias used by Reliakit primitive constructors.

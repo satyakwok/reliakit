@@ -1,6 +1,6 @@
 use crate::{PrimitiveError, PrimitiveResult};
 use alloc::string::String;
-use core::{fmt, hash::Hash, ops::Deref};
+use core::{fmt, hash::Hash, ops::Deref, str::FromStr};
 
 /// Owned string that is not empty and not whitespace-only.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -78,9 +78,41 @@ impl TryFrom<&str> for NonEmptyStr {
     }
 }
 
+impl FromStr for NonEmptyStr {
+    type Err = PrimitiveError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Self::new(s)
+    }
+}
+
 impl From<NonEmptyStr> for String {
     fn from(value: NonEmptyStr) -> Self {
         value.into_inner()
+    }
+}
+
+impl PartialEq<str> for NonEmptyStr {
+    fn eq(&self, other: &str) -> bool {
+        self.as_str() == other
+    }
+}
+
+impl PartialEq<&str> for NonEmptyStr {
+    fn eq(&self, other: &&str) -> bool {
+        self.as_str() == *other
+    }
+}
+
+impl PartialEq<String> for NonEmptyStr {
+    fn eq(&self, other: &String) -> bool {
+        self.as_str() == other.as_str()
+    }
+}
+
+impl PartialEq<&String> for NonEmptyStr {
+    fn eq(&self, other: &&String) -> bool {
+        self.as_str() == other.as_str()
     }
 }
 
@@ -163,5 +195,14 @@ mod tests {
         let value = NonEmptyStr::new("hello").unwrap();
         let s = String::from(value);
         assert_eq!(s, "hello");
+    }
+
+    #[test]
+    fn from_str_and_string_comparisons() {
+        let value = "hello".parse::<NonEmptyStr>().unwrap();
+        let owned = String::from("hello");
+        assert_eq!(value, "hello");
+        assert_eq!(value, owned);
+        assert!(NonEmptyStr::try_from("   ").is_err());
     }
 }

@@ -59,17 +59,27 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 #![forbid(unsafe_code)]
+#![warn(missing_docs)]
 
 extern crate alloc;
 
+/// Bounded string primitive.
 pub mod bounded;
+/// Non-empty vector primitive.
 pub mod collections;
+/// Human-readable duration primitive.
 pub mod duration;
+/// Shared primitive error type.
 pub mod error;
+/// Non-empty string primitive.
 pub mod non_empty;
+/// Numeric primitives.
 pub mod numeric;
+/// Semantic version primitive.
 pub mod semver;
+/// Text validation primitives.
 pub mod text;
+/// UUID primitive.
 pub mod uuid;
 
 pub use bounded::BoundedStr;
