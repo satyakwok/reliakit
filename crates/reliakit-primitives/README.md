@@ -23,9 +23,12 @@ Use this crate when a value has simple validity rules that should be checked onc
 
 - names and identifiers that must not be empty,
 - strings with minimum or maximum character lengths,
-- percentages constrained to `0..=100`,
-- ports constrained to `1..=65535`,
-- byte sizes that should display consistently.
+- slugs, email addresses, HTTP URLs, or hex strings,
+- percentages, ports, positive integers, or positive floats,
+- byte sizes that should display consistently,
+- semantic version strings,
+- UUIDs in canonical format,
+- human-readable durations like `1h30m` or `500ms`.
 
 ## When Not To Use It
 
@@ -35,14 +38,14 @@ Do not use this crate as a replacement for domain-specific validation, parsing, 
 
 ```toml
 [dependencies]
-reliakit-primitives = "0.1"
+reliakit-primitives = "0.2"
 ```
 
 For `no_std` environments:
 
 ```toml
 [dependencies]
-reliakit-primitives = { version = "0.1", default-features = false, features = ["alloc"] }
+reliakit-primitives = { version = "0.2", default-features = false, features = ["alloc"] }
 ```
 
 ## Examples
@@ -77,13 +80,41 @@ let port = Port::new(3000)?;
 
 ## Available Types
 
+### Strings
+
 | Type | Description |
 |---|---|
 | `NonEmptyStr` | Owned string that is not empty and not whitespace-only |
 | `BoundedStr<MIN, MAX>` | Owned string constrained by character length |
-| `Percent` | Percentage value from `0` to `100` inclusive |
+| `Slug` | Lowercase alphanumeric + hyphens, URL-safe |
+| `Email` | Basic structural email validation |
+| `HttpUrl` | URL that must start with `http://` or `https://` |
+| `HexString` | Hexadecimal characters with optional `0x`/`0X` prefix |
+
+### Numbers
+
+| Type | Description |
+|---|---|
+| `Percent` | Integer percentage from `0` to `100` inclusive |
+| `PercentageF64` | Float percentage from `0.0` to `100.0` inclusive |
 | `Port` | TCP/UDP port from `1` to `65535` inclusive |
+| `PositiveInt` | `u64` strictly greater than zero |
+| `PositiveFloat` | Finite `f64` strictly greater than zero |
 | `ByteSize` | Byte size value with human-readable display output |
+
+### Collections
+
+| Type | Description |
+|---|---|
+| `NonEmptyVec<T>` | `Vec<T>` guaranteed to contain at least one element |
+
+### Structured Values
+
+| Type | Description |
+|---|---|
+| `SemVer` | Semantic version (`1.2.3`, `2.0.0-beta.1`, `1.0.0+build`) |
+| `Uuid` | UUID in `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx` format |
+| `HumanDuration` | Duration parsed from `1h`, `30m`, `45s`, `500ms`, or combinations |
 
 ## Feature Flags
 
@@ -106,7 +137,7 @@ Rust stable. No nightly features are used.
 
 ## Status
 
-Active. The `0.1.x` API is considered stable for the current set of types.
+Active. The `0.2.x` API is considered stable for the current set of types.
 
 ## Contributing
 

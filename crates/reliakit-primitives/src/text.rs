@@ -215,7 +215,7 @@ impl HttpUrl {
 
     /// Returns `true` if the URL uses `https`.
     pub fn is_https(&self) -> bool {
-        self.0.to_lowercase().starts_with("https://")
+        self.0.len() >= 8 && self.0[..8].eq_ignore_ascii_case("https://")
     }
 }
 
@@ -441,6 +441,18 @@ mod tests {
         use alloc::string::ToString;
         let u = HttpUrl::new("https://example.com").unwrap();
         assert_eq!(u.to_string(), "https://example.com");
+    }
+
+    #[test]
+    fn url_is_https_uppercase_scheme() {
+        let u = HttpUrl::new("HTTPS://example.com").unwrap();
+        assert!(u.is_https());
+    }
+
+    #[test]
+    fn url_is_http_not_https() {
+        let u = HttpUrl::new("http://example.com").unwrap();
+        assert!(!u.is_https());
     }
 
     // HexString

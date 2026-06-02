@@ -137,11 +137,11 @@ impl fmt::Display for HumanDuration {
             wrote = true;
         }
         if s > 0 || millis > 0 {
-            if millis > 0 {
-                write!(f, "{}", s * 1000 + millis as u64)?;
-                write!(f, "ms")?;
-            } else {
+            if s > 0 {
                 write!(f, "{s}s")?;
+            }
+            if millis > 0 {
+                write!(f, "{millis}ms")?;
             }
             wrote = true;
         }
@@ -223,5 +223,18 @@ mod tests {
     #[test]
     fn display_zero() {
         assert_eq!(HumanDuration::parse("0s").unwrap().to_string(), "0s");
+    }
+
+    #[test]
+    fn display_mixed_seconds_and_millis() {
+        assert_eq!(
+            HumanDuration::parse("1s500ms").unwrap().to_string(),
+            "1s500ms"
+        );
+    }
+
+    #[test]
+    fn display_millis_only() {
+        assert_eq!(HumanDuration::parse("500ms").unwrap().to_string(), "500ms");
     }
 }

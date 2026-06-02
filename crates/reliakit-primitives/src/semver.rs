@@ -153,7 +153,17 @@ impl PartialOrd for SemVer {
 
 impl Ord for SemVer {
     fn cmp(&self, other: &Self) -> core::cmp::Ordering {
-        (self.major, self.minor, self.patch).cmp(&(other.major, other.minor, other.patch))
+        let v = (self.major, self.minor, self.patch).cmp(&(other.major, other.minor, other.patch));
+        if v != core::cmp::Ordering::Equal {
+            return v;
+        }
+        // Per semver spec §11: pre-release < release when core version is equal.
+        match (&self.pre, &other.pre) {
+            (None, None) => core::cmp::Ordering::Equal,
+            (Some(_), None) => core::cmp::Ordering::Less,
+            (None, Some(_)) => core::cmp::Ordering::Greater,
+            (Some(a), Some(b)) => a.cmp(b),
+        }
     }
 }
 
@@ -259,5 +269,20 @@ mod tests {
         assert!(v1 < v2);
         assert!(v1 < v3);
         assert!(v3 < v2);
+    }
+
+    #[test]
+    fn pre_release_sorts_below_release() {
+        let release = SemVer::parse("1.0.0").unwrap();
+        let pre = SemVer::parse("1.0.0-alpha").unwrap();
+        assert!(pre < release);
+        assert!(release > pre);
+    }
+
+    #[test]
+    fn pre_release_compared_lexicographically() {
+        let alpha = SemVer::parse("1.0.0-alpha").unwrap();
+        let beta = SemVer::parse("1.0.0-beta").unwrap();
+        assert!(alpha < beta);
     }
 }
