@@ -108,4 +108,29 @@ mod tests {
         let v = Valid::new(MinAge(21)).unwrap();
         assert_eq!(v.get().0, 21);
     }
+
+    struct NamedAge(u8);
+
+    impl Validate for NamedAge {
+        type Error = ValidationError;
+        fn validate(&self) -> Result<(), Self::Error> {
+            if self.0 < 18 {
+                return Err(ValidationError::new("must be at least 18"));
+            }
+            Ok(())
+        }
+    }
+
+    impl core::fmt::Display for NamedAge {
+        fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            write!(f, "age:{}", self.0)
+        }
+    }
+
+    #[test]
+    fn valid_display_delegates_to_inner() {
+        use alloc::string::ToString;
+        let v = Valid::new(NamedAge(25)).unwrap();
+        assert_eq!(v.to_string(), "age:25");
+    }
 }

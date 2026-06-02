@@ -66,6 +66,10 @@ impl ValidationError {
     }
 
     /// Creates an empty `ValidationError`. Useful for building up violations.
+    ///
+    /// Always check [`is_empty`](Self::is_empty) before returning this as
+    /// `Err`. Returning an empty `ValidationError` is valid Rust but conveys
+    /// no information to the caller.
     pub fn empty() -> Self {
         Self {
             violations: Vec::new(),

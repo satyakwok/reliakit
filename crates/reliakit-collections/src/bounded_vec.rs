@@ -51,18 +51,22 @@ impl<T, const MIN: usize, const MAX: usize> BoundedVec<T, MIN, MAX> {
     }
 
     /// Removes and returns the last element. Returns an error if removing
-    /// would bring the length below `MIN`.
+    /// would bring the length below `MIN`, or if the collection is empty.
     pub fn pop(&mut self) -> CollectionResult<T> {
-        if self.0.len() <= MIN {
+        if self.0.is_empty() {
             return Err(CollectionError::TooFew {
                 min: MIN,
-                actual: self.0.len().saturating_sub(1),
+                actual: 0,
             });
         }
-        self.0.pop().ok_or(CollectionError::TooFew {
-            min: MIN,
-            actual: 0,
-        })
+        let after_pop = self.0.len() - 1;
+        if after_pop < MIN {
+            return Err(CollectionError::TooFew {
+                min: MIN,
+                actual: after_pop,
+            });
+        }
+        Ok(self.0.pop().unwrap())
     }
 
     /// Returns the number of elements.
@@ -72,7 +76,8 @@ impl<T, const MIN: usize, const MAX: usize> BoundedVec<T, MIN, MAX> {
 
     /// Returns `true` if the collection contains no elements.
     ///
-    /// Can only return `true` when `MIN == 0`.
+    /// Always returns `false` when `MIN > 0`, since construction guarantees
+    /// at least `MIN` elements.
     pub fn is_empty(&self) -> bool {
         self.0.is_empty()
     }
@@ -251,6 +256,21 @@ mod tests {
         assert!(v.is_empty());
         assert_eq!(v.first(), None);
         assert_eq!(v.last(), None);
+    }
+
+    #[test]
+    fn pop_min_zero_empty_vec_returns_error() {
+        let mut v = BoundedVec::<i32, 0, 5>::new(alloc::vec![]).unwrap();
+        let err = v.pop().unwrap_err();
+        assert_eq!(err, CollectionError::TooFew { min: 0, actual: 0 });
+    }
+
+    #[test]
+    fn pop_min_zero_nonempty_succeeds() {
+        let mut v = BoundedVec::<i32, 0, 5>::new(alloc::vec![1, 2]).unwrap();
+        assert_eq!(v.pop().unwrap(), 2);
+        assert_eq!(v.pop().unwrap(), 1);
+        assert!(v.pop().is_err());
     }
 
     #[test]
