@@ -6,6 +6,39 @@ This project follows normal Rust crate versioning. Crate releases may use a
 workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 `CRATE-vMAJOR.MINOR.PATCH`.
 
+## reliakit-primitives 0.2.3 - 2026-06-02
+
+### Fixed
+
+- Fixed silent `u64` truncation in `HumanDuration::parse` for very large hour
+  values. Inputs such as `"18446744073709551615h"` previously returned `Ok`
+  with a wrong `Duration`; they now return `Err(Invalid)`.
+- Removed unreachable dead-code guard in `HumanDuration::parse`.
+- Fixed potential `usize` overflow in `BoundedVec::push` error payload when
+  `MAX == usize::MAX`.
+
+## reliakit-validate 0.1.0 - 2026-06-02
+
+### Added
+
+- Added the `reliakit-validate` crate with:
+  - `Validate` — trait for types that can validate themselves.
+  - `Valid<T>` — zero-cost wrapper carrying proof of successful validation.
+  - `ValidationError` — error type collecting one or more `Violation`s.
+  - `Violation` — single failed constraint with optional field name.
+  - `ValidateResult<T>` — `Result<T, ValidationError>` type alias.
+
+## reliakit-collections 0.1.0 - 2026-06-02
+
+### Added
+
+- Added the `reliakit-collections` crate with:
+  - `BoundedVec<T, MIN, MAX>` — owned `Vec<T>` constrained to hold between
+    `MIN` and `MAX` elements. `push` and `pop` return errors instead of
+    panicking when bounds would be violated.
+  - `CollectionError` — error type with `TooFew`, `TooMany`, and
+    `InvalidBounds` variants.
+
 ## reliakit-primitives 0.2.2 - 2026-06-02
 
 ### Added

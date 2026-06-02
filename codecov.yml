@@ -14,6 +14,16 @@ coverage:
         threshold: 1%
         flags:
           - reliakit-secret
+      reliakit-validate:
+        target: 90%
+        threshold: 1%
+        flags:
+          - reliakit-validate
+      reliakit-collections:
+        target: 90%
+        threshold: 1%
+        flags:
+          - reliakit-collections
     patch:
       default:
         target: 90%

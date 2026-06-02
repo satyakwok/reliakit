@@ -60,3 +60,39 @@ jobs:
           fail_ci_if_error: true
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Generate reliakit-validate coverage
+        run: |
+          cargo llvm-cov \
+            -p reliakit-validate \
+            --all-features \
+            --lcov \
+            --output-path lcov-reliakit-validate.info
+
+      - name: Upload reliakit-validate coverage
+        uses: codecov/codecov-action@v6
+        with:
+          files: lcov-reliakit-validate.info
+          flags: reliakit-validate
+          name: reliakit-validate
+          fail_ci_if_error: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Generate reliakit-collections coverage
+        run: |
+          cargo llvm-cov \
+            -p reliakit-collections \
+            --all-features \
+            --lcov \
+            --output-path lcov-reliakit-collections.info
+
+      - name: Upload reliakit-collections coverage
+        uses: codecov/codecov-action@v6
+        with:
+          files: lcov-reliakit-collections.info
+          flags: reliakit-collections
+          name: reliakit-collections
+          fail_ci_if_error: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
