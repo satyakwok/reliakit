@@ -168,11 +168,11 @@ Contributions are welcome. Please open an issue before submitting a pull request
 
 ## Star History
 
-<a href="https://www.star-history.com/?repos=satyakwok%2Freliakit&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=satyakwok%2Freliakit&type=Date">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=satyakwok/reliakit&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=satyakwok/reliakit&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=satyakwok/reliakit&type=date&legend=top-left" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=satyakwok/reliakit&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=satyakwok/reliakit&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=satyakwok/reliakit&type=Date" />
  </picture>
 </a>
 
