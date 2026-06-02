@@ -4,12 +4,21 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+  RUSTDOCFLAGS: "-D warnings"
+
 jobs:
   docs:
     runs-on: ubuntu-latest
-
-    env:
-      RUSTDOCFLAGS: "-D warnings"
 
     steps:
       - name: Checkout
@@ -18,5 +27,8 @@ jobs:
       - name: Install stable Rust
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+
       - name: Build docs
-        run: cargo doc --workspace --all-features --no-deps
+        run: cargo doc --workspace --all-features --no-deps --locked

@@ -8,6 +8,14 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
 jobs:
   coverage:
     name: Coverage
@@ -30,6 +38,7 @@ jobs:
           cargo llvm-cov \
             -p reliakit-primitives \
             --all-features \
+            --locked \
             --lcov \
             --output-path lcov-reliakit-primitives.info
 
@@ -48,6 +57,7 @@ jobs:
           cargo llvm-cov \
             -p reliakit-secret \
             --all-features \
+            --locked \
             --lcov \
             --output-path lcov-reliakit-secret.info
 
@@ -66,6 +76,7 @@ jobs:
           cargo llvm-cov \
             -p reliakit-validate \
             --all-features \
+            --locked \
             --lcov \
             --output-path lcov-reliakit-validate.info
 
@@ -84,6 +95,7 @@ jobs:
           cargo llvm-cov \
             -p reliakit-collections \
             --all-features \
+            --locked \
             --lcov \
             --output-path lcov-reliakit-collections.info
 

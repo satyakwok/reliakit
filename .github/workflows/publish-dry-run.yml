@@ -4,6 +4,17 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
 jobs:
   publish-dry-run:
     runs-on: ubuntu-latest
@@ -15,14 +26,17 @@ jobs:
       - name: Install stable Rust
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+
       - name: Verify reliakit-primitives package
-        run: cargo publish -p reliakit-primitives --dry-run
+        run: cargo publish -p reliakit-primitives --dry-run --locked
 
       - name: Verify reliakit-secret package
-        run: cargo publish -p reliakit-secret --dry-run
+        run: cargo publish -p reliakit-secret --dry-run --locked
 
       - name: Verify reliakit-validate package
-        run: cargo publish -p reliakit-validate --dry-run
+        run: cargo publish -p reliakit-validate --dry-run --locked
 
       - name: Verify reliakit-collections package
-        run: cargo publish -p reliakit-collections --dry-run
+        run: cargo publish -p reliakit-collections --dry-run --locked

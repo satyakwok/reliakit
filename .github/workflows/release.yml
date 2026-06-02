@@ -8,12 +8,18 @@ on:
       - "reliakit-validate-v*"
       - "reliakit-collections-v*"
 
+# GitHub release creation requires write access to repository contents.
+# This workflow does not publish to crates.io.
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
 jobs:
   release:
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: write
 
     steps:
       - name: Checkout
@@ -22,8 +28,11 @@ jobs:
       - name: Install stable Rust
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+
       - name: Run tests
-        run: cargo test --workspace --all-features
+        run: cargo test --workspace --all-features --locked
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
