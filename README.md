@@ -166,6 +166,10 @@ Contributions are welcome. Please open an issue before submitting a pull request
 - Add tests for any new public API surface.
 - Run `cargo fmt`, `cargo clippy`, and `cargo test` before submitting.
 
+See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for contribution guidelines,
+[`CHANGELOG.md`](./CHANGELOG.md) for release notes, and
+[`SECURITY.md`](./SECURITY.md) for vulnerability reporting.
+
 ## Star History
 
 <a href="https://www.star-history.com/?repos=satyakwok%2Freliakit&type=Date">

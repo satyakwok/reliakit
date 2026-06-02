@@ -1,0 +1,43 @@
+name: Feature request
+description: Propose a new primitive, crate, feature flag, or API refinement.
+title: "feat: "
+labels: ["enhancement"]
+body:
+  - type: input
+    id: crate
+    attributes:
+      label: Crate
+      description: Which crate would this affect?
+      placeholder: reliakit-primitives
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What problem should this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the API or behavior you want.
+      render: rust
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives
+      description: Existing crates, patterns, or workarounds you considered.
+    validations:
+      required: false
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope check
+      options:
+        - label: This can be implemented without adding unnecessary dependencies.
+        - label: This keeps the affected crate focused and reusable.
+        - label: This does not require a hidden runtime or framework integration.

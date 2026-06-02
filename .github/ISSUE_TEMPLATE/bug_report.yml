@@ -1,0 +1,59 @@
+name: Bug report
+description: Report a correctness issue, panic, validation bug, or documentation mismatch.
+title: "bug: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting an issue. Please include enough detail to reproduce the behavior.
+  - type: input
+    id: crate
+    attributes:
+      label: Crate
+      description: Which crate is affected?
+      placeholder: reliakit-primitives
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Which crate version are you using?
+      placeholder: 0.2.1
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What happened?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Minimal code or steps to reproduce the issue.
+      render: rust
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What should have happened?
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Rust version, target, feature flags, and operating system.
+      placeholder: |
+        rustc 1.xx.x
+        target: x86_64-unknown-linux-gnu
+        features: default
+        OS: Linux
+    validations:
+      required: false
