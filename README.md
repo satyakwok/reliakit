@@ -89,12 +89,14 @@ From crates.io:
 ```toml
 [dependencies]
 reliakit-primitives = "0.2"
+reliakit-secret = "0.1"
 ```
 
-The unreleased workspace crates can be used from Git:
+Or depend on the Git repository directly:
 
 ```toml
 [dependencies]
+reliakit-primitives = { git = "https://github.com/satyakwok/reliakit", package = "reliakit-primitives" }
 reliakit-secret = { git = "https://github.com/satyakwok/reliakit", package = "reliakit-secret" }
 ```
 

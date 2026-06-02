@@ -5,7 +5,7 @@ All notable changes to this workspace are documented here.
 This project follows normal Rust crate versioning. Crate releases are tagged as
 `vMAJOR.MINOR.PATCH`.
 
-## Unreleased
+## reliakit-secret 0.1.0 - 2026-06-02
 
 ### Added
 

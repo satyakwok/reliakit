@@ -42,3 +42,21 @@ jobs:
           fail_ci_if_error: true
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Generate reliakit-secret coverage
+        run: |
+          cargo llvm-cov \
+            -p reliakit-secret \
+            --all-features \
+            --lcov \
+            --output-path lcov-reliakit-secret.info
+
+      - name: Upload reliakit-secret coverage
+        uses: codecov/codecov-action@v6
+        with:
+          files: lcov-reliakit-secret.info
+          flags: reliakit-secret
+          name: reliakit-secret
+          fail_ci_if_error: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

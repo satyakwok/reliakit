@@ -40,25 +40,23 @@ primitive.
 
 ## Installation
 
-From the workspace repository:
-
 ```toml
 [dependencies]
-reliakit-secret = { git = "https://github.com/satyakwok/reliakit", package = "reliakit-secret" }
+reliakit-secret = "0.1"
 ```
 
 For `no_std` without allocation:
 
 ```toml
 [dependencies]
-reliakit-secret = { git = "https://github.com/satyakwok/reliakit", package = "reliakit-secret", default-features = false }
+reliakit-secret = { version = "0.1", default-features = false }
 ```
 
 For `no_std` with string-backed secrets:
 
 ```toml
 [dependencies]
-reliakit-secret = { git = "https://github.com/satyakwok/reliakit", package = "reliakit-secret", default-features = false, features = ["alloc"] }
+reliakit-secret = { version = "0.1", default-features = false, features = ["alloc"] }
 ```
 
 ## Examples

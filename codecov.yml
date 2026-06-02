@@ -9,6 +9,11 @@ coverage:
         threshold: 1%
         flags:
           - reliakit-primitives
+      reliakit-secret:
+        target: 90%
+        threshold: 1%
+        flags:
+          - reliakit-secret
     patch:
       default:
         target: 90%
