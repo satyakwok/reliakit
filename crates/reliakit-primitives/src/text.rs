@@ -132,7 +132,7 @@ impl Email {
 }
 
 fn is_valid_email(s: &str) -> bool {
-    if s.contains(' ') {
+    if s.chars().any(|c| c.is_whitespace()) {
         return false;
     }
     let at_count = s.chars().filter(|&c| c == '@').count();
@@ -197,9 +197,14 @@ impl HttpUrl {
                 message: "URL must start with http:// or https://",
             });
         };
-        if after_scheme.is_empty() {
+        if after_scheme.is_empty() || after_scheme.chars().all(|c| c.is_whitespace()) {
             return Err(PrimitiveError::Invalid {
                 message: "URL must have a non-empty host",
+            });
+        }
+        if after_scheme.chars().any(|c| c.is_whitespace()) {
+            return Err(PrimitiveError::Invalid {
+                message: "URL must not contain whitespace",
             });
         }
         Ok(Self(value))
@@ -400,6 +405,26 @@ mod tests {
     #[test]
     fn email_rejects_spaces() {
         assert!(Email::new("us er@example.com").is_err());
+    }
+
+    #[test]
+    fn email_rejects_tab() {
+        assert!(Email::new("user\t@example.com").is_err());
+    }
+
+    #[test]
+    fn email_rejects_newline() {
+        assert!(Email::new("user\n@example.com").is_err());
+    }
+
+    #[test]
+    fn url_rejects_whitespace_host() {
+        assert!(HttpUrl::new("http://   ").is_err());
+    }
+
+    #[test]
+    fn url_rejects_whitespace_in_path() {
+        assert!(HttpUrl::new("https://ex ample.com").is_err());
     }
 
     #[test]

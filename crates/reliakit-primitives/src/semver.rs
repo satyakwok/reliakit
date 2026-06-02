@@ -41,6 +41,11 @@ impl SemVer {
                     message: "build metadata must not be empty after '+'",
                 });
             }
+            if b.contains('+') {
+                return Err(PrimitiveError::Invalid {
+                    message: "build metadata must not contain '+'",
+                });
+            }
             (&s[..idx], Some(b))
         } else {
             (s, None)
@@ -236,6 +241,11 @@ mod tests {
     #[test]
     fn rejects_empty_build() {
         assert!(SemVer::parse("1.0.0+").is_err());
+    }
+
+    #[test]
+    fn rejects_build_with_plus() {
+        assert!(SemVer::parse("1.0.0+a+b").is_err());
     }
 
     #[test]

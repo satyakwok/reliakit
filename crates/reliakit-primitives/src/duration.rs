@@ -24,7 +24,15 @@ impl HumanDuration {
             return Err(PrimitiveError::Empty);
         }
 
+        // Unit rank: higher = larger unit. Each unit may appear at most once,
+        // and units must be provided in strictly descending order (h > m > s > ms).
+        const RANK_H: u8 = 4;
+        const RANK_M: u8 = 3;
+        const RANK_S: u8 = 2;
+        const RANK_MS: u8 = 1;
+
         let mut total_nanos: u128 = 0;
+        let mut last_rank: u8 = u8::MAX;
         let mut found_any = false;
         let mut pos = 0;
         let bytes = s.as_bytes();
@@ -52,17 +60,24 @@ impl HumanDuration {
             }
             let unit = &s[unit_start..pos];
 
-            let nanos_per_unit: u128 = match unit {
-                "ms" => 1_000_000,
-                "s" => 1_000_000_000,
-                "m" => 60 * 1_000_000_000,
-                "h" => 3_600 * 1_000_000_000,
+            let (nanos_per_unit, rank): (u128, u8) = match unit {
+                "h" => (3_600 * 1_000_000_000, RANK_H),
+                "m" => (60 * 1_000_000_000, RANK_M),
+                "s" => (1_000_000_000, RANK_S),
+                "ms" => (1_000_000, RANK_MS),
                 _ => {
                     return Err(PrimitiveError::Invalid {
                         message: "unknown time unit; use h, m, s, or ms",
                     })
                 }
             };
+
+            if rank >= last_rank {
+                return Err(PrimitiveError::Invalid {
+                    message: "units must be in descending order (h, m, s, ms) with no duplicates",
+                });
+            }
+            last_rank = rank;
 
             let component =
                 (num as u128)
@@ -202,6 +217,21 @@ mod tests {
     #[test]
     fn rejects_no_number() {
         assert!(HumanDuration::parse("s").is_err());
+    }
+
+    #[test]
+    fn rejects_out_of_order_units() {
+        assert!(HumanDuration::parse("1s1h").is_err());
+    }
+
+    #[test]
+    fn rejects_duplicate_units() {
+        assert!(HumanDuration::parse("1h1h").is_err());
+    }
+
+    #[test]
+    fn rejects_ms_before_s() {
+        assert!(HumanDuration::parse("500ms30s").is_err());
     }
 
     #[test]
