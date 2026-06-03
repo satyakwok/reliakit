@@ -39,14 +39,14 @@ out of scope:
 
 ```toml
 [dependencies]
-reliakit-validate = "0.1"
+reliakit-validate = "0.2"
 ```
 
 For `no_std` environments:
 
 ```toml
 [dependencies]
-reliakit-validate = { version = "0.1", default-features = false, features = ["alloc"] }
+reliakit-validate = { version = "0.2", default-features = false, features = ["alloc"] }
 ```
 
 ## Examples
@@ -134,12 +134,15 @@ println!("{error}"); // "email: invalid format; password: too short"
 
 | Flag | Default | Description |
 |---|---|---|
-| `std` | yes | Enables `std::error::Error` for `ValidationError` |
-| `alloc` | no | Enables `ValidationError` without `std` |
+| `std` | yes | Enables `std::error::Error` for `ValidationError`; implies `alloc` |
+| `alloc` | no | Enables `ValidationError` and `ValidateResult` (backed by `Vec`) |
 
 ## `no_std`
 
-The crate supports `no_std` environments when `std` is disabled and `alloc` is available.
+The crate supports `no_std`. The `Validate` trait, `Valid<T>`, and `Violation`
+are available without `alloc` — implement `Validate` with your own error type in
+allocation-free contexts. `ValidationError` and `ValidateResult` require the
+`alloc` feature (enabled by default via `std`).
 
 ## Safety
 

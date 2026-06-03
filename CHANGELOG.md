@@ -44,6 +44,17 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
   `BoundedVec` requires `alloc` (enabled by default via `std`). This changes the
   public API available under `--no-default-features`.
 
+## reliakit-validate 0.2.0 - 2026-06-03
+
+### Changed
+
+- **Breaking:** gated `ValidationError` and `ValidateResult` behind the `alloc`
+  feature (they collect `Violation`s in a `Vec`); `std` now implies `alloc`.
+  The `Validate` trait, `Valid<T>`, and `Violation` remain available without
+  `alloc`. Building with `--no-default-features` no longer exposes
+  `ValidationError`/`ValidateResult`, changing the public API available under
+  `--no-default-features`.
+
 ## reliakit-codec 0.1.0 - 2026-06-03
 
 Initial release.

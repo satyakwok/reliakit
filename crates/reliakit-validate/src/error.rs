@@ -1,3 +1,4 @@
+#[cfg(feature = "alloc")]
 use alloc::vec::Vec;
 use core::fmt;
 
@@ -42,14 +43,20 @@ impl fmt::Display for Violation {
 /// `ValidationError` is designed for multi-field struct validation where all
 /// fields should be checked and all violations reported together. For
 /// single-value validation, a simpler error type may be more appropriate.
+///
+/// Requires the `alloc` feature (enabled by default via `std`), since it is
+/// backed by `Vec<Violation>`.
+#[cfg(feature = "alloc")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ValidationError {
     violations: Vec<Violation>,
 }
 
 /// Result alias for validation operations.
+#[cfg(feature = "alloc")]
 pub type ValidateResult<T = ()> = Result<T, ValidationError>;
 
+#[cfg(feature = "alloc")]
 impl ValidationError {
     /// Creates a `ValidationError` with a single unnamed violation.
     pub fn new(message: &'static str) -> Self {
@@ -109,6 +116,7 @@ impl ValidationError {
     }
 }
 
+#[cfg(feature = "alloc")]
 impl From<Violation> for ValidationError {
     fn from(v: Violation) -> Self {
         Self {
@@ -117,12 +125,14 @@ impl From<Violation> for ValidationError {
     }
 }
 
+#[cfg(feature = "alloc")]
 impl From<&'static str> for ValidationError {
     fn from(message: &'static str) -> Self {
         Self::new(message)
     }
 }
 
+#[cfg(feature = "alloc")]
 impl fmt::Display for ValidationError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.violations.as_slice() {
@@ -144,7 +154,7 @@ impl fmt::Display for ValidationError {
 #[cfg(feature = "std")]
 impl std::error::Error for ValidationError {}
 
-#[cfg(test)]
+#[cfg(all(test, feature = "alloc"))]
 mod tests {
     use super::{ValidateResult, ValidationError, Violation};
     use alloc::string::ToString;
