@@ -1,6 +1,6 @@
 [package]
 name = "reliakit-primitives"
-version = "0.2.5"
+version = "0.3.0"
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
@@ -11,9 +11,12 @@ description = "Reusable type-safe primitives for constrained and reliability-ori
 keywords = ["primitives", "validation", "types", "reliability", "no-std"]
 categories = ["data-structures", "rust-patterns", "no-std"]
 
+[package.metadata.docs.rs]
+all-features = true
+
 [features]
 default = ["std"]
-std = []
+std = ["alloc"]
 alloc = []
 
 [dependencies]
@@ -23,15 +26,17 @@ alloc = []
 # published library, which remain zero.
 [dev-dependencies]
 reliakit-secret = { path = "../reliakit-secret", version = "0.1" }
-reliakit-validate = { path = "../reliakit-validate", version = "0.1" }
+reliakit-validate = { path = "../reliakit-validate", version = "0.2" }
 
 [[example]]
 name = "primitives_basic"
 path = "examples/primitives_basic.rs"
+required-features = ["alloc"]
 
 [[example]]
 name = "service_config"
 path = "examples/service_config.rs"
+required-features = ["alloc"]
 
 [lints]
 workspace = true

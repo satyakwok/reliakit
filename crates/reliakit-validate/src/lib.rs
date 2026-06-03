@@ -70,15 +70,32 @@
 //! assert_eq!(result.unwrap_err().len(), 2);
 //! ```
 
+//! # Feature flags
+//!
+//! - `std` (default) enables `std::error::Error` for [`ValidationError`] and
+//!   implies `alloc`.
+//! - `alloc` enables [`ValidationError`] and [`ValidateResult`], which collect
+//!   multiple [`Violation`]s in a `Vec`.
+//!
+//! # `no_std`
+//!
+//! The crate supports `no_std`. The [`Validate`] trait, [`Valid<T>`], and
+//! [`Violation`] are available without `alloc`; implement [`Validate`] with your
+//! own error type in allocation-free contexts. [`ValidationError`] and
+//! [`ValidateResult`] require the `alloc` feature (enabled by default via `std`).
+
 #![cfg_attr(not(feature = "std"), no_std)]
 #![forbid(unsafe_code)]
 
+#[cfg(feature = "alloc")]
 extern crate alloc;
 
 mod error;
 mod valid;
 
-pub use error::{ValidateResult, ValidationError, Violation};
+pub use error::Violation;
+#[cfg(feature = "alloc")]
+pub use error::{ValidateResult, ValidationError};
 pub use valid::Valid;
 
 /// A type that can validate itself.

@@ -33,14 +33,29 @@
 //! assert!(v.pop().is_ok());    // still above minimum
 //! assert!(v.pop().is_err());   // would go below minimum
 //! ```
+//!
+//! # Feature flags
+//!
+//! - `std` (default) enables `std::error::Error` for [`CollectionError`] and
+//!   implies `alloc`.
+//! - `alloc` enables [`BoundedVec`], which is backed by `Vec<T>`.
+//!
+//! # `no_std`
+//!
+//! The crate supports `no_std`. [`BoundedVec`] requires the `alloc` feature
+//! (enabled by default via `std`). The error types ([`CollectionError`],
+//! [`CollectionResult`]) are available without `alloc`.
 
 #![cfg_attr(not(feature = "std"), no_std)]
 #![forbid(unsafe_code)]
 
+#[cfg(feature = "alloc")]
 extern crate alloc;
 
+#[cfg(feature = "alloc")]
 mod bounded_vec;
 mod error;
 
+#[cfg(feature = "alloc")]
 pub use bounded_vec::BoundedVec;
 pub use error::{CollectionError, CollectionResult};

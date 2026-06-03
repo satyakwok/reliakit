@@ -38,14 +38,14 @@ This crate covers bounded collection types. The following are out of scope:
 
 ```toml
 [dependencies]
-reliakit-collections = "0.1"
+reliakit-collections = "0.2"
 ```
 
 For `no_std` environments:
 
 ```toml
 [dependencies]
-reliakit-collections = { version = "0.1", default-features = false, features = ["alloc"] }
+reliakit-collections = { version = "0.2", default-features = false, features = ["alloc"] }
 ```
 
 ## Examples
@@ -98,12 +98,14 @@ assert!(Triple::new(vec![1, 2, 3, 4]).is_err());
 
 | Flag | Default | Description |
 |---|---|---|
-| `std` | yes | Enables `std::error::Error` for `CollectionError` |
-| `alloc` | no | Enables `BoundedVec` without `std` |
+| `std` | yes | Enables `std::error::Error` for `CollectionError`; implies `alloc` |
+| `alloc` | no | Enables `BoundedVec` (backed by `Vec<T>`) |
 
 ## `no_std`
 
-The crate supports `no_std` environments when `std` is disabled and `alloc` is available.
+The crate supports `no_std`. `BoundedVec` requires the `alloc` feature (enabled
+by default via `std`). The error types (`CollectionError`, `CollectionResult`)
+are available without `alloc`.
 
 ## Safety
 
