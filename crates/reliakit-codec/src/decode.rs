@@ -6,6 +6,15 @@ use crate::CodecError;
 pub trait DecodeSource {
     /// Reads exactly enough bytes to fill `out` or returns an error.
     fn read_exact(&mut self, out: &mut [u8]) -> Result<(), CodecError>;
+
+    /// Returns the unread byte count when the source can know it cheaply.
+    ///
+    /// Streaming sources may return `None`. Slice-backed sources return
+    /// `Some(_)`, allowing decoders to reject impossible length prefixes before
+    /// allocating.
+    fn remaining_len(&self) -> Option<usize> {
+        None
+    }
 }
 
 /// Trait for strict canonical binary decoding.
@@ -51,5 +60,9 @@ impl DecodeSource for SliceReader<'_> {
         out.copy_from_slice(bytes);
         self.offset = end;
         Ok(())
+    }
+
+    fn remaining_len(&self) -> Option<usize> {
+        Some(self.remaining())
     }
 }

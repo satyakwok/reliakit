@@ -95,11 +95,7 @@ impl CanonicalEncode for alloc::string::String {
 #[cfg(feature = "alloc")]
 impl CanonicalDecode for alloc::string::String {
     fn decode<R: DecodeSource + ?Sized>(reader: &mut R) -> Result<Self, CodecError> {
-        let len = u32::decode(reader)?;
-        let len = usize::try_from(len)
-            .map_err(|_| CodecError::length_overflow("string length does not fit usize"))?;
-        let mut bytes = alloc::vec![0u8; len];
-        reader.read_exact(&mut bytes)?;
+        let bytes = read_len_prefixed_bytes(reader, "string")?;
         Self::from_utf8(bytes)
             .map_err(|_| CodecError::invalid_value("invalid UTF-8 string payload"))
     }
@@ -124,12 +120,49 @@ impl<T: CanonicalDecode> CanonicalDecode for alloc::vec::Vec<T> {
         let len = u32::decode(reader)?;
         let len = usize::try_from(len)
             .map_err(|_| CodecError::length_overflow("vector length does not fit usize"))?;
-        let mut items = alloc::vec::Vec::with_capacity(len);
+        let mut items = alloc::vec::Vec::new();
         for _ in 0..len {
             items.push(T::decode(reader)?);
         }
         Ok(items)
     }
+}
+
+#[cfg(feature = "alloc")]
+fn read_len_prefixed_bytes<R: DecodeSource + ?Sized>(
+    reader: &mut R,
+    context: &'static str,
+) -> Result<alloc::vec::Vec<u8>, CodecError> {
+    const CHUNK_SIZE: usize = 8 * 1024;
+
+    let len = u32::decode(reader)?;
+    let len = usize::try_from(len)
+        .map_err(|_| CodecError::length_overflow("byte length does not fit usize"))?;
+
+    if let Some(remaining) = reader.remaining_len() {
+        if len > remaining {
+            return Err(CodecError::unexpected_eof());
+        }
+    }
+
+    let mut bytes = alloc::vec::Vec::new();
+    let mut remaining = len;
+    while remaining != 0 {
+        let chunk_len = remaining.min(CHUNK_SIZE);
+        bytes.try_reserve_exact(chunk_len).map_err(|_| {
+            CodecError::length_overflow(match context {
+                "string" => "string length exceeds available memory",
+                _ => "byte length exceeds available memory",
+            })
+        })?;
+
+        let start = bytes.len();
+        bytes.resize(start + chunk_len, 0);
+        reader.read_exact(&mut bytes[start..])?;
+        remaining -= chunk_len;
+    }
+
+    Ok(bytes)
 }
 
 impl<T: CanonicalEncode> CanonicalEncode for Option<T> {
@@ -203,6 +236,15 @@ impl<T: CanonicalDecode, const N: usize> CanonicalDecode for [T; N] {
             Ok(array) => Ok(array),
             Err(_) => Err(CodecError::invalid_value("decoded array length mismatch")),
         }
+    }
+}
+
+#[cfg(not(feature = "alloc"))]
+impl<const N: usize> CanonicalDecode for [u8; N] {
+    fn decode<R: DecodeSource + ?Sized>(reader: &mut R) -> Result<Self, CodecError> {
+        let mut bytes = [0u8; N];
+        reader.read_exact(&mut bytes)?;
+        Ok(bytes)
     }
 }
 

@@ -1,6 +1,6 @@
 use reliakit_codec::{
     decode_from_slice_exact, encode_to_vec, CanonicalDecode, CanonicalEncode, CodecError,
-    DecodeSource, EncodeSink,
+    CodecErrorKind, DecodeSource, EncodeSink,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -69,10 +69,8 @@ fn main() -> Result<(), CodecError> {
     );
 
     let err = decode_from_slice_exact::<MessageKind>(&[9]).unwrap_err();
-    assert_eq!(
-        err.message(),
-        "unknown MessageKind tag: expected 0x00 or 0x01"
-    );
+    assert_eq!(err.kind(), CodecErrorKind::InvalidValue);
+    assert!(err.message().contains("unknown MessageKind tag"));
 
     Ok(())
 }

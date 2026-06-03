@@ -160,6 +160,12 @@ mod tests {
     }
 
     #[test]
+    fn string_rejects_impossible_length_before_allocating() {
+        let err = decode_from_slice_exact::<String>(&u32::MAX.to_le_bytes()).unwrap_err();
+        assert_eq!(err.kind(), CodecErrorKind::UnexpectedEof);
+    }
+
+    #[test]
     fn length_prefix_controls_string_bytes() {
         assert_eq!(
             encode_to_vec("abc").unwrap(),

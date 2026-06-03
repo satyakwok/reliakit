@@ -162,6 +162,10 @@ impl CanonicalDecode for Point {
 Any other `bool`, `Option`, or `Result` tag is invalid. Enum tags in user-defined
 types should follow the same strict pattern.
 
+Generic `[T; N]` decoding requires the `alloc` feature in this version because
+the crate forbids unsafe code and Rust 1.85 does not provide a stable fallible
+array initializer. In no-alloc builds, `[u8; N]` decoding is supported directly.
+
 ## Examples
 
 Encode and decode a primitive:
@@ -205,8 +209,8 @@ Use `features = ["alloc"]` when you need `String`, `Vec<T>`, arrays decoded via
 temporary vectors, or `encode_to_vec`.
 
 Without `alloc`, the core traits, byte-slice reader, integer implementations,
-`bool`, `Option`, `Result`, tuple implementations, and array encoding remain
-available.
+`bool`, `Option`, `Result`, tuple implementations, array encoding, and `[u8; N]`
+decoding remain available.
 
 ## Safety
 

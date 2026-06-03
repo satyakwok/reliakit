@@ -14,6 +14,12 @@
 //! negotiation, and non-canonical alternatives are not part of this initial
 //! format. They are omitted because their representation or ordering can be
 //! platform-dependent, ambiguous, or outside this crate's first-version scope.
+//!
+//! Generic fixed-array decoding (`[T; N]`) requires the `alloc` feature in this
+//! version because the crate forbids unsafe code and Rust 1.85 does not provide
+//! a stable fallible array initializer. In no-alloc builds, `[u8; N]` decoding is
+//! available because it can be filled directly from the source without heap
+//! allocation.
 
 /// Tag used for `false`.
 pub const BOOL_FALSE: u8 = 0x00;
