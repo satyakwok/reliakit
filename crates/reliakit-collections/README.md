@@ -28,11 +28,11 @@ Use this crate when:
 
 ## When Not To Use It
 
-Do not use this crate as a replacement for:
+This crate covers bounded collection types. The following are out of scope:
 
-- runtime-sized collections without known bounds — use `std::collections` directly,
-- fixed-size stack-allocated arrays — use `[T; N]`,
-- `NonEmptyVec<T>` with no upper bound — that type is already in `reliakit-primitives`.
+- runtime-sized collections without known bounds, served by `std::collections`,
+- fixed-size stack-allocated arrays, served by `[T; N]`,
+- unbounded non-empty vectors, which `reliakit-primitives` already provides as `NonEmptyVec<T>`.
 
 ## Installation
 

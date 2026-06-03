@@ -4,9 +4,6 @@
 
 # reliakit-codec
 
-[![Crates.io](https://img.shields.io/crates/v/reliakit-codec.svg)](https://crates.io/crates/reliakit-codec)
-[![Crates.io Downloads](https://img.shields.io/crates/d/reliakit-codec.svg)](https://crates.io/crates/reliakit-codec)
-[![Docs.rs](https://docs.rs/reliakit-codec/badge.svg)](https://docs.rs/reliakit-codec)
 [![CI](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml/badge.svg)](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/satyakwok/reliakit/branch/main/graph/badge.svg?flag=reliakit-codec)](https://codecov.io/gh/satyakwok/reliakit/tree/main/crates/reliakit-codec)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/satyakwok/reliakit/blob/main/LICENSE)
@@ -70,7 +67,15 @@ platform-dependent.
 
 ## Installation
 
-Standalone use:
+`reliakit-codec` is not yet published to crates.io. While it lives in the
+workspace, depend on it through the Git repository:
+
+```toml
+[dependencies]
+reliakit-codec = { git = "https://github.com/satyakwok/reliakit", package = "reliakit-codec" }
+```
+
+After publish, once `reliakit-codec` is available on crates.io:
 
 ```toml
 [dependencies]
@@ -234,9 +239,10 @@ The minimum supported Rust version is Rust 1.85.
 
 ## Status
 
-This is the initial `0.1` crate skeleton. The first version focuses on clear
-traits, documented format rules, primitive implementations, examples, tests, and
-optional integration with `reliakit-primitives`.
+This is the initial `0.1` crate skeleton and is not yet published to crates.io.
+The first version focuses on clear traits, documented format rules, primitive
+implementations, examples, tests, and optional integration with
+`reliakit-primitives`.
 
 Future features may add more integrations, such as a separate
 `reliakit-collections` feature for collection-specific types. Derive macros,

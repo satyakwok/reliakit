@@ -28,11 +28,12 @@ Use this crate when:
 
 ## When Not To Use It
 
-Do not use this crate as a replacement for:
+This crate covers struct- and value-level validation rules. The following are
+out of scope:
 
-- type-level constraints at construction time — use `reliakit-primitives` for those,
-- schema validation or deserialization — use a dedicated parsing library,
-- domain-specific business rules that belong in your own code.
+- type-level constraints at construction time, which belong in `reliakit-primitives`,
+- schema validation and deserialization, which belong in a dedicated parsing library,
+- domain-specific business rules, which belong in your own code.
 
 ## Installation
 
