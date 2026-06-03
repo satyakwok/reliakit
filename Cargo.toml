@@ -4,6 +4,7 @@ members = [
     "crates/reliakit-secret",
     "crates/reliakit-validate",
     "crates/reliakit-collections",
+    "crates/reliakit-codec",
 ]
 resolver = "2"
 

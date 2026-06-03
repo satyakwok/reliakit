@@ -24,6 +24,11 @@ coverage:
         threshold: 1%
         flags:
           - reliakit-collections
+      reliakit-codec:
+        target: 90%
+        threshold: 1%
+        flags:
+          - reliakit-codec
     patch:
       default:
         target: 90%
