@@ -138,17 +138,26 @@ assert_eq!(request_id.version(), 4);
 assert_eq!(timeout.as_duration().as_secs(), 90);
 ```
 
+`SemVer` implements Rust's total `Ord` consistently with `Eq`. Build metadata
+is used as a final tie-breaker for ordering so `BTreeSet`, `BTreeMap`, sorting,
+and binary search behave correctly. Use `SemVer::cmp_precedence` when you need
+SemVer precedence rules that ignore build metadata.
+
 ### Error handling
 
 All fallible constructors return `PrimitiveResult<T>`, an alias for
 `Result<T, PrimitiveError>`.
 
 ```rust
-use reliakit_primitives::{NonEmptyStr, PrimitiveError};
+use reliakit_primitives::{NonEmptyStr, PrimitiveError, PrimitiveErrorKind};
 
 let err = NonEmptyStr::new("   ").unwrap_err();
 assert_eq!(err, PrimitiveError::Empty);
+assert_eq!(err.kind(), PrimitiveErrorKind::Empty);
 ```
+
+Use `PrimitiveErrorKind` when you need stable programmatic matching without
+depending on display text.
 
 ## Available Types
 
