@@ -268,6 +268,8 @@ mod tests {
 
         let array = [1u8, 2, 3, 4];
         let encoded = encode_to_vec(&array).unwrap();
+        // Fixed arrays carry no length prefix: items are written in order.
+        assert_eq!(encoded, vec![1, 2, 3, 4]);
         assert_eq!(decode_from_slice_exact::<[u8; 4]>(&encoded).unwrap(), array);
     }
 

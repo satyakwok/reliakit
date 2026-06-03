@@ -12,6 +12,9 @@ description = "Deterministic canonical binary encoding and decoding traits for r
 keywords = ["codec", "binary", "canonical", "no-std", "reliability"]
 categories = ["encoding", "no-std", "parser-implementations"]
 
+[package.metadata.docs.rs]
+all-features = true
+
 [features]
 default = ["std"]
 std = ["alloc", "reliakit-primitives?/std"]
