@@ -10,13 +10,24 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 
 ### Added
 
+- Added a manual publish workflow for publishing one selected crate to
+  crates.io after tests, version checks, and `cargo publish --dry-run`.
+
+### Changed
+
+- Rewrote the workspace `README.md` with "Why Reliakit?", "When should I use
+  this?", and a before/after section; corrected the workspace layout, status,
+  and roadmap to reflect all published crates.
+
+## reliakit-primitives 0.2.5 - 2026-06-03
+
+### Added
+
 - `reliakit-primitives`: added `PrimitiveErrorKind` and
   `PrimitiveError::kind()` for stable programmatic error matching without
   depending on display text.
 - `reliakit-primitives`: added `SemVer::cmp_precedence()` for SemVer
   precedence comparisons that intentionally ignore build metadata.
-- Added a manual publish workflow for publishing one selected crate to
-  crates.io after tests, version checks, and `cargo publish --dry-run`.
 - `reliakit-primitives`: added the `service_config` example, demonstrating
   `reliakit-primitives`, `reliakit-secret`, and `reliakit-validate` working
   together. The library's runtime dependencies remain zero; the secret and
@@ -30,9 +41,6 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
   adding missing string conversion and deref implementations.
 - `reliakit-primitives`: removed an avoidable allocation from HTTP URL scheme
   validation.
-- Rewrote the workspace `README.md` with "Why Reliakit?", "When should I use
-  this?", and a before/after section; corrected the workspace layout, status,
-  and roadmap to reflect all published crates.
 
 ## reliakit-primitives 0.2.4 - 2026-06-02
 
