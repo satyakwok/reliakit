@@ -1,22 +1,33 @@
 version: 2
-updates:
-  # Keep GitHub Actions versions current.
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 5
-    commit-message:
-      prefix: "ci"
-    ignore:
-      # Removed in favor of plain rustup shell commands; do not re-introduce.
-      - dependency-name: "dtolnay/rust-toolchain"
 
-  # Keep Cargo dependencies current.
+updates:
   - package-ecosystem: "cargo"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "daily"
+      time: "02:00"
+      timezone: "Asia/Jakarta"
     open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "rust"
     commit-message:
-      prefix: "deps"
+      prefix: "chore"
+      include: "scope"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+      time: "02:30"
+      timezone: "Asia/Jakarta"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    ignore:
+      # Removed in favor of plain rustup shell commands; do not re-introduce.
+      - dependency-name: "dtolnay/rust-toolchain"
