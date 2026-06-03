@@ -11,7 +11,7 @@ dependencies = [
 
 [[package]]
 name = "reliakit-collections"
-version = "0.1.0"
+version = "0.2.0"
 
 [[package]]
 name = "reliakit-primitives"
@@ -27,4 +27,4 @@ version = "0.1.0"
 
 [[package]]
 name = "reliakit-validate"
-version = "0.1.0"
+version = "0.2.0"

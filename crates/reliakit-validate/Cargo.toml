@@ -11,6 +11,9 @@ description = "Composable validation traits and error types for Rust structs and
 keywords = ["validation", "validate", "rules", "constraints", "no-std"]
 categories = ["data-structures", "rust-patterns", "no-std"]
 
+[package.metadata.docs.rs]
+all-features = true
+
 [features]
 default = ["std"]
 std = ["alloc"]

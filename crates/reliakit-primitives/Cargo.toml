@@ -11,6 +11,9 @@ description = "Reusable type-safe primitives for constrained and reliability-ori
 keywords = ["primitives", "validation", "types", "reliability", "no-std"]
 categories = ["data-structures", "rust-patterns", "no-std"]
 
+[package.metadata.docs.rs]
+all-features = true
+
 [features]
 default = ["std"]
 std = ["alloc"]
@@ -23,7 +26,7 @@ alloc = []
 # published library, which remain zero.
 [dev-dependencies]
 reliakit-secret = { path = "../reliakit-secret", version = "0.1" }
-reliakit-validate = { path = "../reliakit-validate", version = "0.1" }
+reliakit-validate = { path = "../reliakit-validate", version = "0.2" }
 
 [[example]]
 name = "primitives_basic"
