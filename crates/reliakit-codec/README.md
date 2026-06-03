@@ -55,12 +55,12 @@ and deterministic:
 
 ## When Not To Use
 
-Do not use this crate as a Serde replacement, schema language, RPC framework, or
-general-purpose serialization ecosystem.
+Use a different tool when you need automatic derive support, schema negotiation,
+multi-format serialization, RPC abstractions, or broad ecosystem
+interoperability.
 
-The first version intentionally does not include derive macros, proc macros,
-schema negotiation, unordered map support, floats, pointer-sized integers, or
-non-canonical alternatives.
+`reliakit-codec` is intentionally small. It focuses on explicit canonical binary
+encoding, strict decoding, and deterministic byte output.
 
 `HashMap` and other unordered maps are not supported because their iteration
 order is not canonical. Floats are not supported because NaN payloads, signed

@@ -61,7 +61,8 @@ Use this crate when a value has simple validity rules that should be checked onc
 
 ## When Not To Use It
 
-Do not use this crate as a replacement for domain-specific validation, parsing, serialization, or schema libraries. The types here are intentionally small and general.
+Use a domain-specific validator, parser, serializer, or schema library when a
+value needs rules beyond these small general-purpose primitives.
 
 For example, `Email` is a basic structural validator, not a full RFC 5321 or
 deliverability checker. `HttpUrl` checks for an HTTP(S) scheme and a non-empty
