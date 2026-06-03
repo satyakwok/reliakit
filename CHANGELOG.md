@@ -19,6 +19,27 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
   this?", and a before/after section; corrected the workspace layout, status,
   and roadmap to reflect all published crates.
 
+## reliakit-codec 0.1.0 - 2026-06-03
+
+Initial release.
+
+### Added
+
+- Added the `reliakit-codec` crate with:
+  - `CanonicalEncode` and `CanonicalDecode` traits for deterministic binary
+    encoding and strict decoding.
+  - `EncodeSink` and `DecodeSource` sink/source traits that work without
+    `std::io`.
+  - `SliceReader` for decoding from in-memory byte slices.
+  - `CodecError` and `CodecErrorKind` for stable, programmatic error handling.
+  - `encode_to_vec`, `decode_from_slice`, and `decode_from_slice_exact`
+    helpers.
+  - Canonical implementations for integers, `bool`, `str`/`String`, `Vec<T>`,
+    `Option<T>`, `Result<T, E>`, fixed-size arrays, and tuples up to arity 4.
+  - Optional `reliakit-primitives` integration behind the `primitives` feature.
+  - `no_std` support with an optional `alloc` feature, and
+    `#![forbid(unsafe_code)]`.
+
 ## reliakit-primitives 0.2.5 - 2026-06-03
 
 ### Added

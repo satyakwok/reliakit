@@ -142,7 +142,7 @@ Implemented types:
 
 - `BoundedVec<T, MIN, MAX>`
 
-### `reliakit-codec`
+### `reliakit-codec` — [crates.io](https://crates.io/crates/reliakit-codec) · [docs.rs](https://docs.rs/reliakit-codec)
 
 Deterministic canonical binary encoding and decoding. It defines one canonical
 binary representation per supported type and keeps encoding explicit through
@@ -157,9 +157,6 @@ Implemented types:
 - `DecodeSource`
 - `SliceReader`
 - `CodecError`
-
-Present in the workspace and pending its initial `0.1` release; not yet
-published to crates.io.
 
 ### `reliakit-core`
 
@@ -179,6 +176,7 @@ reliakit-primitives = "0.2"
 reliakit-secret = "0.1"
 reliakit-validate = "0.1"
 reliakit-collections = "0.1"
+reliakit-codec = "0.1"
 ```
 
 Add only the crates you need — each is usable independently.
@@ -272,10 +270,9 @@ reliakit/
 Active. Reliakit is published as a real Rust library workspace and follows
 normal Rust crate versioning.
 
-`reliakit-primitives`, `reliakit-secret`, `reliakit-validate`, and
-`reliakit-collections` are published to crates.io. APIs may receive
-compatible refinements before a `1.0` release. `reliakit-codec` lives in the
-workspace and is pending its initial release.
+`reliakit-primitives`, `reliakit-secret`, `reliakit-validate`,
+`reliakit-collections`, and `reliakit-codec` are published to crates.io. APIs
+may receive compatible refinements before a `1.0` release.
 
 Logo assets are stored under [`assets/`](./assets/).
 
@@ -287,9 +284,6 @@ Published:
 - `reliakit-secret`
 - `reliakit-validate`
 - `reliakit-collections`
-
-Pending initial release:
-
 - `reliakit-codec`
 
 Planned:
