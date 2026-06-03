@@ -85,7 +85,7 @@ pub mod uuid;
 pub use bounded::BoundedStr;
 pub use collections::NonEmptyVec;
 pub use duration::HumanDuration;
-pub use error::{PrimitiveError, PrimitiveResult};
+pub use error::{PrimitiveError, PrimitiveErrorKind, PrimitiveResult};
 pub use non_empty::NonEmptyStr;
 pub use numeric::{ByteSize, Percent, PercentageF64, Port, PositiveFloat, PositiveInt};
 pub use semver::SemVer;
