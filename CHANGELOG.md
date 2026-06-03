@@ -19,6 +19,42 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
   this?", and a before/after section; corrected the workspace layout, status,
   and roadmap to reflect all published crates.
 
+## reliakit-primitives 0.3.0 - 2026-06-03
+
+### Changed
+
+- **Breaking:** made the `alloc` feature behavior match its documentation by
+  gating the allocation-backed owned types (`Slug`, `Email`, `HttpUrl`,
+  `HexString`, `NonEmptyStr`, `BoundedStr`, `NonEmptyVec`, `SemVer`) and the
+  `String` equality impls on `Uuid`/`HumanDuration` behind the `alloc` feature.
+  `std` now implies `alloc`. Building with `--no-default-features` now exposes
+  only the allocation-free primitives (numeric types, `Uuid`, `HumanDuration`,
+  and the error types), changing the public API available under
+  `--no-default-features`.
+- Clarified `BoundedStr::new` docs to state that, when `MIN > 0`, empty or
+  whitespace-only input is rejected with `Empty`.
+
+## reliakit-collections 0.2.0 - 2026-06-03
+
+### Changed
+
+- **Breaking:** gated `BoundedVec` behind the `alloc` feature (it is backed by
+  `Vec<T>`), and `std` now implies `alloc`. Building with `--no-default-features`
+  now exposes only the error types (`CollectionError`, `CollectionResult`);
+  `BoundedVec` requires `alloc` (enabled by default via `std`). This changes the
+  public API available under `--no-default-features`.
+
+## reliakit-validate 0.2.0 - 2026-06-03
+
+### Changed
+
+- **Breaking:** gated `ValidationError` and `ValidateResult` behind the `alloc`
+  feature (they collect `Violation`s in a `Vec`); `std` now implies `alloc`.
+  The `Validate` trait, `Valid<T>`, and `Violation` remain available without
+  `alloc`. Building with `--no-default-features` no longer exposes
+  `ValidationError`/`ValidateResult`, changing the public API available under
+  `--no-default-features`.
+
 ## reliakit-codec 0.1.0 - 2026-06-03
 
 Initial release.

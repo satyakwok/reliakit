@@ -1,4 +1,5 @@
 use crate::{PrimitiveError, PrimitiveResult};
+#[cfg(feature = "alloc")]
 use alloc::string::String;
 use core::{fmt, str::FromStr, time::Duration};
 
@@ -182,12 +183,14 @@ impl PartialEq<&str> for HumanDuration {
     }
 }
 
+#[cfg(feature = "alloc")]
 impl PartialEq<String> for HumanDuration {
     fn eq(&self, other: &String) -> bool {
         self.eq(other.as_str())
     }
 }
 
+#[cfg(feature = "alloc")]
 impl PartialEq<&String> for HumanDuration {
     fn eq(&self, other: &&String) -> bool {
         self.eq(other.as_str())

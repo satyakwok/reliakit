@@ -11,6 +11,9 @@ description = "Secret-safe wrappers for Rust values that should not leak through
 keywords = ["secret", "redaction", "security", "privacy", "no-std"]
 categories = ["authentication", "config", "no-std", "rust-patterns"]
 
+[package.metadata.docs.rs]
+all-features = true
+
 [features]
 default = ["std"]
 std = []

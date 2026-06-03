@@ -63,7 +63,7 @@ impl<T: Validate + core::fmt::Display> core::fmt::Display for Valid<T> {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "alloc"))]
 mod tests {
     use super::Valid;
     use crate::{Validate, ValidationError};

@@ -172,10 +172,10 @@ From crates.io:
 
 ```toml
 [dependencies]
-reliakit-primitives = "0.2"
+reliakit-primitives = "0.3"
 reliakit-secret = "0.1"
-reliakit-validate = "0.1"
-reliakit-collections = "0.1"
+reliakit-validate = "0.2"
+reliakit-collections = "0.2"
 reliakit-codec = "0.1"
 ```
 

@@ -1,6 +1,6 @@
 [package]
 name = "reliakit-collections"
-version = "0.1.0"
+version = "0.2.0"
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
@@ -11,9 +11,12 @@ description = "Bounded and reliability-oriented collection types for Rust."
 keywords = ["collections", "bounded", "vec", "constraints", "no-std"]
 categories = ["data-structures", "rust-patterns", "no-std"]
 
+[package.metadata.docs.rs]
+all-features = true
+
 [features]
 default = ["std"]
-std = []
+std = ["alloc"]
 alloc = []
 
 [dependencies]

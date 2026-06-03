@@ -10,7 +10,9 @@ impl<const MIN: usize, const MAX: usize> BoundedStr<MIN, MAX> {
     /// Creates a new bounded string.
     ///
     /// Length is measured in Unicode scalar values via `chars().count()`, not
-    /// bytes. If `MIN > MAX`, construction returns `OutOfRange`.
+    /// bytes. If `MIN > MAX`, construction returns `OutOfRange`. When `MIN > 0`,
+    /// an input that is empty or contains only whitespace is rejected with
+    /// `Empty`, even if its character count would otherwise satisfy `MIN`.
     pub fn new(value: impl Into<String>) -> PrimitiveResult<Self> {
         let value = value.into();
         let actual = value.chars().count();
