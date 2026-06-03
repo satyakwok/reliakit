@@ -31,7 +31,7 @@ jobs:
           cargo --version
 
       - name: Cache Cargo
-        uses: actions/cache@v5
+        uses: actions/cache@v5.0.5
         with:
           path: |
             ~/.cargo/registry
@@ -72,7 +72,7 @@ jobs:
           cargo +1.85.0 --version
 
       - name: Cache Cargo
-        uses: actions/cache@v5
+        uses: actions/cache@v5.0.5
         with:
           path: |
             ~/.cargo/registry
@@ -103,7 +103,7 @@ jobs:
           cargo --version
 
       - name: Cache Cargo
-        uses: actions/cache@v5
+        uses: actions/cache@v5.0.5
         with:
           path: |
             ~/.cargo/registry
