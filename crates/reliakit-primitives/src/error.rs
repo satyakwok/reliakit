@@ -1,5 +1,23 @@
 use core::fmt;
 
+/// Stable category for a primitive validation error.
+///
+/// This lets callers match on broad failure kinds without depending on display
+/// text or static validation messages.
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+pub enum PrimitiveErrorKind {
+    /// The value was empty or whitespace-only.
+    Empty,
+    /// The value was shorter than the minimum allowed length.
+    TooShort,
+    /// The value was longer than the maximum allowed length.
+    TooLong,
+    /// The value was outside the inclusive allowed range.
+    OutOfRange,
+    /// The value did not match the expected format.
+    InvalidFormat,
+}
+
 /// Error returned when a primitive value fails validation.
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -39,6 +57,19 @@ pub enum PrimitiveError {
 /// Result alias used by Reliakit primitive constructors.
 pub type PrimitiveResult<T> = Result<T, PrimitiveError>;
 
+impl PrimitiveError {
+    /// Returns the stable category for this error.
+    pub const fn kind(&self) -> PrimitiveErrorKind {
+        match self {
+            Self::Empty => PrimitiveErrorKind::Empty,
+            Self::TooShort { .. } => PrimitiveErrorKind::TooShort,
+            Self::TooLong { .. } => PrimitiveErrorKind::TooLong,
+            Self::OutOfRange { .. } => PrimitiveErrorKind::OutOfRange,
+            Self::Invalid { .. } => PrimitiveErrorKind::InvalidFormat,
+        }
+    }
+}
+
 impl fmt::Display for PrimitiveError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -68,7 +99,7 @@ impl std::error::Error for PrimitiveError {}
 
 #[cfg(test)]
 mod tests {
-    use super::PrimitiveError;
+    use super::{PrimitiveError, PrimitiveErrorKind};
     use alloc::string::ToString;
 
     #[test]
@@ -113,6 +144,35 @@ mod tests {
             }
             .to_string(),
             "invalid value: bad format"
+        );
+    }
+
+    #[test]
+    fn kind_returns_stable_error_category() {
+        assert_eq!(PrimitiveError::Empty.kind(), PrimitiveErrorKind::Empty);
+        assert_eq!(
+            PrimitiveError::TooShort { min: 3, actual: 1 }.kind(),
+            PrimitiveErrorKind::TooShort
+        );
+        assert_eq!(
+            PrimitiveError::TooLong { max: 5, actual: 8 }.kind(),
+            PrimitiveErrorKind::TooLong
+        );
+        assert_eq!(
+            PrimitiveError::OutOfRange {
+                min: 1,
+                max: 100,
+                actual: 200
+            }
+            .kind(),
+            PrimitiveErrorKind::OutOfRange
+        );
+        assert_eq!(
+            PrimitiveError::Invalid {
+                message: "bad format"
+            }
+            .kind(),
+            PrimitiveErrorKind::InvalidFormat
         );
     }
 }

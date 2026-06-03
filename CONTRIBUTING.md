@@ -48,6 +48,9 @@ Each crate in this workspace has a narrow scope:
 | Crate | Scope |
 |---|---|
 | `reliakit-primitives` | Owned wrapper types for constrained values. No dependencies. |
+| `reliakit-secret` | Secret-safe wrappers that redact values in diagnostic output. No dependencies. |
+| `reliakit-validate` | Validation traits, validated-value wrappers, and validation errors. No dependencies. |
+| `reliakit-collections` | Bounded and reliability-oriented collection types. No dependencies. |
 
 Proposed additions to a crate should fit within its stated scope. If they do not, consider proposing a new crate.
 

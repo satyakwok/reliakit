@@ -8,6 +8,8 @@ Reliakit currently supports the latest published version of each crate.
 |---|---|
 | `reliakit-primitives` `0.2.x` | Yes |
 | `reliakit-secret` `0.1.x` | Yes |
+| `reliakit-validate` `0.1.x` | Yes |
+| `reliakit-collections` `0.1.x` | Yes |
 
 Older versions may receive fixes when the issue is severe and the fix can be
 backported safely.

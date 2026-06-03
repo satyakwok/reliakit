@@ -8,6 +8,9 @@ updates:
     open-pull-requests-limit: 5
     commit-message:
       prefix: "ci"
+    ignore:
+      # Removed in favor of plain rustup shell commands; do not re-introduce.
+      - dependency-name: "dtolnay/rust-toolchain"
 
   # Keep Cargo dependencies current.
   - package-ecosystem: "cargo"

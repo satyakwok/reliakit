@@ -171,6 +171,19 @@ Or depend on the Git repository directly:
 reliakit-primitives = { git = "https://github.com/satyakwok/reliakit", package = "reliakit-primitives" }
 ```
 
+## Workspace vs Crates
+
+This repository is a Cargo workspace. The workspace lets Reliakit develop
+multiple related crates in one repository with shared CI, tests, examples, and
+metadata.
+
+Users do not depend on the workspace directly. Add only the crate you need:
+
+- Use `reliakit-primitives` for constrained primitive types.
+- Use `reliakit-secret` for redacted secret wrappers.
+- Use `reliakit-validate` for validation traits and errors.
+- Use `reliakit-collections` for bounded collection types.
+
 ## MSRV
 
 Reliakit currently supports Rust `1.85` and newer.
@@ -280,11 +293,11 @@ See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for contribution guidelines,
 
 ## Star History
 
-<a href="https://www.star-history.com/?repos=satyakwok%2Freliakit&type=Date">
+<a href="https://github.com/satyakwok/reliakit/stargazers">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=satyakwok/reliakit&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=satyakwok/reliakit&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=satyakwok/reliakit&type=Date" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=satyakwok/reliakit&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=satyakwok/reliakit&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=satyakwok/reliakit&type=date&legend=top-left" />
  </picture>
 </a>
 
