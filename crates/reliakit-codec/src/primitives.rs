@@ -180,8 +180,12 @@ mod impls {
 #[cfg(all(test, feature = "primitives"))]
 mod tests {
     use crate::{decode_from_slice_exact, encode_to_vec, CodecErrorKind};
+    use alloc::string::ToString;
     use alloc::vec;
-    use reliakit_primitives::{Email, NonEmptyStr, NonEmptyVec, Percent, Port, Uuid};
+    use reliakit_primitives::{
+        BoundedStr, ByteSize, Email, HexString, HttpUrl, HumanDuration, NonEmptyStr, NonEmptyVec,
+        Percent, Port, PositiveInt, SemVer, Slug, Uuid,
+    };
 
     #[test]
     fn string_primitives_roundtrip_through_validation() {
@@ -195,6 +199,25 @@ mod tests {
         let email = Email::new("ops@example.com").unwrap();
         let encoded = encode_to_vec(&email).unwrap();
         assert_eq!(decode_from_slice_exact::<Email>(&encoded).unwrap(), email);
+
+        let url = HttpUrl::new("https://example.com/health").unwrap();
+        let encoded = encode_to_vec(&url).unwrap();
+        assert_eq!(decode_from_slice_exact::<HttpUrl>(&encoded).unwrap(), url);
+
+        let slug = Slug::new("service-api").unwrap();
+        let encoded = encode_to_vec(&slug).unwrap();
+        assert_eq!(decode_from_slice_exact::<Slug>(&encoded).unwrap(), slug);
+
+        let hex = HexString::new("0xdeadBEEF").unwrap();
+        let encoded = encode_to_vec(&hex).unwrap();
+        assert_eq!(decode_from_slice_exact::<HexString>(&encoded).unwrap(), hex);
+
+        let bounded = BoundedStr::<3, 8>::new("service").unwrap();
+        let encoded = encode_to_vec(&bounded).unwrap();
+        assert_eq!(
+            decode_from_slice_exact::<BoundedStr<3, 8>>(&encoded).unwrap(),
+            bounded
+        );
     }
 
     #[test]
@@ -214,11 +237,122 @@ mod tests {
     }
 
     #[test]
+    fn numeric_primitives_roundtrip() {
+        let port = Port::new(8080).unwrap();
+        assert_eq!(encode_to_vec(&port).unwrap(), 8080u16.to_le_bytes());
+        assert_eq!(
+            decode_from_slice_exact::<Port>(&8080u16.to_le_bytes()).unwrap(),
+            port
+        );
+
+        let percent = Percent::new(80).unwrap();
+        assert_eq!(encode_to_vec(&percent).unwrap(), [80]);
+        assert_eq!(decode_from_slice_exact::<Percent>(&[80]).unwrap(), percent);
+
+        let positive = PositiveInt::new(9).unwrap();
+        assert_eq!(encode_to_vec(&positive).unwrap(), 9u64.to_le_bytes());
+        assert_eq!(
+            decode_from_slice_exact::<PositiveInt>(&9u64.to_le_bytes()).unwrap(),
+            positive
+        );
+
+        let size = ByteSize::from_mb(2);
+        assert_eq!(
+            encode_to_vec(&size).unwrap(),
+            (2 * 1024 * 1024u64).to_le_bytes()
+        );
+        assert_eq!(
+            decode_from_slice_exact::<ByteSize>(&(2 * 1024 * 1024u64).to_le_bytes()).unwrap(),
+            size
+        );
+    }
+
+    #[test]
+    fn primitive_validation_failures_are_decode_errors() {
+        let empty_string = encode_to_vec("").unwrap();
+        assert_eq!(
+            decode_from_slice_exact::<NonEmptyStr>(&empty_string)
+                .unwrap_err()
+                .kind(),
+            CodecErrorKind::InvalidValue
+        );
+        assert_eq!(
+            decode_from_slice_exact::<Email>(&empty_string)
+                .unwrap_err()
+                .kind(),
+            CodecErrorKind::InvalidValue
+        );
+        assert_eq!(
+            decode_from_slice_exact::<HttpUrl>(&empty_string)
+                .unwrap_err()
+                .kind(),
+            CodecErrorKind::InvalidValue
+        );
+        assert_eq!(
+            decode_from_slice_exact::<Slug>(&empty_string)
+                .unwrap_err()
+                .kind(),
+            CodecErrorKind::InvalidValue
+        );
+        assert_eq!(
+            decode_from_slice_exact::<HexString>(&empty_string)
+                .unwrap_err()
+                .kind(),
+            CodecErrorKind::InvalidValue
+        );
+        assert_eq!(
+            decode_from_slice_exact::<BoundedStr<3, 8>>(&empty_string)
+                .unwrap_err()
+                .kind(),
+            CodecErrorKind::InvalidValue
+        );
+        assert_eq!(
+            decode_from_slice_exact::<PositiveInt>(&0u64.to_le_bytes())
+                .unwrap_err()
+                .kind(),
+            CodecErrorKind::InvalidValue
+        );
+    }
+
+    #[test]
     fn uuid_encodes_raw_bytes_canonically() {
         let uuid = Uuid::parse("550e8400-e29b-41d4-a716-446655440000").unwrap();
         let encoded = encode_to_vec(&uuid).unwrap();
         assert_eq!(encoded, uuid.as_bytes());
         assert_eq!(decode_from_slice_exact::<Uuid>(&encoded).unwrap(), uuid);
+    }
+
+    #[test]
+    fn structured_primitives_roundtrip_through_text_forms() {
+        let version = SemVer::parse("1.2.3-beta.1+build.5").unwrap();
+        let encoded = encode_to_vec(&version).unwrap();
+        assert_eq!(encoded, encode_to_vec(&version.to_string()).unwrap());
+        assert_eq!(
+            decode_from_slice_exact::<SemVer>(&encoded).unwrap(),
+            version
+        );
+
+        let duration = HumanDuration::parse("1h30m45s").unwrap();
+        let encoded = encode_to_vec(&duration).unwrap();
+        assert_eq!(encoded, encode_to_vec(&duration.to_string()).unwrap());
+        assert_eq!(
+            decode_from_slice_exact::<HumanDuration>(&encoded).unwrap(),
+            duration
+        );
+
+        let invalid = encode_to_vec("not-semver").unwrap();
+        assert_eq!(
+            decode_from_slice_exact::<SemVer>(&invalid)
+                .unwrap_err()
+                .kind(),
+            CodecErrorKind::InvalidValue
+        );
+        assert_eq!(
+            decode_from_slice_exact::<HumanDuration>(&invalid)
+                .unwrap_err()
+                .kind(),
+            CodecErrorKind::InvalidValue
+        );
     }
 
     #[test]

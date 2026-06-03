@@ -82,9 +82,10 @@ pub use helpers::encode_to_vec;
 #[cfg(all(test, feature = "alloc"))]
 mod tests {
     use super::*;
-    use alloc::string::String;
+    use alloc::string::{String, ToString};
     use alloc::vec;
     use alloc::vec::Vec;
+    use core::fmt::Write as _;
 
     #[derive(Debug, PartialEq, Eq)]
     struct Message {
@@ -122,6 +123,29 @@ mod tests {
     }
 
     #[test]
+    fn integer_widths_roundtrip() {
+        macro_rules! assert_integer {
+            ($ty:ty, $value:expr) => {
+                let value = $value as $ty;
+                let encoded = encode_to_vec(&value).unwrap();
+                assert_eq!(encoded, value.to_le_bytes());
+                assert_eq!(decode_from_slice_exact::<$ty>(&encoded).unwrap(), value);
+            };
+        }
+
+        assert_integer!(u8, 200);
+        assert_integer!(i8, -12);
+        assert_integer!(u16, 0x1234);
+        assert_integer!(i16, -1234);
+        assert_integer!(u32, 0x1234_5678);
+        assert_integer!(i32, -123_456);
+        assert_integer!(u64, 0x1234_5678_9abc_def0);
+        assert_integer!(i64, -123_456_789);
+        assert_integer!(u128, 0x1234_5678_9abc_def0_1111_2222_3333_4444);
+        assert_integer!(i128, -123_456_789_123_456_789);
+    }
+
+    #[test]
     fn bool_decode_is_strict() {
         assert!(!decode_from_slice_exact::<bool>(&[0x00]).unwrap());
         assert!(decode_from_slice_exact::<bool>(&[0x01]).unwrap());
@@ -155,6 +179,21 @@ mod tests {
     }
 
     #[test]
+    fn slice_reader_reports_remaining_and_eof() {
+        let mut reader = SliceReader::new(&[1, 2]);
+        assert!(!reader.is_empty());
+
+        let mut one = [0u8; 1];
+        reader.read_exact(&mut one).unwrap();
+        assert_eq!(one, [1]);
+        assert_eq!(reader.remaining(), 1);
+
+        let mut two = [0u8; 2];
+        let err = reader.read_exact(&mut two).unwrap_err();
+        assert_eq!(err.kind(), CodecErrorKind::UnexpectedEof);
+    }
+
+    #[test]
     fn manual_struct_roundtrip() {
         let message = Message {
             id: 7,
@@ -185,6 +224,34 @@ mod tests {
     }
 
     #[test]
+    fn option_and_result_encode_all_branches() {
+        let none: Option<u16> = None;
+        assert_eq!(encode_to_vec(&none).unwrap(), vec![0]);
+        assert_eq!(decode_from_slice_exact::<Option<u16>>(&[0]).unwrap(), None);
+
+        let some = Some(0x1234u16);
+        assert_eq!(encode_to_vec(&some).unwrap(), vec![1, 0x34, 0x12]);
+        assert_eq!(
+            decode_from_slice_exact::<Option<u16>>(&[1, 0x34, 0x12]).unwrap(),
+            some
+        );
+
+        let ok: Result<u8, u16> = Ok(9);
+        assert_eq!(encode_to_vec(&ok).unwrap(), vec![0, 9]);
+        assert_eq!(
+            decode_from_slice_exact::<Result<u8, u16>>(&[0, 9]).unwrap(),
+            ok
+        );
+
+        let err: Result<u8, u16> = Err(0x1234);
+        assert_eq!(encode_to_vec(&err).unwrap(), vec![1, 0x34, 0x12]);
+        assert_eq!(
+            decode_from_slice_exact::<Result<u8, u16>>(&[1, 0x34, 0x12]).unwrap(),
+            err
+        );
+    }
+
+    #[test]
     fn vec_and_array_roundtrip() {
         let values = vec![1u16, 2, 3];
         let encoded = encode_to_vec(&values).unwrap();
@@ -196,5 +263,74 @@ mod tests {
         let array = [1u8, 2, 3, 4];
         let encoded = encode_to_vec(&array).unwrap();
         assert_eq!(decode_from_slice_exact::<[u8; 4]>(&encoded).unwrap(), array);
+    }
+
+    #[test]
+    fn tuples_roundtrip_by_field_order() {
+        assert_eq!(
+            decode_from_slice_exact::<(u8,)>(&encode_to_vec(&(1u8,)).unwrap()).unwrap(),
+            (1,)
+        );
+        assert_eq!(
+            decode_from_slice_exact::<(u8, u16)>(&encode_to_vec(&(1u8, 0x0203u16)).unwrap())
+                .unwrap(),
+            (1, 0x0203)
+        );
+        assert_eq!(
+            decode_from_slice_exact::<(u8, u16, bool)>(
+                &encode_to_vec(&(1u8, 0x0203u16, true)).unwrap()
+            )
+            .unwrap(),
+            (1, 0x0203, true)
+        );
+        assert_eq!(
+            decode_from_slice_exact::<(u8, u16, bool, i8)>(
+                &encode_to_vec(&(1u8, 0x0203u16, true, -4i8)).unwrap()
+            )
+            .unwrap(),
+            (1, 0x0203, true, -4)
+        );
+    }
+
+    #[test]
+    fn codec_error_accessors_and_display_are_actionable() {
+        let error = CodecError::new(CodecErrorKind::ReadFailed, "reader failed");
+        assert_eq!(error.kind(), CodecErrorKind::ReadFailed);
+        assert_eq!(error.message(), "reader failed");
+        assert_eq!(error.to_string(), "reader failed");
+
+        assert_eq!(CodecError::read_failed().kind(), CodecErrorKind::ReadFailed);
+        assert_eq!(
+            CodecError::write_failed().kind(),
+            CodecErrorKind::WriteFailed
+        );
+        assert_eq!(
+            CodecError::length_overflow("length too large").message(),
+            "length too large"
+        );
+
+        let mut rendered = String::new();
+        write!(&mut rendered, "{}", CodecError::trailing_bytes()).unwrap();
+        assert_eq!(rendered, "decode completed but trailing bytes remain");
+    }
+
+    #[test]
+    #[cfg(feature = "std")]
+    fn std_buf_writer_maps_write_failures() {
+        struct FailingWriter;
+
+        impl std::io::Write for FailingWriter {
+            fn write(&mut self, _buf: &[u8]) -> std::io::Result<usize> {
+                Err(std::io::Error::other("fail"))
+            }
+
+            fn flush(&mut self) -> std::io::Result<()> {
+                Ok(())
+            }
+        }
+
+        let mut writer = std::io::BufWriter::with_capacity(0, FailingWriter);
+        let err = 1u8.encode(&mut writer).unwrap_err();
+        assert_eq!(err.kind(), CodecErrorKind::WriteFailed);
     }
 }
