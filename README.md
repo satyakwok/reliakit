@@ -185,11 +185,11 @@ From crates.io:
 
 ```toml
 [dependencies]
-reliakit-primitives = "0.3"
+reliakit-primitives = "0.4"
 reliakit-secret = "0.1"
-reliakit-validate = "0.2"
+reliakit-validate = "0.3"
 reliakit-collections = "0.2"
-reliakit-codec = "0.1"
+reliakit-codec = "0.2"
 reliakit-backoff = "0.1"
 ```
 

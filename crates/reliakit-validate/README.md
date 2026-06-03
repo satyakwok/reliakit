@@ -39,14 +39,14 @@ out of scope:
 
 ```toml
 [dependencies]
-reliakit-validate = "0.2"
+reliakit-validate = "0.3"
 ```
 
 For `no_std` environments:
 
 ```toml
 [dependencies]
-reliakit-validate = { version = "0.2", default-features = false, features = ["alloc"] }
+reliakit-validate = { version = "0.3", default-features = false, features = ["alloc"] }
 ```
 
 ## Examples

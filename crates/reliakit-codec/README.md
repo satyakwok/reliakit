@@ -72,21 +72,21 @@ platform-dependent.
 
 ```toml
 [dependencies]
-reliakit-codec = "0.1"
+reliakit-codec = "0.2"
 ```
 
 With optional `reliakit-primitives` integrations:
 
 ```toml
 [dependencies]
-reliakit-codec = { version = "0.1", features = ["primitives"] }
+reliakit-codec = { version = "0.2", features = ["primitives"] }
 ```
 
 For `no_std` with allocation:
 
 ```toml
 [dependencies]
-reliakit-codec = { version = "0.1", default-features = false, features = ["alloc"] }
+reliakit-codec = { version = "0.2", default-features = false, features = ["alloc"] }
 ```
 
 ## Core Concepts

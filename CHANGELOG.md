@@ -19,6 +19,28 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
   this?", and a before/after section; corrected the workspace layout, status,
   and roadmap to reflect all published crates.
 
+## reliakit-primitives 0.4.0 - 2026-06-04
+
+### Changed
+
+- **Breaking:** marked `PrimitiveErrorKind` `#[non_exhaustive]` so future error
+  categories can be added without a breaking change. Match on it with a `_` arm.
+
+## reliakit-validate 0.3.0 - 2026-06-04
+
+### Changed
+
+- **Breaking:** marked `Violation` `#[non_exhaustive]` so future fields can be
+  added without a breaking change. Construct it via `Violation::new` /
+  `Violation::with_field` rather than a struct literal.
+
+## reliakit-codec 0.2.0 - 2026-06-04
+
+### Changed
+
+- **Breaking:** marked `CodecErrorKind` `#[non_exhaustive]` so future error
+  categories can be added without a breaking change. Match on it with a `_` arm.
+
 ## reliakit-backoff 0.1.0 - 2026-06-04
 
 Initial release.

@@ -8,7 +8,7 @@ version = "0.1.0"
 
 [[package]]
 name = "reliakit-codec"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "reliakit-primitives",
 ]
@@ -19,7 +19,7 @@ version = "0.2.0"
 
 [[package]]
 name = "reliakit-primitives"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "reliakit-secret",
  "reliakit-validate",
@@ -31,4 +31,4 @@ version = "0.1.0"
 
 [[package]]
 name = "reliakit-validate"
-version = "0.2.0"
+version = "0.3.0"
