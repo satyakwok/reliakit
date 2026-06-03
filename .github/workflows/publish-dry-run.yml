@@ -53,3 +53,6 @@ jobs:
 
       - name: Verify reliakit-collections package
         run: cargo publish -p reliakit-collections --dry-run --locked
+
+      - name: Verify reliakit-codec package
+        run: cargo publish -p reliakit-codec --dry-run --locked
