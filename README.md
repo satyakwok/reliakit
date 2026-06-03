@@ -171,6 +171,19 @@ Or depend on the Git repository directly:
 reliakit-primitives = { git = "https://github.com/satyakwok/reliakit", package = "reliakit-primitives" }
 ```
 
+## Workspace vs Crates
+
+This repository is a Cargo workspace. The workspace lets Reliakit develop
+multiple related crates in one repository with shared CI, tests, examples, and
+metadata.
+
+Users do not depend on the workspace directly. Add only the crate you need:
+
+- Use `reliakit-primitives` for constrained primitive types.
+- Use `reliakit-secret` for redacted secret wrappers.
+- Use `reliakit-validate` for validation traits and errors.
+- Use `reliakit-collections` for bounded collection types.
+
 ## MSRV
 
 Reliakit currently supports Rust `1.85` and newer.

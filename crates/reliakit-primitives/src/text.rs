@@ -122,6 +122,12 @@ impl PartialEq<&String> for Slug {
     }
 }
 
+impl From<Slug> for String {
+    fn from(value: Slug) -> Self {
+        value.into_inner()
+    }
+}
+
 // ── Email ─────────────────────────────────────────────────────────────────────
 
 /// Email address with basic structural validation.
@@ -200,10 +206,26 @@ impl AsRef<str> for Email {
     }
 }
 
+impl Deref for Email {
+    type Target = str;
+
+    fn deref(&self) -> &Self::Target {
+        self.as_str()
+    }
+}
+
 impl TryFrom<&str> for Email {
     type Error = PrimitiveError;
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
+        Self::new(value)
+    }
+}
+
+impl TryFrom<String> for Email {
+    type Error = PrimitiveError;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
         Self::new(value)
     }
 }
@@ -240,6 +262,12 @@ impl PartialEq<&String> for Email {
     }
 }
 
+impl From<Email> for String {
+    fn from(value: Email) -> Self {
+        value.into_inner()
+    }
+}
+
 // ── HttpUrl ───────────────────────────────────────────────────────────────────
 
 /// HTTP or HTTPS URL with scheme validation.
@@ -256,16 +284,9 @@ impl HttpUrl {
         if value.is_empty() {
             return Err(PrimitiveError::Empty);
         }
-        let lower = value.to_lowercase();
-        let after_scheme = if let Some(rest) = lower.strip_prefix("https://") {
-            rest
-        } else if let Some(rest) = lower.strip_prefix("http://") {
-            rest
-        } else {
-            return Err(PrimitiveError::Invalid {
-                message: "URL must start with http:// or https://",
-            });
-        };
+        let after_scheme = strip_http_scheme(&value).ok_or(PrimitiveError::Invalid {
+            message: "URL must start with http:// or https://",
+        })?;
         let host = after_scheme.split(['/', '?', '#']).next().unwrap_or("");
         if host.is_empty() || host.chars().all(|c| c.is_whitespace()) {
             return Err(PrimitiveError::Invalid {
@@ -296,6 +317,24 @@ impl HttpUrl {
     }
 }
 
+fn strip_http_scheme(value: &str) -> Option<&str> {
+    if value
+        .as_bytes()
+        .get(..8)
+        .is_some_and(|prefix| prefix.eq_ignore_ascii_case(b"https://"))
+    {
+        Some(&value[8..])
+    } else if value
+        .as_bytes()
+        .get(..7)
+        .is_some_and(|prefix| prefix.eq_ignore_ascii_case(b"http://"))
+    {
+        Some(&value[7..])
+    } else {
+        None
+    }
+}
+
 impl fmt::Display for HttpUrl {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(&self.0)
@@ -308,10 +347,26 @@ impl AsRef<str> for HttpUrl {
     }
 }
 
+impl Deref for HttpUrl {
+    type Target = str;
+
+    fn deref(&self) -> &Self::Target {
+        self.as_str()
+    }
+}
+
 impl TryFrom<&str> for HttpUrl {
     type Error = PrimitiveError;
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
+        Self::new(value)
+    }
+}
+
+impl TryFrom<String> for HttpUrl {
+    type Error = PrimitiveError;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
         Self::new(value)
     }
 }
@@ -345,6 +400,12 @@ impl PartialEq<String> for HttpUrl {
 impl PartialEq<&String> for HttpUrl {
     fn eq(&self, other: &&String) -> bool {
         self.as_str() == other.as_str()
+    }
+}
+
+impl From<HttpUrl> for String {
+    fn from(value: HttpUrl) -> Self {
+        value.into_inner()
     }
 }
 
@@ -415,10 +476,26 @@ impl AsRef<str> for HexString {
     }
 }
 
+impl Deref for HexString {
+    type Target = str;
+
+    fn deref(&self) -> &Self::Target {
+        self.as_str()
+    }
+}
+
 impl TryFrom<&str> for HexString {
     type Error = PrimitiveError;
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
+        Self::new(value)
+    }
+}
+
+impl TryFrom<String> for HexString {
+    type Error = PrimitiveError;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
         Self::new(value)
     }
 }
@@ -452,6 +529,12 @@ impl PartialEq<String> for HexString {
 impl PartialEq<&String> for HexString {
     fn eq(&self, other: &&String) -> bool {
         self.as_str() == other.as_str()
+    }
+}
+
+impl From<HexString> for String {
+    fn from(value: HexString) -> Self {
+        value.into_inner()
     }
 }
 
@@ -519,6 +602,13 @@ mod tests {
         assert_eq!(slug, "hello");
         assert_eq!(slug, owned);
         assert!("Hello".parse::<Slug>().is_err());
+    }
+
+    #[test]
+    fn slug_converts_into_string() {
+        let slug = Slug::new("hello").unwrap();
+        let inner = String::from(slug);
+        assert_eq!(inner, "hello");
     }
 
     // Email
@@ -596,6 +686,17 @@ mod tests {
         assert!("bad".parse::<Email>().is_err());
     }
 
+    #[test]
+    fn email_string_ergonomics() {
+        let email = Email::try_from(String::from("a@b.com")).unwrap();
+        let borrowed: &str = email.as_ref();
+        assert_eq!(borrowed, "a@b.com");
+        assert_eq!(&*email, "a@b.com");
+
+        let inner = String::from(email);
+        assert_eq!(inner, "a@b.com");
+    }
+
     // HttpUrl
     #[test]
     fn url_accepts_http() {
@@ -643,6 +744,12 @@ mod tests {
     }
 
     #[test]
+    fn url_accepts_uppercase_http_scheme() {
+        let u = HttpUrl::new("HTTP://example.com").unwrap();
+        assert!(!u.is_https());
+    }
+
+    #[test]
     fn url_is_http_not_https() {
         let u = HttpUrl::new("http://example.com").unwrap();
         assert!(!u.is_https());
@@ -655,6 +762,17 @@ mod tests {
         assert_eq!(url, "https://example.com");
         assert_eq!(url, owned);
         assert!("ftp://example.com".parse::<HttpUrl>().is_err());
+    }
+
+    #[test]
+    fn url_string_ergonomics() {
+        let url = HttpUrl::try_from(String::from("https://example.com")).unwrap();
+        let borrowed: &str = url.as_ref();
+        assert_eq!(borrowed, "https://example.com");
+        assert_eq!(&*url, "https://example.com");
+
+        let inner = String::from(url);
+        assert_eq!(inner, "https://example.com");
     }
 
     // HexString
@@ -705,5 +823,16 @@ mod tests {
         assert_eq!(hex, "ff00");
         assert_eq!(hex, owned);
         assert!("xyz".parse::<HexString>().is_err());
+    }
+
+    #[test]
+    fn hex_string_ergonomics() {
+        let hex = HexString::try_from(String::from("ff00")).unwrap();
+        let borrowed: &str = hex.as_ref();
+        assert_eq!(borrowed, "ff00");
+        assert_eq!(&*hex, "ff00");
+
+        let inner = String::from(hex);
+        assert_eq!(inner, "ff00");
     }
 }

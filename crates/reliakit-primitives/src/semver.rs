@@ -102,6 +102,27 @@ impl SemVer {
     pub fn is_pre_release(&self) -> bool {
         self.pre.is_some()
     }
+
+    /// Compares semantic version precedence according to the SemVer rules.
+    ///
+    /// Build metadata is ignored for SemVer precedence. This differs from
+    /// [`Ord`], which uses build metadata as a final tie-breaker so that Rust's
+    /// total ordering remains consistent with [`Eq`].
+    pub fn cmp_precedence(&self, other: &Self) -> core::cmp::Ordering {
+        let core =
+            (self.major, self.minor, self.patch).cmp(&(other.major, other.minor, other.patch));
+        if core != core::cmp::Ordering::Equal {
+            return core;
+        }
+
+        // Per SemVer spec §11: pre-release < release when core version is equal.
+        match (&self.pre, &other.pre) {
+            (None, None) => core::cmp::Ordering::Equal,
+            (Some(_), None) => core::cmp::Ordering::Less,
+            (None, Some(_)) => core::cmp::Ordering::Greater,
+            (Some(a), Some(b)) => compare_pre_release(a, b),
+        }
+    }
 }
 
 fn parse_version_component(s: &str) -> PrimitiveResult<u64> {
@@ -262,17 +283,8 @@ impl PartialOrd for SemVer {
 
 impl Ord for SemVer {
     fn cmp(&self, other: &Self) -> core::cmp::Ordering {
-        let v = (self.major, self.minor, self.patch).cmp(&(other.major, other.minor, other.patch));
-        if v != core::cmp::Ordering::Equal {
-            return v;
-        }
-        // Per semver spec §11: pre-release < release when core version is equal.
-        match (&self.pre, &other.pre) {
-            (None, None) => core::cmp::Ordering::Equal,
-            (Some(_), None) => core::cmp::Ordering::Less,
-            (None, Some(_)) => core::cmp::Ordering::Greater,
-            (Some(a), Some(b)) => compare_pre_release(a, b),
-        }
+        self.cmp_precedence(other)
+            .then_with(|| self.build.cmp(&other.build))
     }
 }
 
@@ -280,6 +292,7 @@ impl Ord for SemVer {
 mod tests {
     use super::SemVer;
     use crate::PrimitiveError;
+    use alloc::collections::BTreeSet;
     use alloc::string::ToString;
 
     #[test]
@@ -432,6 +445,33 @@ mod tests {
         let numeric = SemVer::parse("1.0.0-1").unwrap();
         let alpha = SemVer::parse("1.0.0-alpha").unwrap();
         assert!(numeric < alpha);
+    }
+
+    #[test]
+    fn precedence_ignores_build_metadata() {
+        let first = SemVer::parse("1.0.0+build.1").unwrap();
+        let second = SemVer::parse("1.0.0+build.2").unwrap();
+
+        assert_eq!(first.cmp_precedence(&second), core::cmp::Ordering::Equal);
+    }
+
+    #[test]
+    fn ord_is_consistent_with_eq_for_build_metadata() {
+        let first = SemVer::parse("1.0.0+build.1").unwrap();
+        let second = SemVer::parse("1.0.0+build.2").unwrap();
+
+        assert_ne!(first, second);
+        assert_ne!(first.cmp(&second), core::cmp::Ordering::Equal);
+    }
+
+    #[test]
+    fn btree_set_keeps_distinct_build_metadata() {
+        let mut versions = BTreeSet::new();
+
+        versions.insert(SemVer::parse("1.0.0+build.1").unwrap());
+        versions.insert(SemVer::parse("1.0.0+build.2").unwrap());
+
+        assert_eq!(versions.len(), 2);
     }
 
     #[test]
