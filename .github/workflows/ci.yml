@@ -94,10 +94,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Install Rust stable
+      - name: Install Rust stable with no_std target
         run: |
           rustup toolchain install stable --profile minimal
           rustup default stable
+          rustup target add thumbv7em-none-eabi
           rustc --version
           cargo --version
 
@@ -113,9 +114,11 @@ jobs:
             ${{ runner.os }}-cargo-${{ github.job }}-
             ${{ runner.os }}-cargo-
 
-      - name: Check no_std (alloc only)
+      # Check against a real bare-metal target with no std available, so a stray
+      # `std` dependency cannot slip through (the host target always has std).
+      - name: Check no_std (alloc only, bare-metal target)
         run: |
-          cargo check -p reliakit-primitives --no-default-features --features alloc --locked
-          cargo check -p reliakit-secret --no-default-features --features alloc --locked
-          cargo check -p reliakit-validate --no-default-features --features alloc --locked
-          cargo check -p reliakit-collections --no-default-features --features alloc --locked
+          cargo check -p reliakit-primitives --no-default-features --features alloc --target thumbv7em-none-eabi --locked
+          cargo check -p reliakit-secret --no-default-features --features alloc --target thumbv7em-none-eabi --locked
+          cargo check -p reliakit-validate --no-default-features --features alloc --target thumbv7em-none-eabi --locked
+          cargo check -p reliakit-collections --no-default-features --features alloc --target thumbv7em-none-eabi --locked
