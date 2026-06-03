@@ -3,6 +3,13 @@
 version = 4
 
 [[package]]
+name = "reliakit-codec"
+version = "0.1.0"
+dependencies = [
+ "reliakit-primitives",
+]
+
+[[package]]
 name = "reliakit-collections"
 version = "0.1.0"
 
