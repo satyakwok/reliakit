@@ -15,6 +15,13 @@
 //! format. They are omitted because their representation or ordering can be
 //! platform-dependent, ambiguous, or outside this crate's first-version scope.
 //!
+//! The vector length prefix is an item count, not a byte length. Decoding a
+//! vector performs work proportional to that count. For element types that
+//! decode from zero bytes (such as `[u8; 0]`), the declared count is therefore
+//! not bounded by the remaining input length; only decode lengths you are
+//! willing to iterate over from untrusted sources, or frame such inputs before
+//! decoding.
+//!
 //! Generic fixed-array decoding (`[T; N]`) requires the `alloc` feature in this
 //! version because the crate forbids unsafe code and Rust 1.85 does not provide
 //! a stable fallible array initializer. In no-alloc builds, `[u8; N]` decoding is

@@ -274,6 +274,20 @@ mod tests {
     }
 
     #[test]
+    fn vec_of_zero_sized_elements_roundtrips() {
+        // A `Vec` of zero-sized elements encodes to just its `u32` item-count
+        // prefix; decoding reconstructs the same count. This pins the documented
+        // behavior that the prefix is an item count, not a byte length.
+        let values: Vec<[u8; 0]> = vec![[], [], []];
+        let encoded = encode_to_vec(&values).unwrap();
+        assert_eq!(encoded, vec![3, 0, 0, 0]);
+        assert_eq!(
+            decode_from_slice_exact::<Vec<[u8; 0]>>(&encoded).unwrap(),
+            values
+        );
+    }
+
+    #[test]
     fn tuples_roundtrip_by_field_order() {
         assert_eq!(
             decode_from_slice_exact::<(u8,)>(&encode_to_vec(&(1u8,)).unwrap()).unwrap(),
