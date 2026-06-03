@@ -158,6 +158,19 @@ Implemented types:
 - `SliceReader`
 - `CodecError`
 
+### `reliakit-backoff` — [crates.io](https://crates.io/crates/reliakit-backoff) · [docs.rs](https://docs.rs/reliakit-backoff)
+
+Clock-agnostic retry backoff policies. It computes the delay to wait before each
+retry (constant, linear, or exponential, with optional cap and retry limit) and
+provides pure jitter helpers. It does not sleep or read the clock, so it works
+in sync, async, and `no_std` contexts. Depends only on `core`.
+
+Implemented types:
+
+- `Backoff`
+- `Delays`
+- `full_jitter` / `equal_jitter`
+
 ### `reliakit-core`
 
 Planned. Shared core types, traits, and errors used across Reliakit crates.
@@ -177,6 +190,7 @@ reliakit-secret = "0.1"
 reliakit-validate = "0.2"
 reliakit-collections = "0.2"
 reliakit-codec = "0.1"
+reliakit-backoff = "0.1"
 ```
 
 Add only the crates you need — each is usable independently.
@@ -258,7 +272,9 @@ reliakit/
 │   │   └── examples/
 │   ├── reliakit-validate/
 │   ├── reliakit-collections/
-│   └── reliakit-codec/
+│   ├── reliakit-codec/
+│   │   └── examples/
+│   └── reliakit-backoff/
 │       └── examples/
 ├── Cargo.toml
 ├── README.md
@@ -271,8 +287,8 @@ Active. Reliakit is published as a real Rust library workspace and follows
 normal Rust crate versioning.
 
 `reliakit-primitives`, `reliakit-secret`, `reliakit-validate`,
-`reliakit-collections`, and `reliakit-codec` are published to crates.io. APIs
-may receive compatible refinements before a `1.0` release.
+`reliakit-collections`, `reliakit-codec`, and `reliakit-backoff` are published
+to crates.io. APIs may receive compatible refinements before a `1.0` release.
 
 Logo assets are stored under [`assets/`](./assets/).
 
@@ -285,6 +301,7 @@ Published:
 - `reliakit-validate`
 - `reliakit-collections`
 - `reliakit-codec`
+- `reliakit-backoff`
 
 Planned:
 

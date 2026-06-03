@@ -19,6 +19,23 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
   this?", and a before/after section; corrected the workspace layout, status,
   and roadmap to reflect all published crates.
 
+## reliakit-backoff 0.1.0 - 2026-06-04
+
+Initial release.
+
+### Added
+
+- Added the `reliakit-backoff` crate: clock-agnostic retry backoff policies.
+  - `Backoff` with `constant`, `linear`, and `exponential` strategies, plus
+    `with_max_delay` and `with_max_retries`.
+  - `Backoff::delay(attempt)` returns the delay to wait before a zero-based
+    retry, or `None` once the retry limit is reached. All arithmetic saturates
+    and the computation runs in bounded time.
+  - `Backoff::delays()` iterator over successive delays.
+  - `full_jitter` and `equal_jitter` pure helpers that take caller-supplied
+    randomness (no RNG dependency).
+  - `#![no_std]`, zero dependencies, `#![forbid(unsafe_code)]`.
+
 ## reliakit-primitives 0.3.0 - 2026-06-03
 
 ### Changed
