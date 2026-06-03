@@ -1,4 +1,5 @@
 use crate::{PrimitiveError, PrimitiveResult};
+#[cfg(feature = "alloc")]
 use alloc::string::String;
 use core::{fmt, str::FromStr};
 
@@ -101,12 +102,14 @@ impl PartialEq<&str> for Uuid {
     }
 }
 
+#[cfg(feature = "alloc")]
 impl PartialEq<String> for Uuid {
     fn eq(&self, other: &String) -> bool {
         self.eq(other.as_str())
     }
 }
 
+#[cfg(feature = "alloc")]
 impl PartialEq<&String> for Uuid {
     fn eq(&self, other: &&String) -> bool {
         self.eq(other.as_str())

@@ -19,7 +19,7 @@ alloc = []
 primitives = ["alloc", "dep:reliakit-primitives", "reliakit-primitives/alloc"]
 
 [dependencies]
-reliakit-primitives = { path = "../reliakit-primitives", version = "0.2", optional = true, default-features = false }
+reliakit-primitives = { path = "../reliakit-primitives", version = "0.3", optional = true, default-features = false }
 
 [[example]]
 name = "basic_encoding"

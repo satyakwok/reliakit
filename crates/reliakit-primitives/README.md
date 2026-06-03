@@ -202,16 +202,26 @@ depending on display text.
 
 | Flag | Default | Description |
 |---|---|---|
-| `std` | yes | Enables `std::error::Error` for `PrimitiveError` |
-| `alloc` | no | Enables allocation-backed types without `std` |
+| `std` | yes | Enables `std::error::Error` for `PrimitiveError`; implies `alloc` |
+| `alloc` | no | Enables the allocation-backed owned types and collection helpers |
 
 ## `no_std`
 
-The crate supports `no_std` environments when `std` feature is disabled and `alloc` is available.
+The crate supports `no_std`. Building with `--no-default-features` (no `std`,
+no `alloc`) provides the allocation-free primitives:
 
-String-backed and vector-backed primitives require allocation. Use
-`default-features = false, features = ["alloc"]` for allocation-backed types
-without `std`.
+- numeric: `Percent`, `PercentageF64`, `Port`, `PositiveInt`, `PositiveFloat`,
+  `ByteSize`,
+- `Uuid` and `HumanDuration` (parsing and `Display` do not allocate),
+- the error types (`PrimitiveError`, `PrimitiveErrorKind`, `PrimitiveResult`).
+
+Enabling `alloc` adds the owned, allocation-backed types: `Slug`, `Email`,
+`HttpUrl`, `HexString`, `NonEmptyStr`, `BoundedStr`, `NonEmptyVec`, and `SemVer`.
+The default `std` build enables `alloc` for normal application use:
+
+```toml
+reliakit-primitives = { version = "0.3", default-features = false, features = ["alloc"] }
+```
 
 ## Safety
 
