@@ -5,6 +5,7 @@ use core::fmt;
 /// This lets callers match on broad failure kinds without depending on display
 /// text or static validation messages.
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[non_exhaustive]
 pub enum PrimitiveErrorKind {
     /// The value was empty or whitespace-only.
     Empty,

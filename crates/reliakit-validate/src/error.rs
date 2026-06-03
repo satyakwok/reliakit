@@ -4,6 +4,7 @@ use core::fmt;
 
 /// A single failed constraint, optionally associated with a named field.
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[non_exhaustive]
 pub struct Violation {
     /// The field name, if validation was run on a named field.
     pub field: Option<&'static str>,

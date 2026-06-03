@@ -4,6 +4,7 @@ use core::fmt;
 
 /// High-level category for a codec error.
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[non_exhaustive]
 pub enum CodecErrorKind {
     /// The input ended before the requested bytes could be read.
     UnexpectedEof,
