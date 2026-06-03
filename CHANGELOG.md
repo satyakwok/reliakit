@@ -34,6 +34,16 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 - Clarified `BoundedStr::new` docs to state that, when `MIN > 0`, empty or
   whitespace-only input is rejected with `Empty`.
 
+## reliakit-collections 0.2.0 - 2026-06-03
+
+### Changed
+
+- **Breaking:** gated `BoundedVec` behind the `alloc` feature (it is backed by
+  `Vec<T>`), and `std` now implies `alloc`. Building with `--no-default-features`
+  now exposes only the error types (`CollectionError`, `CollectionResult`);
+  `BoundedVec` requires `alloc` (enabled by default via `std`). This changes the
+  public API available under `--no-default-features`.
+
 ## reliakit-codec 0.1.0 - 2026-06-03
 
 Initial release.
