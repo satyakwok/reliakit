@@ -218,24 +218,16 @@ assert_eq!(api_key.expose_secret(), "rk_live_example");
 - Stable, documented APIs.
 - Composable crates.
 
-## Non-Goals
+## Scope
 
-Reliakit is not:
+Reliakit focuses on small, explicit building blocks for reliability-oriented
+Rust code.
 
-- an async runtime,
-- a web framework,
-- an ORM,
-- a logging framework,
-- a replacement for `serde`,
-- a replacement for `tokio`,
-- a replacement for `clap`,
-- a replacement for `anyhow`,
-- a replacement for `thiserror`,
-- a replacement for `hashbrown`,
-- a replacement for `syn`.
+It is intentionally not a framework. It does not provide a runtime, web stack,
+ORM, logging system, or broad application platform.
 
-Reliakit provides focused primitives and utility crates; it does not replace
-mature ecosystem foundations.
+Each crate is designed to be adopted independently, with minimal API surface,
+clear invariants, and no hidden runtime behavior.
 
 ## Workspace Layout
 
