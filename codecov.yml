@@ -39,6 +39,11 @@ coverage:
         threshold: 1%
         flags:
           - reliakit-circuit
+      reliakit-ratelimit:
+        target: 90%
+        threshold: 1%
+        flags:
+          - reliakit-ratelimit
     patch:
       default:
         target: 90%
