@@ -8,6 +8,7 @@
 [![Crates.io Downloads](https://img.shields.io/crates/d/reliakit-backoff.svg)](https://crates.io/crates/reliakit-backoff)
 [![Docs.rs](https://docs.rs/reliakit-backoff/badge.svg)](https://docs.rs/reliakit-backoff)
 [![CI](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml/badge.svg)](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/satyakwok/reliakit/branch/main/graph/badge.svg?flag=reliakit-backoff)](https://codecov.io/gh/satyakwok/reliakit/tree/main/crates/reliakit-backoff)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/satyakwok/reliakit/blob/main/LICENSE)
 
 Clock-agnostic retry backoff policies for Rust.
