@@ -92,10 +92,11 @@ covered by tests.
 
 Phase 1 ships with unit tests for every required acceptance/rejection, escape and
 surrogate handling, all limit kinds, error locations/paths, golden compact bytes,
-roundtrip, and an arbitrary-input panic smoke test. Planned hardening (Phase 3):
-JSONTestSuite integration, `cargo-fuzz` targets (parser safety, roundtrip,
-canonical idempotence, dup-key escape equivalence, limit enforcement, differential
-vs a reference parser), with crash inputs kept as regression tests.
+roundtrip, and an arbitrary-input panic smoke test. Hardening (Phase 3, done):
+JSONTestSuite-style conformance tests and a dependency-free, deterministic in-test
+fuzzer (hand-written PRNG) covering parser safety (no panic), compact roundtrip,
+and canonical idempotence. Coverage-guided fuzzing is intentionally omitted — it
+needs a third-party engine, and reliakit takes no third-party dependencies.
 
 ## Release gates
 
@@ -113,8 +114,10 @@ Unicode ordering, idempotence, differential checks, and fuzzing all pass.
    rejection, `JsonValue`, `JsonNumber`. **(done)**
 2. Compact writer + exact-byte and roundtrip tests. **(done)**
 3. Hardening — JSONTestSuite-style conformance tests, limit-boundary tests, and
-   `cargo-fuzz` targets (parse, compact round-trip, canonical idempotence) plus a
-   `reliakit-codec` decode target. **(done)**
+   a dependency-free in-test fuzzer (hand-written PRNG) covering parse safety,
+   compact round-trip, and canonical idempotence. **(done)** Coverage-guided
+   fuzzing is intentionally omitted: it would require a third-party engine, and
+   reliakit takes no third-party dependencies.
 4. Canonicalization — RFC 8785 design, number formatting (ECMAScript), key
    ordering (UTF-16). **(done behind the `canonical` feature; validated against
    the RFC 8785 number examples and a large randomized `f64` round-trip sample.

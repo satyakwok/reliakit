@@ -540,6 +540,13 @@ mod tests {
                 let reparsed = parse_str(&compact).expect("compact output must reparse");
                 assert_eq!(reparsed, value);
                 assert_eq!(to_compact_string(&reparsed), compact);
+
+                // Canonical (JCS) output must be idempotent when available.
+                #[cfg(feature = "canonical")]
+                if let Ok(canonical) = to_canonical_string(&value) {
+                    let again = parse_str(&canonical).expect("canonical output must reparse");
+                    assert_eq!(to_canonical_string(&again).unwrap(), canonical);
+                }
             }
         }
     }
