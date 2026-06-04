@@ -172,6 +172,9 @@ depending on display text.
 | `Email` | Basic structural email validation |
 | `HttpUrl` | URL that must start with `http://` or `https://` |
 | `HexString` | Hexadecimal characters with optional `0x`/`0X` prefix |
+| `Base64` | Standard (RFC 4648) base64 with correct padding |
+| `Identifier` | ASCII identifier: a letter or `_`, then letters, digits, or `_` |
+| `Hostname` | RFC 1123 hostname (dot-separated labels, ≤253 chars) |
 
 ### Numbers
 
@@ -196,6 +199,7 @@ depending on display text.
 |---|---|
 | `SemVer` | Semantic version (`1.2.3`, `2.0.0-beta.1`, `1.0.0+build`) |
 | `Uuid` | UUID in `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx` format |
+| `MacAddress` | 48-bit MAC address (`aa:bb:cc:dd:ee:ff` or `-` form), allocation-free |
 | `HumanDuration` | Duration parsed from `1h`, `30m`, `45s`, `500ms`, or combinations |
 
 ## Feature Flags
@@ -212,11 +216,13 @@ no `alloc`) provides the allocation-free primitives:
 
 - numeric: `Percent`, `PercentageF64`, `Port`, `PositiveInt`, `PositiveFloat`,
   `ByteSize`,
-- `Uuid` and `HumanDuration` (parsing and `Display` do not allocate),
+- `Uuid`, `MacAddress`, and `HumanDuration` (parsing and `Display` do not
+  allocate),
 - the error types (`PrimitiveError`, `PrimitiveErrorKind`, `PrimitiveResult`).
 
 Enabling `alloc` adds the owned, allocation-backed types: `Slug`, `Email`,
-`HttpUrl`, `HexString`, `NonEmptyStr`, `BoundedStr`, `NonEmptyVec`, and `SemVer`.
+`HttpUrl`, `HexString`, `Base64`, `Identifier`, `Hostname`, `NonEmptyStr`,
+`BoundedStr`, `NonEmptyVec`, and `SemVer`.
 The default `std` build enables `alloc` for normal application use:
 
 ```toml

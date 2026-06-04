@@ -120,6 +120,26 @@ assert_eq!(error.len(), 2);
 println!("{error}"); // "email: invalid format; password: too short"
 ```
 
+### Conditional rules with `require` / `finish`
+
+`require` records a violation only when a check fails, and `finish` turns the
+accumulated violations into a `Result` — so you cannot forget the final
+emptiness check:
+
+```rust
+use reliakit_validate::{ValidationError, Violation};
+
+let name = "";
+let age = 15;
+
+let result = ValidationError::empty()
+    .require(!name.is_empty(), Violation::with_field("name", "must not be empty"))
+    .require_field(age >= 18, "age", "must be at least 18")
+    .finish();
+
+assert_eq!(result.unwrap_err().len(), 2);
+```
+
 ## API Overview
 
 | Item | Description |

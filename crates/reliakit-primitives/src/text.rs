@@ -538,12 +538,414 @@ impl From<HexString> for String {
     }
 }
 
+// ── Base64 ────────────────────────────────────────────────────────────────────
+
+/// Standard (RFC 4648) base64 string with required, correct padding.
+///
+/// Rules: non-empty, length is a multiple of `4`, every non-padding character is
+/// in the standard alphabet (`A-Z`, `a-z`, `0-9`, `+`, `/`), and `=` padding (at
+/// most two) appears only at the end. This is a *format* check; it does not
+/// decode the data. The URL-safe alphabet (`-`/`_`) is not accepted.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct Base64(String);
+
+impl Base64 {
+    /// Creates a new `Base64`. Returns an error if the value is empty or is not
+    /// well-formed standard base64 (see the type docs for the exact rules).
+    pub fn new(value: impl Into<String>) -> PrimitiveResult<Self> {
+        let value = value.into();
+        if value.is_empty() {
+            return Err(PrimitiveError::Empty);
+        }
+        let bytes = value.as_bytes();
+        if bytes.len() % 4 != 0 {
+            return Err(PrimitiveError::Invalid {
+                message: "base64 length must be a multiple of 4",
+            });
+        }
+        let pad = bytes.iter().rev().take_while(|&&b| b == b'=').count();
+        if pad > 2 {
+            return Err(PrimitiveError::Invalid {
+                message: "base64 has at most two padding characters",
+            });
+        }
+        // Every character before the padding must be in the standard alphabet;
+        // because `=` is not in the alphabet, this also rejects interior padding.
+        if !bytes[..bytes.len() - pad]
+            .iter()
+            .all(|&b| b.is_ascii_alphanumeric() || b == b'+' || b == b'/')
+        {
+            return Err(PrimitiveError::Invalid {
+                message: "base64 contains a character outside the standard alphabet",
+            });
+        }
+        Ok(Self(value))
+    }
+
+    /// Returns the underlying base64 string slice.
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+
+    /// Consumes the wrapper and returns the inner string.
+    pub fn into_inner(self) -> String {
+        self.0
+    }
+
+    /// Returns `true` if the value carries `=` padding.
+    pub fn is_padded(&self) -> bool {
+        self.0.ends_with('=')
+    }
+
+    /// Returns the number of bytes this base64 string decodes to.
+    pub fn decoded_len(&self) -> usize {
+        let pad = self.0.bytes().rev().take_while(|&b| b == b'=').count();
+        self.0.len() / 4 * 3 - pad
+    }
+}
+
+impl fmt::Display for Base64 {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(&self.0)
+    }
+}
+
+impl AsRef<str> for Base64 {
+    fn as_ref(&self) -> &str {
+        self.as_str()
+    }
+}
+
+impl Deref for Base64 {
+    type Target = str;
+
+    fn deref(&self) -> &Self::Target {
+        self.as_str()
+    }
+}
+
+impl TryFrom<&str> for Base64 {
+    type Error = PrimitiveError;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        Self::new(value)
+    }
+}
+
+impl TryFrom<String> for Base64 {
+    type Error = PrimitiveError;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        Self::new(value)
+    }
+}
+
+impl FromStr for Base64 {
+    type Err = PrimitiveError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Self::new(s)
+    }
+}
+
+impl PartialEq<str> for Base64 {
+    fn eq(&self, other: &str) -> bool {
+        self.as_str() == other
+    }
+}
+
+impl PartialEq<&str> for Base64 {
+    fn eq(&self, other: &&str) -> bool {
+        self.as_str() == *other
+    }
+}
+
+impl PartialEq<String> for Base64 {
+    fn eq(&self, other: &String) -> bool {
+        self.as_str() == other.as_str()
+    }
+}
+
+impl PartialEq<&String> for Base64 {
+    fn eq(&self, other: &&String) -> bool {
+        self.as_str() == other.as_str()
+    }
+}
+
+impl From<Base64> for String {
+    fn from(value: Base64) -> Self {
+        value.into_inner()
+    }
+}
+
+// ── Identifier ────────────────────────────────────────────────────────────────
+
+/// A conservative ASCII identifier: a letter or `_`, then letters, digits, or
+/// `_`.
+///
+/// Rules: non-empty, the first character is `[A-Za-z_]`, and every remaining
+/// character is `[A-Za-z0-9_]`. Useful for handles, keys, and machine-generated
+/// names that must be safe across many systems.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct Identifier(String);
+
+impl Identifier {
+    /// Creates a new `Identifier`. Returns an error if the value is empty or
+    /// contains a character not allowed at its position (see the type docs).
+    pub fn new(value: impl Into<String>) -> PrimitiveResult<Self> {
+        let value = value.into();
+        let mut chars = value.chars();
+        match chars.next() {
+            None => return Err(PrimitiveError::Empty),
+            Some(first) if !(first.is_ascii_alphabetic() || first == '_') => {
+                return Err(PrimitiveError::Invalid {
+                    message: "identifier must start with an ASCII letter or underscore",
+                });
+            }
+            Some(_) => {}
+        }
+        if !chars.all(|c| c.is_ascii_alphanumeric() || c == '_') {
+            return Err(PrimitiveError::Invalid {
+                message: "identifier may contain only ASCII letters, digits, and underscores",
+            });
+        }
+        Ok(Self(value))
+    }
+
+    /// Returns the underlying identifier string slice.
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+
+    /// Consumes the wrapper and returns the inner string.
+    pub fn into_inner(self) -> String {
+        self.0
+    }
+}
+
+impl fmt::Display for Identifier {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(&self.0)
+    }
+}
+
+impl AsRef<str> for Identifier {
+    fn as_ref(&self) -> &str {
+        self.as_str()
+    }
+}
+
+impl Deref for Identifier {
+    type Target = str;
+
+    fn deref(&self) -> &Self::Target {
+        self.as_str()
+    }
+}
+
+impl TryFrom<&str> for Identifier {
+    type Error = PrimitiveError;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        Self::new(value)
+    }
+}
+
+impl TryFrom<String> for Identifier {
+    type Error = PrimitiveError;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        Self::new(value)
+    }
+}
+
+impl FromStr for Identifier {
+    type Err = PrimitiveError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Self::new(s)
+    }
+}
+
+impl PartialEq<str> for Identifier {
+    fn eq(&self, other: &str) -> bool {
+        self.as_str() == other
+    }
+}
+
+impl PartialEq<&str> for Identifier {
+    fn eq(&self, other: &&str) -> bool {
+        self.as_str() == *other
+    }
+}
+
+impl PartialEq<String> for Identifier {
+    fn eq(&self, other: &String) -> bool {
+        self.as_str() == other.as_str()
+    }
+}
+
+impl PartialEq<&String> for Identifier {
+    fn eq(&self, other: &&String) -> bool {
+        self.as_str() == other.as_str()
+    }
+}
+
+impl From<Identifier> for String {
+    fn from(value: Identifier) -> Self {
+        value.into_inner()
+    }
+}
+
+// ── Hostname ──────────────────────────────────────────────────────────────────
+
+/// A DNS hostname following the RFC 1123 rules.
+///
+/// Rules: non-empty, at most 253 characters total, split into dot-separated
+/// labels where each label is 1–63 characters of `[A-Za-z0-9-]` and does not
+/// start or end with a hyphen. Empty labels (a leading, trailing, or doubled
+/// dot) are rejected. The check is case-preserving and does not resolve the name.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct Hostname(String);
+
+impl Hostname {
+    /// Creates a new `Hostname`. Returns an error if the value is empty, too
+    /// long, or has a label that violates the RFC 1123 rules (see the type docs).
+    pub fn new(value: impl Into<String>) -> PrimitiveResult<Self> {
+        let value = value.into();
+        if value.is_empty() {
+            return Err(PrimitiveError::Empty);
+        }
+        if value.len() > 253 {
+            return Err(PrimitiveError::TooLong {
+                max: 253,
+                actual: value.len(),
+            });
+        }
+        for label in value.split('.') {
+            if label.is_empty() {
+                return Err(PrimitiveError::Invalid {
+                    message: "hostname label must not be empty",
+                });
+            }
+            if label.len() > 63 {
+                return Err(PrimitiveError::Invalid {
+                    message: "hostname label must not exceed 63 characters",
+                });
+            }
+            if label.starts_with('-') || label.ends_with('-') {
+                return Err(PrimitiveError::Invalid {
+                    message: "hostname label must not start or end with a hyphen",
+                });
+            }
+            if !label
+                .bytes()
+                .all(|b| b.is_ascii_alphanumeric() || b == b'-')
+            {
+                return Err(PrimitiveError::Invalid {
+                    message: "hostname label may contain only letters, digits, and hyphens",
+                });
+            }
+        }
+        Ok(Self(value))
+    }
+
+    /// Returns the underlying hostname string slice.
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+
+    /// Consumes the wrapper and returns the inner string.
+    pub fn into_inner(self) -> String {
+        self.0
+    }
+
+    /// Iterates over the dot-separated labels, from left to right.
+    pub fn labels(&self) -> impl Iterator<Item = &str> + '_ {
+        self.0.split('.')
+    }
+}
+
+impl fmt::Display for Hostname {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(&self.0)
+    }
+}
+
+impl AsRef<str> for Hostname {
+    fn as_ref(&self) -> &str {
+        self.as_str()
+    }
+}
+
+impl Deref for Hostname {
+    type Target = str;
+
+    fn deref(&self) -> &Self::Target {
+        self.as_str()
+    }
+}
+
+impl TryFrom<&str> for Hostname {
+    type Error = PrimitiveError;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        Self::new(value)
+    }
+}
+
+impl TryFrom<String> for Hostname {
+    type Error = PrimitiveError;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        Self::new(value)
+    }
+}
+
+impl FromStr for Hostname {
+    type Err = PrimitiveError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Self::new(s)
+    }
+}
+
+impl PartialEq<str> for Hostname {
+    fn eq(&self, other: &str) -> bool {
+        self.as_str() == other
+    }
+}
+
+impl PartialEq<&str> for Hostname {
+    fn eq(&self, other: &&str) -> bool {
+        self.as_str() == *other
+    }
+}
+
+impl PartialEq<String> for Hostname {
+    fn eq(&self, other: &String) -> bool {
+        self.as_str() == other.as_str()
+    }
+}
+
+impl PartialEq<&String> for Hostname {
+    fn eq(&self, other: &&String) -> bool {
+        self.as_str() == other.as_str()
+    }
+}
+
+impl From<Hostname> for String {
+    fn from(value: Hostname) -> Self {
+        value.into_inner()
+    }
+}
+
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
 #[cfg(test)]
 mod tests {
-    use super::{Email, HexString, HttpUrl, Slug};
-    use crate::PrimitiveError;
+    use super::{Base64, Email, HexString, Hostname, HttpUrl, Identifier, Slug};
+    use crate::{PrimitiveError, PrimitiveErrorKind};
 
     // Slug
     #[test]
@@ -834,5 +1236,153 @@ mod tests {
 
         let inner = String::from(hex);
         assert_eq!(inner, "ff00");
+    }
+
+    #[test]
+    fn base64_accepts_valid() {
+        assert_eq!(Base64::new("aGVsbG8=").unwrap().as_str(), "aGVsbG8=");
+        assert!(Base64::new("YWJjZA==").is_ok()); // two pads
+        assert!(Base64::new("YWJjZGU+").is_ok()); // '+' and no pad
+        assert!(Base64::new("ab/+ZZ90").is_ok());
+    }
+
+    #[test]
+    fn base64_rejects_bad() {
+        assert_eq!(
+            Base64::new("").unwrap_err().kind(),
+            PrimitiveErrorKind::Empty
+        );
+        assert_eq!(
+            Base64::new("aGVsbG8").unwrap_err().kind(), // not a multiple of 4
+            PrimitiveErrorKind::InvalidFormat
+        );
+        assert!(Base64::new("ab-_ZZ90").is_err()); // url-safe alphabet
+        assert!(Base64::new("ab=cZZ90").is_err()); // interior padding
+        assert!(Base64::new("ab======").is_err()); // too much padding
+    }
+
+    #[test]
+    fn base64_padding_and_decoded_len() {
+        let b = Base64::new("aGVsbG8=").unwrap(); // "hello" -> 5 bytes
+        assert!(b.is_padded());
+        assert_eq!(b.decoded_len(), 5);
+        let b = Base64::new("YWJjZA==").unwrap(); // "abcd" -> 4 bytes
+        assert_eq!(b.decoded_len(), 4);
+        let b = Base64::new("YWJjZGZn").unwrap(); // 6 bytes, no pad
+        assert!(!b.is_padded());
+        assert_eq!(b.decoded_len(), 6);
+    }
+
+    #[test]
+    fn identifier_accepts_valid() {
+        assert_eq!(Identifier::new("user_id").unwrap().as_str(), "user_id");
+        assert!(Identifier::new("_private").is_ok());
+        assert!(Identifier::new("A1").is_ok());
+        assert!(Identifier::new("x").is_ok());
+    }
+
+    #[test]
+    fn identifier_rejects_bad() {
+        assert_eq!(
+            Identifier::new("").unwrap_err().kind(),
+            PrimitiveErrorKind::Empty
+        );
+        assert!(Identifier::new("3bad").is_err()); // starts with digit
+        assert!(Identifier::new("has space").is_err());
+        assert!(Identifier::new("dash-no").is_err());
+        assert!(Identifier::new("café").is_err()); // non-ascii
+    }
+
+    #[test]
+    fn hostname_accepts_valid() {
+        assert_eq!(
+            Hostname::new("api.example.com").unwrap().as_str(),
+            "api.example.com"
+        );
+        assert!(Hostname::new("localhost").is_ok());
+        assert!(Hostname::new("a-b.c-d.example").is_ok());
+        let h = Hostname::new("api.example.com").unwrap();
+        let labels: alloc::vec::Vec<&str> = h.labels().collect();
+        assert_eq!(labels, ["api", "example", "com"]);
+    }
+
+    #[test]
+    fn hostname_rejects_bad() {
+        assert_eq!(
+            Hostname::new("").unwrap_err().kind(),
+            PrimitiveErrorKind::Empty
+        );
+        assert!(Hostname::new("-bad.com").is_err()); // leading hyphen
+        assert!(Hostname::new("bad-.com").is_err()); // trailing hyphen
+        assert!(Hostname::new("a..b").is_err()); // empty label
+        assert!(Hostname::new(".leading").is_err());
+        assert!(Hostname::new("trailing.").is_err());
+        assert!(Hostname::new("under_score.com").is_err()); // underscore not allowed
+        assert!(Hostname::new(String::from("a").repeat(64)).is_err());
+        let too_long = alloc::format!("{}.com", String::from("a").repeat(252));
+        assert!(Hostname::new(too_long).is_err());
+    }
+
+    // The owned/reference comparisons below intentionally exercise the
+    // `PartialEq<String>` and `PartialEq<&String>` impls, which `cmp_owned` and
+    // `op_ref` would otherwise rewrite away.
+    #[test]
+    #[allow(clippy::cmp_owned, clippy::op_ref)]
+    fn base64_conversions_and_traits() {
+        let from_str: Base64 = "YWJj".parse().unwrap();
+        let try_ref = Base64::try_from("YWJj").unwrap();
+        let try_owned = Base64::try_from(String::from("YWJj")).unwrap();
+        assert_eq!(from_str, try_ref);
+        assert_eq!(try_ref, try_owned);
+
+        assert_eq!(try_ref.to_string(), "YWJj"); // Display
+        let as_ref: &str = try_ref.as_ref(); // AsRef
+        assert_eq!(as_ref, "YWJj");
+        assert_eq!(&*try_ref, "YWJj"); // Deref
+        assert!(try_ref == "YWJj"); // PartialEq<&str>
+        assert!(try_ref == *"YWJj"); // PartialEq<str>
+        assert!(try_ref == String::from("YWJj")); // PartialEq<String>
+        assert!(try_ref == &String::from("YWJj")); // PartialEq<&String>
+        assert_eq!(String::from(try_owned), "YWJj"); // From<Base64> for String
+    }
+
+    #[test]
+    #[allow(clippy::cmp_owned, clippy::op_ref)]
+    fn identifier_conversions_and_traits() {
+        let from_str: Identifier = "user_id".parse().unwrap();
+        let try_ref = Identifier::try_from("user_id").unwrap();
+        let try_owned = Identifier::try_from(String::from("user_id")).unwrap();
+        assert_eq!(from_str, try_ref);
+        assert_eq!(try_ref, try_owned);
+
+        assert_eq!(try_ref.to_string(), "user_id");
+        let as_ref: &str = try_ref.as_ref();
+        assert_eq!(as_ref, "user_id");
+        assert_eq!(&*try_ref, "user_id");
+        assert!(try_ref == "user_id");
+        assert!(try_ref == *"user_id");
+        assert!(try_ref == String::from("user_id"));
+        assert!(try_ref == &String::from("user_id"));
+        assert_eq!(String::from(try_owned), "user_id");
+    }
+
+    #[test]
+    #[allow(clippy::cmp_owned, clippy::op_ref)]
+    fn hostname_conversions_and_traits() {
+        let from_str: Hostname = "example.com".parse().unwrap();
+        let try_ref = Hostname::try_from("example.com").unwrap();
+        let try_owned = Hostname::try_from(String::from("example.com")).unwrap();
+        assert_eq!(from_str, try_ref);
+        assert_eq!(try_ref, try_owned);
+
+        assert_eq!(try_ref.to_string(), "example.com");
+        let as_ref: &str = try_ref.as_ref();
+        assert_eq!(as_ref, "example.com");
+        assert_eq!(&*try_ref, "example.com");
+        assert!(try_ref == "example.com");
+        assert!(try_ref == *"example.com");
+        assert!(try_ref == String::from("example.com"));
+        assert!(try_ref == &String::from("example.com"));
+        assert_eq!(String::from(try_owned), "example.com");
     }
 }

@@ -35,6 +35,29 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
   MIT license text travels with the crate on crates.io rather than only the SPDX
   identifier in the manifest.
 
+## reliakit-primitives 0.4.1 - 2026-06-04
+
+### Added
+
+- Four constrained types. `Base64` (RFC 4648 standard alphabet with correct
+  padding), `Identifier` (ASCII identifier: a letter or `_`, then letters,
+  digits, or `_`), and `Hostname` (RFC 1123 labels) are `alloc`-backed and join
+  the other text primitives. `MacAddress` (six octets, `aa:bb:cc:dd:ee:ff` or
+  `-` form) is allocation-free `no_std`, like `Uuid`. Each follows the existing
+  constructor/`Display`/`AsRef`/`Deref`/`TryFrom`/`FromStr` conventions and uses
+  `PrimitiveError`.
+
+## reliakit-validate 0.3.1 - 2026-06-04
+
+### Added
+
+- `ValidationError` gained builder ergonomics for multi-field checks:
+  `require(condition, violation)` and `require_field(condition, field, message)`
+  record a violation only when a condition fails, and `finish()` turns the
+  accumulated violations into a `ValidateResult` (`Ok(())` when empty), removing
+  the easy-to-forget final emptiness check. Added `FromIterator<Violation>` and
+  `Extend<Violation>` so violations can be collected from an iterator.
+
 ## reliakit-circuit 0.2.1 - 2026-06-04
 
 ### Added
