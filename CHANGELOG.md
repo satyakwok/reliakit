@@ -24,6 +24,19 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
   publish time instead of reading a stored API token, so no long-lived registry
   token is kept in repository secrets.
 
+## reliakit-json 0.2.2 - 2026-06-04
+
+### Added
+
+- Optional `primitives` feature: typed extraction into `reliakit-primitives`
+  constrained types. `JsonObject::get_str_as::<T>(key)` and
+  `JsonValue::str_as::<T>()` run a JSON string through `T`'s `TryFrom<&str>`
+  validating constructor (`Email`, `HttpUrl`, `Hostname`, `Base64`, …). Failures
+  return the new `JsonExtractError`/`JsonExtractErrorKind` (`Missing`,
+  `WrongType`, `Invalid(PrimitiveError)`) carrying the offending field's
+  `JsonPath`. The feature pulls in `reliakit-primitives` only (`no_std` +
+  `alloc`, zero third-party dependencies).
+
 ## reliakit-json 0.2.1 - 2026-06-04
 
 ### Added

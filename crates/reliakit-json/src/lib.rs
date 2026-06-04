@@ -37,6 +37,15 @@
 //! assert!(parse_with_limits(b"[[[[[[[[[[1]]]]]]]]]]", limits).is_err());
 //! ```
 //!
+//! # Feature flags
+//!
+//! - `std` (default) enables `std::error::Error` for the error types. The crate
+//!   is otherwise `no_std` and always uses `alloc`.
+//! - `canonical` enables RFC 8785 (JCS) canonical serialization.
+//! - `primitives` adds typed extraction into `reliakit-primitives` constrained
+//!   types (`JsonObject::get_str_as`, `JsonValue::str_as`); it pulls in
+//!   `reliakit-primitives` (`no_std` + `alloc`, zero third-party dependencies).
+//!
 //! [RFC 8259]: https://www.rfc-editor.org/rfc/rfc8259
 
 #![cfg_attr(not(feature = "std"), no_std)]
@@ -51,6 +60,8 @@ mod error;
 mod limits;
 mod number;
 mod parse;
+#[cfg(feature = "primitives")]
+mod primitives;
 mod value;
 mod write;
 
@@ -62,6 +73,8 @@ pub use error::{
 pub use limits::JsonLimits;
 pub use number::JsonNumber;
 pub use parse::{parse, parse_str, parse_with_limits};
+#[cfg(feature = "primitives")]
+pub use primitives::{JsonExtractError, JsonExtractErrorKind};
 pub use value::{JsonMember, JsonObject, JsonValue};
 pub use write::{to_compact_string, to_compact_vec};
 

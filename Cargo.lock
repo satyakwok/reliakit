@@ -32,7 +32,10 @@ version = "0.1.0"
 
 [[package]]
 name = "reliakit-json"
-version = "0.2.1"
+version = "0.2.2"
+dependencies = [
+ "reliakit-primitives",
+]
 
 [[package]]
 name = "reliakit-primitives"
