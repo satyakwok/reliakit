@@ -1,10 +1,13 @@
 //! Shared building blocks for the Reliakit workspace.
 //!
-//! Reliakit's resilience crates ([`reliakit-backoff`], [`reliakit-circuit`],
+//! Reliakit's time-driven resilience crates ([`reliakit-circuit`],
 //! [`reliakit-ratelimit`], [`reliakit-timeout`]) are *clock-agnostic*: you pass
 //! the current time in as a `u64` tick in any monotonic unit you choose. This
 //! crate provides the small piece they have in common — a [`Clock`] trait and a
-//! couple of ready-made clocks — so you do not have to hand-roll one.
+//! couple of ready-made clocks — so you do not have to hand-roll one. Each of
+//! those crates has an optional `core` feature that adds `*_now(clock)` methods
+//! backed by this trait. ([`reliakit-backoff`] computes delays from an attempt
+//! number and does not read a clock.)
 //!
 //! - [`ManualClock`] — a settable clock for deterministic tests; `no_std`.
 //! - [`MonotonicClock`] — wall-free monotonic milliseconds (requires `std`).

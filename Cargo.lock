@@ -8,9 +8,10 @@ version = "0.1.0"
 
 [[package]]
 name = "reliakit-circuit"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "reliakit-backoff",
+ "reliakit-core",
  "reliakit-ratelimit",
 ]
 
@@ -43,7 +44,10 @@ dependencies = [
 
 [[package]]
 name = "reliakit-ratelimit"
-version = "0.1.0"
+version = "0.1.1"
+dependencies = [
+ "reliakit-core",
+]
 
 [[package]]
 name = "reliakit-secret"
@@ -51,7 +55,10 @@ version = "0.1.0"
 
 [[package]]
 name = "reliakit-timeout"
-version = "0.1.0"
+version = "0.1.1"
+dependencies = [
+ "reliakit-core",
+]
 
 [[package]]
 name = "reliakit-validate"

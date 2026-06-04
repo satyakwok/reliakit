@@ -35,6 +35,37 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
   MIT license text travels with the crate on crates.io rather than only the SPDX
   identifier in the manifest.
 
+## reliakit-circuit 0.2.1 - 2026-06-04
+
+### Added
+
+- Optional `core` feature: `allow_now`, `on_failure_now`, and `trip_now` on
+  `CircuitBreaker` and `RollingBreaker`, which read the current time from a
+  `reliakit_core::Clock` instead of taking an explicit `now: u64`. The feature
+  pulls in `reliakit-core` only (`no_std`, zero third-party dependencies); the
+  `now: u64` methods are unchanged.
+
+## reliakit-ratelimit 0.1.1 - 2026-06-04
+
+### Added
+
+- Optional `core` feature: `available_now`, `try_acquire_now`,
+  `try_acquire_one_now`, and `retry_after_now` on `RateLimiter`, which read the
+  current time from a `reliakit_core::Clock` instead of taking an explicit
+  `now: u64`. The feature pulls in `reliakit-core` only (`no_std`, zero
+  third-party dependencies); the `now: u64` methods are unchanged.
+
+## reliakit-timeout 0.1.1 - 2026-06-04
+
+### Added
+
+- Optional `core` feature: `start_now` on `Timeout` and `elapsed_now`,
+  `remaining_now`, `is_expired_now`, `check_now`, `allows_now`, and `clamp_now`
+  on `Deadline`, which read the current time from a `reliakit_core::Clock`
+  instead of taking an explicit `now: u64`. The feature pulls in `reliakit-core`
+  only (`no_std`, zero third-party dependencies); the `now: u64` methods are
+  unchanged.
+
 ## reliakit-circuit 0.2.0 - 2026-06-04
 
 ### Added

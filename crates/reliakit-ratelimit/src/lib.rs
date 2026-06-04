@@ -34,6 +34,13 @@
 //! assert!(limiter.try_acquire_one(100));
 //! assert!(!limiter.try_acquire_one(100));
 //! ```
+//!
+//! # Feature flags
+//!
+//! - `core` (off by default) adds `*_now(clock)` convenience methods on
+//!   [`RateLimiter`] that read the time from a `reliakit_core::Clock`. It pulls
+//!   in `reliakit-core` (`no_std`, zero third-party dependencies); the
+//!   `now: u64` methods remain the primitive API.
 
 #![no_std]
 #![forbid(unsafe_code)]
@@ -165,6 +172,50 @@ impl RateLimiter {
     }
 }
 
+/// Convenience methods that read the current time from a
+/// [`Clock`](reliakit_core::Clock) instead of taking an explicit `now: u64`.
+///
+/// Available with the `core` feature. Each forwards to the matching `now`-taking
+/// method, which remains the primitive API.
+#[cfg(feature = "core")]
+impl RateLimiter {
+    /// Like [`available`](Self::available), reading the time from `clock`.
+    ///
+    /// ```
+    /// use reliakit_ratelimit::RateLimiter;
+    /// use reliakit_core::ManualClock;
+    ///
+    /// let clock = ManualClock::new(0);
+    /// let mut rl = RateLimiter::new(10, 1, 100);
+    /// assert!(rl.try_acquire_now(&clock, 10)); // drain the bucket
+    /// assert!(!rl.try_acquire_one_now(&clock)); // empty now
+    /// clock.set(100); // one refill interval later
+    /// assert!(rl.try_acquire_one_now(&clock)); // one token refilled
+    /// ```
+    pub fn available_now<C: reliakit_core::Clock>(&mut self, clock: &C) -> u64 {
+        self.available(clock.now())
+    }
+
+    /// Like [`try_acquire`](Self::try_acquire), reading the time from `clock`.
+    pub fn try_acquire_now<C: reliakit_core::Clock>(&mut self, clock: &C, tokens: u64) -> bool {
+        self.try_acquire(clock.now(), tokens)
+    }
+
+    /// Like [`try_acquire_one`](Self::try_acquire_one), reading the time from `clock`.
+    pub fn try_acquire_one_now<C: reliakit_core::Clock>(&mut self, clock: &C) -> bool {
+        self.try_acquire_one(clock.now())
+    }
+
+    /// Like [`retry_after`](Self::retry_after), reading the time from `clock`.
+    pub fn retry_after_now<C: reliakit_core::Clock>(
+        &mut self,
+        clock: &C,
+        tokens: u64,
+    ) -> Option<u64> {
+        self.retry_after(clock.now(), tokens)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -266,5 +317,35 @@ mod tests {
         assert_eq!(rl.capacity(), 1);
         assert_eq!(rl.refill_amount(), 1);
         assert_eq!(rl.refill_interval(), 1);
+    }
+}
+
+#[cfg(all(test, feature = "core"))]
+mod core_tests {
+    use super::*;
+    use reliakit_core::ManualClock;
+
+    #[test]
+    fn now_methods_match_explicit_now() {
+        let clock = ManualClock::new(0);
+        let mut viaclock = RateLimiter::new(10, 2, 100);
+        let mut explicit = RateLimiter::new(10, 2, 100);
+
+        assert_eq!(viaclock.available_now(&clock), explicit.available(0));
+        assert_eq!(
+            viaclock.try_acquire_now(&clock, 7),
+            explicit.try_acquire(0, 7)
+        );
+        assert_eq!(
+            viaclock.retry_after_now(&clock, 5),
+            explicit.retry_after(0, 5)
+        );
+
+        clock.set(250);
+        assert_eq!(
+            viaclock.try_acquire_one_now(&clock),
+            explicit.try_acquire_one(250)
+        );
+        assert_eq!(viaclock.available_now(&clock), explicit.available(250));
     }
 }

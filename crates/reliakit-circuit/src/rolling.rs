@@ -208,6 +208,29 @@ impl<const WINDOW: usize> RollingBreaker<WINDOW> {
     }
 }
 
+/// Convenience methods that read the current time from a
+/// [`Clock`](reliakit_core::Clock) instead of taking an explicit `now: u64`.
+///
+/// Available with the `core` feature. Each forwards to the matching `now`-taking
+/// method, which remains the primitive API.
+#[cfg(feature = "core")]
+impl<const WINDOW: usize> RollingBreaker<WINDOW> {
+    /// Like [`allow`](Self::allow), reading the time from `clock`.
+    pub fn allow_now<C: reliakit_core::Clock>(&mut self, clock: &C) -> bool {
+        self.allow(clock.now())
+    }
+
+    /// Like [`on_failure`](Self::on_failure), reading the time from `clock`.
+    pub fn on_failure_now<C: reliakit_core::Clock>(&mut self, clock: &C) {
+        self.on_failure(clock.now())
+    }
+
+    /// Like [`trip`](Self::trip), reading the time from `clock`.
+    pub fn trip_now<C: reliakit_core::Clock>(&mut self, clock: &C) {
+        self.trip(clock.now())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -309,5 +332,30 @@ mod tests {
         b.reset();
         assert_eq!(b.state(), State::Closed);
         assert_eq!(b.failures_in_window(), 0);
+    }
+}
+
+#[cfg(all(test, feature = "core"))]
+mod core_tests {
+    use super::*;
+    use reliakit_core::ManualClock;
+
+    #[test]
+    fn now_methods_match_explicit_now() {
+        let clock = ManualClock::new(0);
+        let mut viaclock = RollingBreaker::<4>::new(2, 1_000);
+        let mut explicit = RollingBreaker::<4>::new(2, 1_000);
+
+        viaclock.on_failure_now(&clock);
+        explicit.on_failure(0);
+        viaclock.on_failure_now(&clock); // trips
+        explicit.on_failure(0);
+        assert_eq!(viaclock, explicit);
+        assert_eq!(viaclock.state(), State::Open);
+
+        assert_eq!(viaclock.allow_now(&clock), explicit.allow(0)); // both false
+        clock.set(1_000);
+        assert_eq!(viaclock.allow_now(&clock), explicit.allow(1_000)); // both true
+        assert_eq!(viaclock, explicit);
     }
 }

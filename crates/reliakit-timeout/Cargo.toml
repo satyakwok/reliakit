@@ -1,6 +1,6 @@
 [package]
 name = "reliakit-timeout"
-version = "0.1.0"
+version = "0.1.1"
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
@@ -11,7 +11,17 @@ description = "Clock-agnostic deadlines and timeouts for retries and resilience.
 keywords = ["timeout", "deadline", "reliability", "resilience", "no-std"]
 categories = ["algorithms", "no-std", "rust-patterns"]
 
+[package.metadata.docs.rs]
+all-features = true
+
+[features]
+# Convenience methods that read the current time from a `reliakit_core::Clock`
+# instead of taking an explicit `now: u64`. Off by default; pulls in
+# `reliakit-core` (no_std, zero third-party dependencies).
+core = ["dep:reliakit-core"]
+
 [dependencies]
+reliakit-core = { path = "../reliakit-core", version = "0.1", optional = true, default-features = false }
 
 [[example]]
 name = "timeout_basic"
