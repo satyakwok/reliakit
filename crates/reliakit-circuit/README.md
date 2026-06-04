@@ -74,7 +74,10 @@ breaker simply stays open rather than panicking.
 reliakit-circuit = "0.2"
 ```
 
-This crate is `#![no_std]` and has no feature flags; it depends only on `core`.
+This crate is `#![no_std]` with no required dependencies. It has one optional
+feature, `core` (off by default), which pulls in `reliakit-core` and adds
+`*_now(clock)` convenience methods on `CircuitBreaker` and `RollingBreaker`
+backed by its `Clock` trait; the existing `now: u64` methods are unchanged.
 
 ## Usage
 

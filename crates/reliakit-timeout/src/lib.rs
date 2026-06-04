@@ -60,6 +60,13 @@
 //!
 //! [`reliakit-circuit`]: https://docs.rs/reliakit-circuit
 //! [`reliakit-ratelimit`]: https://docs.rs/reliakit-ratelimit
+//!
+//! # Feature flags
+//!
+//! - `core` (off by default) adds `*_now(clock)` convenience methods on
+//!   [`Timeout`] and [`Deadline`] that read the time from a
+//!   `reliakit_core::Clock`. It pulls in `reliakit-core` (`no_std`, zero
+//!   third-party dependencies); the `now: u64` methods remain the primitive API.
 
 #![no_std]
 #![forbid(unsafe_code)]
@@ -180,6 +187,68 @@ impl Deadline {
     }
 }
 
+/// Convenience methods that read the current time from a
+/// [`Clock`](reliakit_core::Clock) instead of taking an explicit `now: u64`.
+///
+/// Available with the `core` feature. Each forwards to the matching `now`-taking
+/// method, which remains the primitive API.
+#[cfg(feature = "core")]
+impl Timeout {
+    /// Like [`start`](Self::start), reading the start instant from `clock`.
+    ///
+    /// ```
+    /// use reliakit_timeout::Timeout;
+    /// use reliakit_core::ManualClock;
+    ///
+    /// let clock = ManualClock::new(1_000);
+    /// let deadline = Timeout::new(30_000).start_now(&clock);
+    /// clock.advance(10_000);
+    /// assert_eq!(deadline.remaining_now(&clock), 20_000);
+    /// assert!(!deadline.is_expired_now(&clock));
+    /// ```
+    pub fn start_now<C: reliakit_core::Clock>(&self, clock: &C) -> Deadline {
+        self.start(clock.now())
+    }
+}
+
+/// Convenience methods that read the current time from a
+/// [`Clock`](reliakit_core::Clock) instead of taking an explicit `now: u64`.
+///
+/// Available with the `core` feature. Each forwards to the matching `now`-taking
+/// method, which remains the primitive API.
+#[cfg(feature = "core")]
+impl Deadline {
+    /// Like [`elapsed`](Self::elapsed), reading the time from `clock`.
+    pub fn elapsed_now<C: reliakit_core::Clock>(&self, clock: &C) -> u64 {
+        self.elapsed(clock.now())
+    }
+
+    /// Like [`remaining`](Self::remaining), reading the time from `clock`.
+    pub fn remaining_now<C: reliakit_core::Clock>(&self, clock: &C) -> u64 {
+        self.remaining(clock.now())
+    }
+
+    /// Like [`is_expired`](Self::is_expired), reading the time from `clock`.
+    pub fn is_expired_now<C: reliakit_core::Clock>(&self, clock: &C) -> bool {
+        self.is_expired(clock.now())
+    }
+
+    /// Like [`check`](Self::check), reading the time from `clock`.
+    pub fn check_now<C: reliakit_core::Clock>(&self, clock: &C) -> Option<u64> {
+        self.check(clock.now())
+    }
+
+    /// Like [`allows`](Self::allows), reading the time from `clock`.
+    pub fn allows_now<C: reliakit_core::Clock>(&self, clock: &C, duration: u64) -> bool {
+        self.allows(clock.now(), duration)
+    }
+
+    /// Like [`clamp`](Self::clamp), reading the time from `clock`.
+    pub fn clamp_now<C: reliakit_core::Clock>(&self, clock: &C, duration: u64) -> u64 {
+        self.clamp(clock.now(), duration)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -275,5 +344,33 @@ mod tests {
         // A default deadline is already expired, not infinite.
         assert!(Deadline::default().is_expired(0));
         assert_eq!(Deadline::default().check(0), None);
+    }
+}
+
+#[cfg(all(test, feature = "core"))]
+mod core_tests {
+    use super::*;
+    use reliakit_core::ManualClock;
+
+    #[test]
+    fn now_methods_match_explicit_now() {
+        let clock = ManualClock::new(1_000);
+        let deadline = Timeout::new(500).start_now(&clock);
+        assert_eq!(deadline, Timeout::new(500).start(1_000));
+
+        clock.set(1_200);
+        assert_eq!(deadline.elapsed_now(&clock), deadline.elapsed(1_200));
+        assert_eq!(deadline.remaining_now(&clock), deadline.remaining(1_200));
+        assert_eq!(deadline.is_expired_now(&clock), deadline.is_expired(1_200));
+        assert_eq!(deadline.check_now(&clock), deadline.check(1_200));
+        assert_eq!(
+            deadline.allows_now(&clock, 200),
+            deadline.allows(1_200, 200)
+        );
+        assert_eq!(deadline.clamp_now(&clock, 400), deadline.clamp(1_200, 400));
+
+        clock.set(2_000); // past expiry
+        assert!(deadline.is_expired_now(&clock));
+        assert_eq!(deadline.check_now(&clock), None);
     }
 }

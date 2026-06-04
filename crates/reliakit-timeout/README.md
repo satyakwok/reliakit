@@ -24,7 +24,7 @@ typical), matching `reliakit-circuit` and `reliakit-ratelimit`. All arithmetic
 saturates, so no method panics — not on overflow, and not on a clock that moves
 backwards.
 
-The crate has no dependencies, is `#![no_std]`, and forbids unsafe code.
+The crate has no required dependencies, is `#![no_std]`, and forbids unsafe code.
 
 ## What This Crate Does
 
@@ -51,7 +51,10 @@ with your runtime's timer or `select!` to actually abort work.
 reliakit-timeout = "0.1"
 ```
 
-This crate is `no_std` and has no feature flags; it depends only on `core`.
+This crate is `no_std` with no required dependencies. It has one optional
+feature, `core` (off by default), which pulls in `reliakit-core` and adds
+`*_now(clock)` convenience methods on `Timeout` and `Deadline` backed by its
+`Clock` trait; the existing `now: u64` methods are unchanged.
 
 ## Example
 
