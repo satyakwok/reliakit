@@ -1,6 +1,6 @@
 [package]
 name = "reliakit-json"
-version = "0.2.1"
+version = "0.2.2"
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
@@ -16,11 +16,15 @@ all-features = true
 
 [features]
 default = ["std"]
-std = []
+std = ["reliakit-primitives?/std"]
 # RFC 8785 (JCS) canonical serialization. Off by default (opt-in).
 canonical = []
+# Typed extraction into reliakit-primitives constrained types. Off by default;
+# pulls in reliakit-primitives (no_std + alloc, zero third-party dependencies).
+primitives = ["dep:reliakit-primitives", "reliakit-primitives/alloc"]
 
 [dependencies]
+reliakit-primitives = { path = "../reliakit-primitives", version = "0.4", optional = true, default-features = false }
 
 [[example]]
 name = "json_basic"

@@ -163,8 +163,35 @@ ordering, escaping, and idempotence are covered by tests.
 |---|---|---|
 | `std` | yes | Implements `std::error::Error` for the error types. |
 | `canonical` | no | Enables RFC 8785 canonical serialization. |
+| `primitives` | no | Typed extraction into `reliakit-primitives` constrained types. |
 
 Disable default features for `no_std`; the crate always requires `alloc`.
+
+### Typed extraction (`primitives`)
+
+With the `primitives` feature, pull a value out of a parsed document and run it
+through a [`reliakit-primitives`](https://crates.io/crates/reliakit-primitives)
+validating constructor in one step. Failures carry the offending field's path.
+
+```toml
+reliakit-json = { version = "0.2", features = ["primitives"] }
+reliakit-primitives = "0.4"
+```
+
+```rust
+use reliakit_json::parse_str;
+use reliakit_primitives::{Email, Hostname};
+
+let doc = parse_str(r#"{ "email": "ops@example.com", "host": "api.example.com" }"#).unwrap();
+let obj = doc.as_object().unwrap();
+
+let email: Email = obj.get_str_as("email").unwrap();
+let host: Hostname = obj.get_str_as("host").unwrap();
+
+// A bad value points at the field: "$.email: ..."
+let bad = parse_str(r#"{ "email": "nope" }"#).unwrap();
+assert!(bad.as_object().unwrap().get_str_as::<Email>("email").is_err());
+```
 
 ## Safety
 
