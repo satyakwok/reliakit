@@ -8,7 +8,7 @@ repository.workspace = true
 homepage.workspace = true
 readme = "README.md"
 description = "Secret-safe wrappers for Rust values that should not leak through formatting or diagnostics."
-keywords = ["secret", "redaction", "security", "privacy", "no-std"]
+keywords = ["secret", "redaction", "security", "no-std", "reliability"]
 categories = ["authentication", "config", "no-std", "rust-patterns"]
 
 [package.metadata.docs.rs]
