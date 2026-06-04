@@ -232,6 +232,10 @@ Implemented types:
 - `JsonLimits`
 - `JsonError` / `JsonErrorKind`
 
+An experimental `canonical` feature adds RFC 8785 (JCS) canonical output
+(`to_canonical_string` / `to_canonical_vec`) for hashing and signing; it is off
+by default until validated against the conformance vectors.
+
 ### `reliakit-timeout` — [crates.io](https://crates.io/crates/reliakit-timeout) · [docs.rs](https://docs.rs/reliakit-timeout)
 
 Clock-agnostic deadlines and timeouts — the time-limiter that rounds out the

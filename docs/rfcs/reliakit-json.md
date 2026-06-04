@@ -82,7 +82,10 @@ machine-readable classifications that may gain variants). `JsonValue` and
 Compact writer is deterministic (member order + exact number text preserved) and
 infallible for in-memory output (`-> String`/`-> Vec<u8>`); `WriteFailure` is
 reserved for a future `std::io` adapter. Canonical (JCS) serialization is
-separate, gated, and not yet exposed.
+separate and gated behind the off-by-default `canonical` feature
+(`to_canonical_string` / `to_canonical_vec`, fallible). It is exposed as
+**experimental** pending the full RFC 8785 conformance vectors and fuzzing, and
+is not yet claimed stable.
 
 ## Testing & hardening
 
@@ -109,8 +112,10 @@ Unicode ordering, idempotence, differential checks, and fuzzing all pass.
    rejection, `JsonValue`, `JsonNumber`. **(done)**
 2. Compact writer + exact-byte and roundtrip tests. **(done)**
 3. Hardening — JSONTestSuite, limit-boundary tests, fuzz targets, package audit.
-4. Canonicalization — RFC 8785 design, number formatting, key ordering, vectors,
-   differential testing, canonical fuzzing.
+4. Canonicalization — RFC 8785 design, number formatting (ECMAScript), key
+   ordering (UTF-16). **(initial implementation done behind the `canonical`
+   feature; reference vectors, differential testing, and canonical fuzzing still
+   pending before it is declared stable.)**
 5. Optional integrations — Reliakit primitive conversions, validation, std I/O
    adapters, manual typed encode/decode traits.
 

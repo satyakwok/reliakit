@@ -45,6 +45,8 @@
 
 extern crate alloc;
 
+#[cfg(feature = "canonical")]
+mod canonical;
 mod error;
 mod limits;
 mod number;
@@ -52,6 +54,8 @@ mod parse;
 mod value;
 mod write;
 
+#[cfg(feature = "canonical")]
+pub use canonical::{to_canonical_string, to_canonical_vec};
 pub use error::{
     JsonError, JsonErrorKind, JsonLimitKind, JsonNumberError, JsonPath, JsonPathSegment,
 };

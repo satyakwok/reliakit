@@ -1,6 +1,6 @@
 [package]
 name = "reliakit-json"
-version = "0.1.0"
+version = "0.2.0"
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
@@ -17,6 +17,9 @@ all-features = true
 [features]
 default = ["std"]
 std = []
+# Experimental RFC 8785 (JCS) canonical serialization. Off by default until it
+# is validated against the conformance vectors; the API may change.
+canonical = []
 
 [dependencies]
 
