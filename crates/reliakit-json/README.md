@@ -4,6 +4,9 @@
 
 # reliakit-json
 
+[![Crates.io](https://img.shields.io/crates/v/reliakit-json.svg)](https://crates.io/crates/reliakit-json)
+[![Crates.io Downloads](https://img.shields.io/crates/d/reliakit-json.svg)](https://crates.io/crates/reliakit-json)
+[![Docs.rs](https://docs.rs/reliakit-json/badge.svg)](https://docs.rs/reliakit-json)
 [![CI](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml/badge.svg)](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/satyakwok/reliakit/branch/main/graph/badge.svg?flag=reliakit-json)](https://codecov.io/gh/satyakwok/reliakit/tree/main/crates/reliakit-json)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/satyakwok/reliakit/blob/main/LICENSE)
@@ -18,10 +21,9 @@ precision, reports errors with location and path, and serializes
 deterministically. It has **no external dependencies**, forbids unsafe code, and
 runs on `no_std` (with `alloc`).
 
-It is **not** a `serde_json` replacement and does not try to be: no derive
-macros, no schema validation, no JSON5, no comments, no trailing commas, no
-lenient parsing, no SIMD. The goal is predictable behavior on hostile input, not
-maximum throughput or convenience.
+Its scope is deliberately narrow: no derive macros, no schema validation, no
+JSON5, no comments, no trailing commas, no lenient parsing, no SIMD. The goal is
+predictable behavior on hostile input, not maximum throughput or convenience.
 
 ## What it guarantees
 
@@ -123,8 +125,8 @@ explicit and finite. Tune individual fields with the `with_*` builders.
 
 ## When not to use it
 
-- You want struct (de)serialization or derive macros — use `serde` + `serde_json`.
-- You want the fastest possible throughput — use a SIMD parser.
+- You want automatic struct (de)serialization driven by derive macros.
+- You need the fastest possible parsing throughput above all else.
 - You need JSON5, comments, or lenient parsing — this crate rejects them by design.
 
 ## Roadmap

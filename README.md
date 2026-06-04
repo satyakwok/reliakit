@@ -33,11 +33,13 @@ Each crate is small, dependency-free at runtime, `#![forbid(unsafe_code)]`,
 | [`reliakit-backoff`](https://crates.io/crates/reliakit-backoff) | Retry backoff policies (constant/linear/exponential) with jitter |
 | [`reliakit-circuit`](https://crates.io/crates/reliakit-circuit) | Circuit breaker that fails fast while a dependency is down |
 | [`reliakit-ratelimit`](https://crates.io/crates/reliakit-ratelimit) | Token-bucket rate limiter with `retry_after` |
+| [`reliakit-json`](https://crates.io/crates/reliakit-json) | Strict, bounded, deterministic JSON for untrusted input |
 
-The last three are **clock-agnostic resilience patterns** — you pass the time
-in, so they work in sync, async, and embedded code, and compose: a rate limiter
-decides whether to call, a circuit breaker stops calling a failing dependency,
-and backoff spaces out retries.
+`reliakit-backoff`, `reliakit-circuit`, and `reliakit-ratelimit` are
+**clock-agnostic resilience patterns** — you pass the time in, so they work in
+sync, async, and embedded code, and compose: a rate limiter decides whether to
+call, a circuit breaker stops calling a failing dependency, and backoff spaces
+out retries.
 
 ## Why Reliakit?
 
@@ -214,22 +216,19 @@ Implemented types:
 
 - `RateLimiter`
 
-### `reliakit-json`
+### `reliakit-json` — [crates.io](https://crates.io/crates/reliakit-json) · [docs.rs](https://docs.rs/reliakit-json)
 
 Strict, bounded, and deterministic JSON for untrusted input and predictable
 output. Rejects duplicate keys, enforces explicit resource limits, preserves
 number precision, reports errors with location and path, and serializes
-deterministically. Depends only on `core` + `alloc`. Not a `serde_json`
-replacement — no derive, schema, JSON5, or lenient parsing.
+deterministically. Depends only on `core` + `alloc`. Deliberately narrow in
+scope: no derive macros, schema validation, JSON5, comments, or lenient parsing.
 
 Implemented types:
 
 - `JsonValue`, `JsonNumber`, `JsonObject`
 - `JsonLimits`
 - `JsonError` / `JsonErrorKind`
-
-Present in the workspace and pending its initial `0.1` release; not yet
-published to crates.io.
 
 ### `reliakit-core`
 
@@ -253,6 +252,7 @@ reliakit-codec = "0.2"
 reliakit-backoff = "0.1"
 reliakit-circuit = "0.1"
 reliakit-ratelimit = "0.1"
+reliakit-json = "0.1"
 ```
 
 Add only the crates you need — each is usable independently.
@@ -356,8 +356,8 @@ normal Rust crate versioning.
 
 `reliakit-primitives`, `reliakit-secret`, `reliakit-validate`,
 `reliakit-collections`, `reliakit-codec`, `reliakit-backoff`,
-`reliakit-circuit`, and `reliakit-ratelimit` are published to crates.io. APIs
-may receive compatible refinements before a `1.0` release.
+`reliakit-circuit`, `reliakit-ratelimit`, and `reliakit-json` are published to
+crates.io. APIs may receive compatible refinements before a `1.0` release.
 
 Logo assets are stored under [`assets/`](./assets/).
 
@@ -373,9 +373,6 @@ Published:
 - `reliakit-backoff`
 - `reliakit-circuit`
 - `reliakit-ratelimit`
-
-Pending initial release:
-
 - `reliakit-json`
 
 Planned:
