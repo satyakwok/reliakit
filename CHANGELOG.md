@@ -10,16 +10,6 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 
 ### Added
 
-- `reliakit-circuit`: added `RollingBreaker<const WINDOW>`, a circuit breaker
-  that trips on the failure *rate* (N failures within the last `WINDOW` calls)
-  rather than on consecutive failures. The window is stored inline
-  (`[bool; WINDOW]`, zero allocation, `no_std`); cooldown and half-open recovery
-  match `CircuitBreaker`. The existing `CircuitBreaker` is unchanged.
-- `reliakit-collections`: added `RingBuffer<T>`, a fixed-capacity circular
-  buffer that overwrites the oldest element when full (a rolling window whose
-  `push` never fails, evicting and returning the oldest element instead). Behind
-  the `alloc` feature. Added `CollectionError::ZeroCapacity` for a zero-capacity
-  request.
 - Hardened the JSON parser with JSONTestSuite-style accept/reject conformance
   tests and a dependency-free, deterministic in-test fuzzer (hand-written PRNG)
   that asserts parsing arbitrary bytes never panics and that every parsed value
@@ -44,6 +34,25 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 - Each crate now ships its own `LICENSE` file in the published package, so the
   MIT license text travels with the crate on crates.io rather than only the SPDX
   identifier in the manifest.
+
+## reliakit-circuit 0.2.0 - 2026-06-04
+
+### Added
+
+- `RollingBreaker<const WINDOW>`, a circuit breaker that trips on the failure
+  *rate* (N failures within the last `WINDOW` calls) rather than on consecutive
+  failures. The window is stored inline (`[bool; WINDOW]`, zero allocation,
+  `no_std`); cooldown and half-open recovery match `CircuitBreaker`, which is
+  unchanged.
+
+## reliakit-collections 0.3.0 - 2026-06-04
+
+### Added
+
+- `RingBuffer<T>`, a fixed-capacity circular buffer that overwrites the oldest
+  element when full (a rolling window whose `push` never fails, evicting and
+  returning the oldest element instead). Behind the `alloc` feature.
+- `CollectionError::ZeroCapacity` for a zero-capacity request.
 
 ## reliakit-core 0.1.0 - 2026-06-04
 

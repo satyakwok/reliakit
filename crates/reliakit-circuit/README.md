@@ -71,7 +71,7 @@ breaker simply stays open rather than panicking.
 
 ```toml
 [dependencies]
-reliakit-circuit = "0.1"
+reliakit-circuit = "0.2"
 ```
 
 This crate is `#![no_std]` and has no feature flags; it depends only on `core`.

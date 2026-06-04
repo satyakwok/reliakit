@@ -38,14 +38,14 @@ This crate covers bounded collection types. The following are out of scope:
 
 ```toml
 [dependencies]
-reliakit-collections = "0.2"
+reliakit-collections = "0.3"
 ```
 
 For `no_std` environments:
 
 ```toml
 [dependencies]
-reliakit-collections = { version = "0.2", default-features = false, features = ["alloc"] }
+reliakit-collections = { version = "0.3", default-features = false, features = ["alloc"] }
 ```
 
 ## Examples
