@@ -322,5 +322,9 @@ mod tests {
         let value = parse_str("1e400").unwrap(); // valid JSON token, infinite as f64
         let err = to_canonical_string(&value).unwrap_err();
         assert_eq!(err.kind(), &JsonErrorKind::NonFiniteNumber);
+        // Serialization errors carry no source position in their message.
+        let shown = alloc::format!("{err}");
+        assert_eq!(shown, "number is not representable as a finite f64");
+        assert!(!shown.contains("byte"));
     }
 }
