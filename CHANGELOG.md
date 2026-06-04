@@ -10,13 +10,24 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 
 ### Added
 
-- Added the `reliakit-timeout` crate (not yet published): clock-agnostic
-  deadlines and timeouts. `Timeout` is a reusable budget; `Deadline` pins it to
-  a `u64` timeline and answers `remaining` / `elapsed` / `is_expired` / `check`
-  / `allows` / `clamp` with saturating arithmetic. Pure `core`, zero
-  dependencies, `#![no_std]`, `#![forbid(unsafe_code)]`.
 - Added a manual publish workflow for publishing one selected crate to
   crates.io after tests, version checks, and `cargo publish --dry-run`.
+
+## reliakit-timeout 0.1.0 - 2026-06-04
+
+Initial release.
+
+### Added
+
+- Added the `reliakit-timeout` crate: clock-agnostic deadlines and timeouts.
+  - `Timeout` is a reusable budget; `Timeout::start(now)` pins it to a
+    `Deadline`.
+  - `Deadline` tracks a budget against a `u64` timeline (any monotonic unit) and
+    answers `remaining`, `elapsed`, `is_expired`, `check` (an `Option`),
+    `allows`, and `clamp` (cap a delay by the time left).
+  - Every method is a saturating `const fn`; a backwards clock or an overflowing
+    `start + budget` cannot panic. Pure `core`, no features, zero dependencies,
+    `#![no_std]`, `#![forbid(unsafe_code)]`.
 
 ### Changed
 

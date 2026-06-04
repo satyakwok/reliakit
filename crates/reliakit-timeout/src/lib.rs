@@ -98,7 +98,9 @@ impl Timeout {
 /// methods. All arithmetic saturates, so a backwards-moving clock or an
 /// overflowing `start + budget` cannot panic.
 ///
-/// A zero budget expires immediately at `start`.
+/// A zero budget expires immediately at `start`. For the same reason,
+/// [`Deadline::default`] (`start` and `budget` both `0`) is already expired —
+/// it is not an "infinite" deadline.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub struct Deadline {
     start: u64,
@@ -157,6 +159,9 @@ impl Deadline {
 
     /// Whether an operation that needs `duration` units can finish before the
     /// deadline at `now` (`remaining(now) >= duration`).
+    ///
+    /// A `duration` of `0` is always allowed, even once the deadline has
+    /// expired.
     pub const fn allows(&self, now: u64, duration: u64) -> bool {
         self.remaining(now) >= duration
     }
@@ -250,6 +255,8 @@ mod tests {
         assert!(d.allows(60, 40));
         assert!(!d.allows(60, 41));
         assert!(!d.allows(100, 1)); // already expired
+        assert!(d.allows(0, 0)); // zero duration always fits
+        assert!(d.allows(100, 0)); // ...even once expired
     }
 
     #[test]
@@ -265,5 +272,8 @@ mod tests {
     fn defaults_are_zero() {
         assert_eq!(Timeout::default(), Timeout::new(0));
         assert_eq!(Deadline::default(), Deadline::new(0, 0));
+        // A default deadline is already expired, not infinite.
+        assert!(Deadline::default().is_expired(0));
+        assert_eq!(Deadline::default().check(0), None);
     }
 }
