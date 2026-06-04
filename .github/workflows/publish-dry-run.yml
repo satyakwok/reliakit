@@ -65,3 +65,6 @@ jobs:
 
       - name: Verify reliakit-ratelimit package
         run: cargo publish -p reliakit-ratelimit --dry-run --locked
+
+      - name: Verify reliakit-json package
+        run: cargo publish -p reliakit-json --dry-run --locked

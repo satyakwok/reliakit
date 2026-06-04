@@ -10,6 +10,12 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 
 ### Added
 
+- Added the `reliakit-json` crate (not yet published): a strict, bounded, and
+  deterministic JSON library. Parses a strict RFC 8259 subset, rejects duplicate
+  keys, enforces explicit `JsonLimits`, preserves number precision, reports
+  errors with location and path, and serializes deterministically. `#![no_std]`
+  + `alloc`, zero dependencies, `#![forbid(unsafe_code)]`. RFC 8785
+  canonicalization is planned but not yet exposed.
 - Added a manual publish workflow for publishing one selected crate to
   crates.io after tests, version checks, and `cargo publish --dry-run`.
 

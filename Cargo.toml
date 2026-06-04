@@ -8,6 +8,7 @@ members = [
     "crates/reliakit-backoff",
     "crates/reliakit-circuit",
     "crates/reliakit-ratelimit",
+    "crates/reliakit-json",
 ]
 resolver = "2"
 

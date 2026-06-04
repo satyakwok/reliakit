@@ -1,0 +1,28 @@
+[package]
+name = "reliakit-json"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme = "README.md"
+description = "Strict, bounded, and deterministic JSON for reliability-sensitive Rust. no_std + alloc, zero-dependency."
+keywords = ["json", "strict", "no-std", "deterministic", "reliability"]
+categories = ["parser-implementations", "encoding", "no-std"]
+
+[package.metadata.docs.rs]
+all-features = true
+
+[features]
+default = ["std"]
+std = []
+
+[dependencies]
+
+[[example]]
+name = "basic"
+path = "examples/basic.rs"
+
+[lints]
+workspace = true

@@ -17,6 +17,11 @@ on:
           - reliakit-secret
           - reliakit-validate
           - reliakit-collections
+          - reliakit-codec
+          - reliakit-backoff
+          - reliakit-circuit
+          - reliakit-ratelimit
+          - reliakit-json
 
 permissions:
   contents: read

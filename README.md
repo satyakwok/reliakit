@@ -214,6 +214,23 @@ Implemented types:
 
 - `RateLimiter`
 
+### `reliakit-json`
+
+Strict, bounded, and deterministic JSON for untrusted input and predictable
+output. Rejects duplicate keys, enforces explicit resource limits, preserves
+number precision, reports errors with location and path, and serializes
+deterministically. Depends only on `core` + `alloc`. Not a `serde_json`
+replacement — no derive, schema, JSON5, or lenient parsing.
+
+Implemented types:
+
+- `JsonValue`, `JsonNumber`, `JsonObject`
+- `JsonLimits`
+- `JsonError` / `JsonErrorKind`
+
+Present in the workspace and pending its initial `0.1` release; not yet
+published to crates.io.
+
 ### `reliakit-core`
 
 Planned. Shared core types, traits, and errors used across Reliakit crates.
@@ -323,7 +340,9 @@ reliakit/
 │   │   └── examples/
 │   ├── reliakit-circuit/
 │   │   └── examples/
-│   └── reliakit-ratelimit/
+│   ├── reliakit-ratelimit/
+│   │   └── examples/
+│   └── reliakit-json/
 │       └── examples/
 ├── Cargo.toml
 ├── README.md
@@ -354,6 +373,10 @@ Published:
 - `reliakit-backoff`
 - `reliakit-circuit`
 - `reliakit-ratelimit`
+
+Pending initial release:
+
+- `reliakit-json`
 
 Planned:
 
