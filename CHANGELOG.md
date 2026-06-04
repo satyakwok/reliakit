@@ -13,6 +13,14 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 - Added a manual publish workflow for publishing one selected crate to
   crates.io after tests, version checks, and `cargo publish --dry-run`.
 
+### Changed
+
+- Renamed the `basic` example target in `reliakit-backoff`, `reliakit-circuit`,
+  `reliakit-ratelimit`, and `reliakit-json` to `backoff_basic`,
+  `circuit_basic`, `ratelimit_basic`, and `json_basic` so the workspace can
+  build all examples together without output-filename collisions. Run them with
+  e.g. `cargo run -p reliakit-json --example json_basic`.
+
 ## reliakit-json 0.1.0 - 2026-06-04
 
 Initial release.

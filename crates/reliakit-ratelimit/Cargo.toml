@@ -14,7 +14,7 @@ categories = ["algorithms", "no-std", "rust-patterns"]
 [dependencies]
 
 [[example]]
-name = "basic"
+name = "ratelimit_basic"
 path = "examples/basic.rs"
 
 [lints]

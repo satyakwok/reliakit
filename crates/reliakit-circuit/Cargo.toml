@@ -21,7 +21,7 @@ reliakit-backoff = { path = "../reliakit-backoff", version = "0.1" }
 reliakit-ratelimit = { path = "../reliakit-ratelimit", version = "0.1" }
 
 [[example]]
-name = "basic"
+name = "circuit_basic"
 path = "examples/basic.rs"
 
 [[example]]
