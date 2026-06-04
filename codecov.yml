@@ -44,6 +44,11 @@ coverage:
         threshold: 1%
         flags:
           - reliakit-ratelimit
+      reliakit-json:
+        target: 90%
+        threshold: 1%
+        flags:
+          - reliakit-json
     patch:
       default:
         target: 90%

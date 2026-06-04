@@ -13,6 +13,30 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 - Added a manual publish workflow for publishing one selected crate to
   crates.io after tests, version checks, and `cargo publish --dry-run`.
 
+## reliakit-json 0.1.0 - 2026-06-04
+
+Initial release.
+
+### Added
+
+- Added the `reliakit-json` crate: a strict, bounded, and deterministic JSON
+  library for untrusted input and predictable output.
+  - Parses a strict RFC 8259 subset and rejects invalid UTF-8, a leading BOM,
+    comments, trailing commas, trailing data, unescaped control characters,
+    invalid escapes, malformed `\uXXXX`, unpaired surrogates, duplicate keys,
+    `NaN`/`Infinity`, leading `+`, leading zeros, and malformed numbers.
+  - `JsonValue`, `JsonNumber` (precision-preserving), and `JsonObject`
+    (unique-key, insertion-ordered).
+  - `JsonLimits` with `new`/`conservative`/`permissive` profiles and `with_*`
+    builders; `parse`, `parse_str`, and `parse_with_limits` apply explicit
+    limits with no implicitly unlimited entry point.
+  - `JsonError` carrying a stable kind, byte offset, line, column, and JSON
+    path.
+  - Deterministic compact serialization via `to_compact_string` /
+    `to_compact_vec`.
+  - `#![no_std]` + `alloc`, zero dependencies, `#![forbid(unsafe_code)]`. RFC
+    8785 canonicalization is planned but not yet exposed.
+
 ## reliakit-ratelimit 0.1.0 - 2026-06-04
 
 Initial release.
