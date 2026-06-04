@@ -1,5 +1,14 @@
 # Publish individual crates to crates.io on version tag push.
 # Usage: git tag reliakit-primitives-v0.2.4 && git push origin reliakit-primitives-v0.2.4
+#
+# Authentication uses crates.io Trusted Publishing via GitHub Actions OIDC:
+# each job requests a short-lived token with rust-lang/crates-io-auth-action
+# and never reads a long-lived API token secret. The "crates-io-publish"
+# environment must be configured on each crate's Trusted Publisher on crates.io.
+#
+# Publish leaf crates before dependents: reliakit-primitives must be published
+# before reliakit-codec (codec has an optional dependency on it). All other
+# intra-workspace references are dev-dependencies and do not constrain order.
 
 name: Publish
 
@@ -27,6 +36,10 @@ jobs:
   publish-primitives:
     if: startsWith(github.ref, 'refs/tags/reliakit-primitives-v')
     runs-on: ubuntu-latest
+    environment: crates-io-publish
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - name: Checkout
@@ -54,9 +67,13 @@ jobs:
       - name: Run tests
         run: cargo test -p reliakit-primitives --all-features --locked
 
+      - name: Authenticate to crates.io
+        id: auth
+        uses: rust-lang/crates-io-auth-action@v1
+
       - name: Publish to crates.io
         env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
         run: |
           crate=reliakit-primitives
           version="$(cargo metadata --no-deps --format-version 1 \
@@ -72,6 +89,10 @@ jobs:
   publish-secret:
     if: startsWith(github.ref, 'refs/tags/reliakit-secret-v')
     runs-on: ubuntu-latest
+    environment: crates-io-publish
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - name: Checkout
@@ -99,9 +120,13 @@ jobs:
       - name: Run tests
         run: cargo test -p reliakit-secret --all-features --locked
 
+      - name: Authenticate to crates.io
+        id: auth
+        uses: rust-lang/crates-io-auth-action@v1
+
       - name: Publish to crates.io
         env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
         run: |
           crate=reliakit-secret
           version="$(cargo metadata --no-deps --format-version 1 \
@@ -117,6 +142,10 @@ jobs:
   publish-validate:
     if: startsWith(github.ref, 'refs/tags/reliakit-validate-v')
     runs-on: ubuntu-latest
+    environment: crates-io-publish
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - name: Checkout
@@ -144,9 +173,13 @@ jobs:
       - name: Run tests
         run: cargo test -p reliakit-validate --all-features --locked
 
+      - name: Authenticate to crates.io
+        id: auth
+        uses: rust-lang/crates-io-auth-action@v1
+
       - name: Publish to crates.io
         env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
         run: |
           crate=reliakit-validate
           version="$(cargo metadata --no-deps --format-version 1 \
@@ -162,6 +195,10 @@ jobs:
   publish-collections:
     if: startsWith(github.ref, 'refs/tags/reliakit-collections-v')
     runs-on: ubuntu-latest
+    environment: crates-io-publish
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - name: Checkout
@@ -189,9 +226,13 @@ jobs:
       - name: Run tests
         run: cargo test -p reliakit-collections --all-features --locked
 
+      - name: Authenticate to crates.io
+        id: auth
+        uses: rust-lang/crates-io-auth-action@v1
+
       - name: Publish to crates.io
         env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
         run: |
           crate=reliakit-collections
           version="$(cargo metadata --no-deps --format-version 1 \
@@ -207,6 +248,10 @@ jobs:
   publish-codec:
     if: startsWith(github.ref, 'refs/tags/reliakit-codec-v')
     runs-on: ubuntu-latest
+    environment: crates-io-publish
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - name: Checkout
@@ -234,9 +279,13 @@ jobs:
       - name: Run tests
         run: cargo test -p reliakit-codec --all-features --locked
 
+      - name: Authenticate to crates.io
+        id: auth
+        uses: rust-lang/crates-io-auth-action@v1
+
       - name: Publish to crates.io
         env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
         run: |
           crate=reliakit-codec
           version="$(cargo metadata --no-deps --format-version 1 \
@@ -252,6 +301,10 @@ jobs:
   publish-backoff:
     if: startsWith(github.ref, 'refs/tags/reliakit-backoff-v')
     runs-on: ubuntu-latest
+    environment: crates-io-publish
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - name: Checkout
@@ -279,9 +332,13 @@ jobs:
       - name: Run tests
         run: cargo test -p reliakit-backoff --all-features --locked
 
+      - name: Authenticate to crates.io
+        id: auth
+        uses: rust-lang/crates-io-auth-action@v1
+
       - name: Publish to crates.io
         env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
         run: |
           crate=reliakit-backoff
           version="$(cargo metadata --no-deps --format-version 1 \
@@ -297,6 +354,10 @@ jobs:
   publish-circuit:
     if: startsWith(github.ref, 'refs/tags/reliakit-circuit-v')
     runs-on: ubuntu-latest
+    environment: crates-io-publish
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - name: Checkout
@@ -324,9 +385,13 @@ jobs:
       - name: Run tests
         run: cargo test -p reliakit-circuit --all-features --locked
 
+      - name: Authenticate to crates.io
+        id: auth
+        uses: rust-lang/crates-io-auth-action@v1
+
       - name: Publish to crates.io
         env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
         run: |
           crate=reliakit-circuit
           version="$(cargo metadata --no-deps --format-version 1 \
@@ -342,6 +407,10 @@ jobs:
   publish-ratelimit:
     if: startsWith(github.ref, 'refs/tags/reliakit-ratelimit-v')
     runs-on: ubuntu-latest
+    environment: crates-io-publish
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - name: Checkout
@@ -369,9 +438,13 @@ jobs:
       - name: Run tests
         run: cargo test -p reliakit-ratelimit --all-features --locked
 
+      - name: Authenticate to crates.io
+        id: auth
+        uses: rust-lang/crates-io-auth-action@v1
+
       - name: Publish to crates.io
         env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
         run: |
           crate=reliakit-ratelimit
           version="$(cargo metadata --no-deps --format-version 1 \
@@ -387,6 +460,10 @@ jobs:
   publish-json:
     if: startsWith(github.ref, 'refs/tags/reliakit-json-v')
     runs-on: ubuntu-latest
+    environment: crates-io-publish
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - name: Checkout
@@ -414,9 +491,13 @@ jobs:
       - name: Run tests
         run: cargo test -p reliakit-json --all-features --locked
 
+      - name: Authenticate to crates.io
+        id: auth
+        uses: rust-lang/crates-io-auth-action@v1
+
       - name: Publish to crates.io
         env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
         run: |
           crate=reliakit-json
           version="$(cargo metadata --no-deps --format-version 1 \
