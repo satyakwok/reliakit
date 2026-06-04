@@ -159,3 +159,22 @@ jobs:
           fail_ci_if_error: true
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Generate reliakit-circuit coverage
+        run: |
+          cargo llvm-cov \
+            -p reliakit-circuit \
+            --all-features \
+            --locked \
+            --lcov \
+            --output-path lcov-reliakit-circuit.info
+
+      - name: Upload reliakit-circuit coverage
+        uses: codecov/codecov-action@v6
+        with:
+          files: lcov-reliakit-circuit.info
+          flags: reliakit-circuit
+          name: reliakit-circuit
+          fail_ci_if_error: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
