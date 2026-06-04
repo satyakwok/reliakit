@@ -425,8 +425,12 @@ for non-trivial changes so the direction can be discussed first.
 - Run `cargo fmt`, `cargo clippy`, and `cargo test` before submitting.
 
 See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for contribution guidelines,
-[`CHANGELOG.md`](./CHANGELOG.md) for release notes, and
-[`SECURITY.md`](./SECURITY.md) for vulnerability reporting.
+[`CHANGELOG.md`](./CHANGELOG.md) for release notes, [`RELEASING.md`](./RELEASING.md)
+for the release process, and [`SECURITY.md`](./SECURITY.md) for vulnerability
+reporting.
+
+Every crate depends only on the standard library and on other `reliakit-*`
+crates; a CI check fails the build if any third-party dependency is introduced.
 
 ## Star History
 

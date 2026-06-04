@@ -123,3 +123,56 @@ jobs:
           cargo check -p reliakit-validate --no-default-features --features alloc --target thumbv7em-none-eabi --locked
           cargo check -p reliakit-collections --no-default-features --features alloc --target thumbv7em-none-eabi --locked
           cargo check -p reliakit-codec --no-default-features --features alloc --target thumbv7em-none-eabi --locked
+          # Featureless pure-core crates: building for the bare-metal target is
+          # itself the no_std proof (no features to disable).
+          cargo check -p reliakit-backoff --target thumbv7em-none-eabi --locked
+          cargo check -p reliakit-circuit --target thumbv7em-none-eabi --locked
+          cargo check -p reliakit-ratelimit --target thumbv7em-none-eabi --locked
+          cargo check -p reliakit-timeout --target thumbv7em-none-eabi --locked
+          # These default to `std`, so the default feature must be disabled.
+          cargo check -p reliakit-core --no-default-features --target thumbv7em-none-eabi --locked
+          cargo check -p reliakit-json --no-default-features --features canonical --target thumbv7em-none-eabi --locked
+
+  no-third-party-deps:
+    name: Zero dependencies
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.3
+
+      - name: Install Rust stable
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+
+      # Reliakit's crates must depend only on the standard library and on each
+      # other. `cargo metadata` lists every dependency of each workspace member,
+      # including dev- and build-dependencies (each carries a `kind`), so this
+      # fails if any of them gains a third-party dependency of any kind.
+      - name: Assert no third-party dependencies
+        run: |
+          cargo metadata --format-version 1 --locked \
+            | python3 -c '
+          import json, sys
+          meta = json.load(sys.stdin)
+          members = set(meta["workspace_members"])
+          offenders = {}
+          for pkg in meta["packages"]:
+              if pkg["id"] not in members:
+                  continue
+              # "dependencies" covers normal, dev, and build kinds.
+              extern = []
+              for d in pkg["dependencies"]:
+                  if not d["name"].startswith("reliakit-"):
+                      kind = d["kind"] or "normal"
+                      extern.append(d["name"] + " (" + kind + ")")
+              if extern:
+                  offenders[pkg["name"]] = sorted(extern)
+          if offenders:
+              print("Third-party dependencies found (reliakit must have none):")
+              for name in sorted(offenders):
+                  print("  " + name + ": " + ", ".join(offenders[name]))
+              sys.exit(1)
+          print("OK: no third-party dependencies (any kind) across the workspace.")
+          '

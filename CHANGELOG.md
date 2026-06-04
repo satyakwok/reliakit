@@ -28,6 +28,10 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
   tests and a dependency-free, deterministic in-test fuzzer (hand-written PRNG)
   that asserts parsing arbitrary bytes never panics and that every parsed value
   survives a compact round-trip and canonical re-serialization unchanged.
+- Added a CI job that fails if any workspace crate gains a third-party
+  dependency (of any kind), enforcing the zero-dependency policy, and extended
+  the bare-metal `no_std` checks to cover every `no_std` crate. Added
+  `RELEASING.md` documenting the per-crate OIDC release flow.
 - Added a manual publish workflow for publishing one selected crate to
   crates.io after tests, version checks, and `cargo publish --dry-run`.
 
