@@ -10,10 +10,6 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 
 ### Added
 
-- Hardened the JSON parser with JSONTestSuite-style accept/reject conformance
-  tests and a dependency-free, deterministic in-test fuzzer (hand-written PRNG)
-  that asserts parsing arbitrary bytes never panics and that every parsed value
-  survives a compact round-trip and canonical re-serialization unchanged.
 - Added a CI job that fails if any workspace crate gains a third-party
   dependency (of any kind), enforcing the zero-dependency policy, and extended
   the bare-metal `no_std` checks to cover every `no_std` crate. Added
@@ -27,13 +23,43 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
   The tag-triggered and manual publish workflows now mint a short-lived token at
   publish time instead of reading a stored API token, so no long-lived registry
   token is kept in repository secrets.
-- Renamed the `basic` example target in `reliakit-backoff`, `reliakit-circuit`,
-  and `reliakit-ratelimit` to `backoff_basic`, `circuit_basic`, and
-  `ratelimit_basic` so the workspace can build all examples together without
-  output-filename collisions.
-- Each crate now ships its own `LICENSE` file in the published package, so the
-  MIT license text travels with the crate on crates.io rather than only the SPDX
-  identifier in the manifest.
+
+## reliakit-json 0.2.1 - 2026-06-04
+
+### Added
+
+- Hardened the parser with JSONTestSuite-style accept/reject conformance tests
+  and a dependency-free, deterministic in-test fuzzer (hand-written PRNG) that
+  asserts parsing arbitrary bytes never panics and that every parsed value
+  survives a compact round-trip and canonical re-serialization unchanged.
+
+### Changed
+
+- Now ships its own `LICENSE` file in the published package, so the MIT license
+  text travels with the crate on crates.io rather than only the SPDX identifier.
+
+## reliakit-codec 0.2.1 - 2026-06-04
+
+### Changed
+
+- Now ships its own `LICENSE` file in the published package, so the MIT license
+  text travels with the crate on crates.io rather than only the SPDX identifier.
+
+## reliakit-backoff 0.1.1 - 2026-06-04
+
+### Changed
+
+- Renamed the `basic` example target to `backoff_basic` so the workspace can
+  build all examples together without output-filename collisions.
+- Now ships its own `LICENSE` file in the published package, so the MIT license
+  text travels with the crate on crates.io rather than only the SPDX identifier.
+
+## reliakit-secret 0.1.1 - 2026-06-04
+
+### Changed
+
+- Now ships its own `LICENSE` file in the published package, so the MIT license
+  text travels with the crate on crates.io rather than only the SPDX identifier.
 
 ## reliakit-primitives 0.4.1 - 2026-06-04
 
