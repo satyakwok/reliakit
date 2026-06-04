@@ -10,6 +10,13 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 
 ### Added
 
+- `reliakit-json` (unreleased `0.2.0`): added RFC 8785 (JCS) canonical
+  serialization behind the off-by-default `canonical` feature —
+  `to_canonical_string` / `to_canonical_vec`, with UTF-16 key ordering, minimal
+  string escaping, and ECMAScript number formatting. Numbers are treated as
+  IEEE-754 doubles; a non-representable magnitude returns the new
+  `JsonErrorKind::NonFiniteNumber`. Number formatting is checked against the
+  RFC 8785 examples and round-tripped over a large randomized `f64` sample.
 - Added a manual publish workflow for publishing one selected crate to
   crates.io after tests, version checks, and `cargo publish --dry-run`.
 

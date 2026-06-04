@@ -81,6 +81,9 @@ pub enum JsonErrorKind {
     LimitExceeded(JsonLimitKind),
     /// The output sink failed to accept bytes (serialization).
     WriteFailure,
+    /// A number could not be represented as a finite IEEE-754 `f64` during
+    /// canonical serialization (e.g. a magnitude that overflows to infinity).
+    NonFiniteNumber,
 }
 
 /// One segment of a [`JsonPath`].
@@ -152,6 +155,19 @@ impl JsonError {
         self
     }
 
+    /// Builds an error that occurred during serialization, where there is no
+    /// source position to report. `offset`, `line`, and `column` are `0`.
+    #[cfg(feature = "canonical")]
+    pub(crate) fn serialization(kind: JsonErrorKind) -> Self {
+        Self {
+            kind,
+            offset: 0,
+            line: 0,
+            column: 0,
+            path: None,
+        }
+    }
+
     /// The stable error category.
     pub fn kind(&self) -> &JsonErrorKind {
         &self.kind
@@ -206,6 +222,7 @@ impl fmt::Display for JsonError {
                 return Ok(());
             }
             JsonErrorKind::WriteFailure => "failed to write output",
+            JsonErrorKind::NonFiniteNumber => "number is not representable as a finite f64",
         };
         write!(
             f,

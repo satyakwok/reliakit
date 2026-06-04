@@ -54,7 +54,7 @@ fn write_value(out: &mut String, value: &JsonValue) {
     }
 }
 
-fn write_escaped(out: &mut String, s: &str) {
+pub(crate) fn write_escaped(out: &mut String, s: &str) {
     out.push('"');
     for c in s.chars() {
         match c {

@@ -129,11 +129,42 @@ explicit and finite. Tune individual fields with the `with_*` builders.
 - You need the fastest possible parsing throughput above all else.
 - You need JSON5, comments, or lenient parsing — this crate rejects them by design.
 
-## Roadmap
+## Canonical output (RFC 8785 / JCS)
 
-RFC 8785 (JSON Canonicalization Scheme) output is planned, but will only be
-exposed once it passes the reference vectors, idempotence, differential, and
-fuzzing gates. It is not part of this release.
+Behind the off-by-default `canonical` feature, `to_canonical_string` and
+`to_canonical_vec` produce [RFC 8785] (JSON Canonicalization Scheme) output: a
+single deterministic byte sequence suitable for hashing or signing. Object keys
+are sorted by UTF-16 code units, whitespace is removed, strings use minimal
+escaping, and numbers use the shortest ECMAScript `Number.toString` form.
+
+```toml
+[dependencies]
+reliakit-json = { version = "0.2", features = ["canonical"] }
+```
+
+```rust
+use reliakit_json::{parse_str, to_canonical_string};
+
+let value = parse_str(r#"{ "b": 1, "a": 1.0 }"#).unwrap();
+assert_eq!(to_canonical_string(&value).unwrap(), r#"{"a":1,"b":1}"#);
+```
+
+Numbers are treated as IEEE-754 doubles, as the scheme requires: a value with
+more precision than an `f64` (e.g. an integer above 2^53) is canonicalized as
+the nearest double, and a magnitude that overflows to infinity returns an error.
+
+Number formatting is checked against the RFC 8785 examples and round-trips every
+canonical number back to the same `f64` across a large randomized sample; key
+ordering, escaping, and idempotence are covered by tests.
+
+## Feature flags
+
+| Feature | Default | Effect |
+|---|---|---|
+| `std` | yes | Implements `std::error::Error` for the error types. |
+| `canonical` | no | Enables RFC 8785 canonical serialization. |
+
+Disable default features for `no_std`; the crate always requires `alloc`.
 
 ## Safety
 
@@ -149,6 +180,7 @@ Rust `1.85` and newer. No nightly features are used.
 Licensed under the MIT License. See [`LICENSE`](https://github.com/satyakwok/reliakit/blob/main/LICENSE).
 
 [RFC 8259]: https://www.rfc-editor.org/rfc/rfc8259
+[RFC 8785]: https://www.rfc-editor.org/rfc/rfc8785
 [kind]: https://docs.rs/reliakit-json/latest/reliakit_json/enum.JsonErrorKind.html
 [`parse`]: https://docs.rs/reliakit-json/latest/reliakit_json/fn.parse.html
 [`parse_str`]: https://docs.rs/reliakit-json/latest/reliakit_json/fn.parse_str.html
