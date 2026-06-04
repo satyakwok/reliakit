@@ -45,6 +45,9 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
   and `reliakit-ratelimit` to `backoff_basic`, `circuit_basic`, and
   `ratelimit_basic` so the workspace can build all examples together without
   output-filename collisions.
+- Each crate now ships its own `LICENSE` file in the published package, so the
+  MIT license text travels with the crate on crates.io rather than only the SPDX
+  identifier in the manifest.
 
 ## reliakit-json 0.2.0 - 2026-06-04
 
