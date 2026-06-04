@@ -1323,7 +1323,11 @@ mod tests {
         assert!(Hostname::new(too_long).is_err());
     }
 
+    // The owned/reference comparisons below intentionally exercise the
+    // `PartialEq<String>` and `PartialEq<&String>` impls, which `cmp_owned` and
+    // `op_ref` would otherwise rewrite away.
     #[test]
+    #[allow(clippy::cmp_owned, clippy::op_ref)]
     fn base64_conversions_and_traits() {
         let from_str: Base64 = "YWJj".parse().unwrap();
         let try_ref = Base64::try_from("YWJj").unwrap();
@@ -1343,6 +1347,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::cmp_owned, clippy::op_ref)]
     fn identifier_conversions_and_traits() {
         let from_str: Identifier = "user_id".parse().unwrap();
         let try_ref = Identifier::try_from("user_id").unwrap();
@@ -1362,6 +1367,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::cmp_owned, clippy::op_ref)]
     fn hostname_conversions_and_traits() {
         let from_str: Hostname = "example.com".parse().unwrap();
         let try_ref = Hostname::try_from("example.com").unwrap();
