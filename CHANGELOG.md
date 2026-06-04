@@ -10,15 +10,37 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 
 ### Added
 
-- `reliakit-json` (unreleased `0.2.0`): added RFC 8785 (JCS) canonical
-  serialization behind the off-by-default `canonical` feature —
-  `to_canonical_string` / `to_canonical_vec`, with UTF-16 key ordering, minimal
-  string escaping, and ECMAScript number formatting. Numbers are treated as
-  IEEE-754 doubles; a non-representable magnitude returns the new
-  `JsonErrorKind::NonFiniteNumber`. Number formatting is checked against the
-  RFC 8785 examples and round-tripped over a large randomized `f64` sample.
 - Added a manual publish workflow for publishing one selected crate to
   crates.io after tests, version checks, and `cargo publish --dry-run`.
+
+### Changed
+
+- Switched crates.io publishing to Trusted Publishing over GitHub Actions OIDC.
+  The tag-triggered and manual publish workflows now mint a short-lived token at
+  publish time instead of reading a stored API token, so no long-lived registry
+  token is kept in repository secrets.
+- Renamed the `basic` example target in `reliakit-backoff`, `reliakit-circuit`,
+  and `reliakit-ratelimit` to `backoff_basic`, `circuit_basic`, and
+  `ratelimit_basic` so the workspace can build all examples together without
+  output-filename collisions.
+
+## reliakit-json 0.2.0 - 2026-06-04
+
+### Added
+
+- Added RFC 8785 (JCS) canonical serialization behind the off-by-default
+  `canonical` feature — `to_canonical_string` / `to_canonical_vec`, with UTF-16
+  key ordering, minimal string escaping, and ECMAScript number formatting.
+  Numbers are treated as IEEE-754 doubles; a non-representable magnitude returns
+  the new `JsonErrorKind::NonFiniteNumber`. Number formatting is checked against
+  the RFC 8785 examples and round-tripped over a large randomized `f64` sample.
+
+### Changed
+
+- `JsonError`'s `Display` no longer appends a source position for
+  serialization-side errors (`NonFiniteNumber`, `WriteFailure`).
+- Renamed the example target from `basic` to `json_basic` (run it with
+  `cargo run -p reliakit-json --example json_basic`).
 
 ## reliakit-timeout 0.1.0 - 2026-06-04
 
@@ -35,18 +57,6 @@ Initial release.
   - Every method is a saturating `const fn`; a backwards clock or an overflowing
     `start + budget` cannot panic. Pure `core`, no features, zero dependencies,
     `#![no_std]`, `#![forbid(unsafe_code)]`.
-
-### Changed
-
-- Switched crates.io publishing to Trusted Publishing over GitHub Actions OIDC.
-  The tag-triggered and manual publish workflows now mint a short-lived token at
-  publish time instead of reading a stored API token, so no long-lived registry
-  token is kept in repository secrets.
-- Renamed the `basic` example target in `reliakit-backoff`, `reliakit-circuit`,
-  `reliakit-ratelimit`, and `reliakit-json` to `backoff_basic`,
-  `circuit_basic`, `ratelimit_basic`, and `json_basic` so the workspace can
-  build all examples together without output-filename collisions. Run them with
-  e.g. `cargo run -p reliakit-json --example json_basic`.
 
 ## reliakit-json 0.1.0 - 2026-06-04
 

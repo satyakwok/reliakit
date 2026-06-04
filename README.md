@@ -270,7 +270,7 @@ reliakit-codec = "0.2"
 reliakit-backoff = "0.1"
 reliakit-circuit = "0.1"
 reliakit-ratelimit = "0.1"
-reliakit-json = "0.1"
+reliakit-json = "0.2"
 reliakit-timeout = "0.1"
 ```
 

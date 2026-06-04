@@ -53,7 +53,7 @@ leading zeros, malformed numbers, and anything exceeding the configured limits.
 
 ```toml
 [dependencies]
-reliakit-json = "0.1"
+reliakit-json = "0.2"
 ```
 
 This crate is `no_std`-compatible (`default-features = false`); the default
