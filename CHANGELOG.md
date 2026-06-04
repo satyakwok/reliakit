@@ -10,6 +10,11 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 
 ### Added
 
+- `reliakit-circuit`: added `RollingBreaker<const WINDOW>`, a circuit breaker
+  that trips on the failure *rate* (N failures within the last `WINDOW` calls)
+  rather than on consecutive failures. The window is stored inline
+  (`[bool; WINDOW]`, zero allocation, `no_std`); cooldown and half-open recovery
+  match `CircuitBreaker`. The existing `CircuitBreaker` is unchanged.
 - `reliakit-collections`: added `RingBuffer<T>`, a fixed-capacity circular
   buffer that overwrites the oldest element when full (a rolling window whose
   `push` never fails, evicting and returning the oldest element instead). Behind

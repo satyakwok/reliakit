@@ -56,10 +56,20 @@
 //! cb.on_success();
 //! assert_eq!(cb.state(), State::Closed);
 //! ```
+//!
+//! # Counting failures by rate
+//!
+//! [`CircuitBreaker`] counts *consecutive* failures. For a *failure rate* over a
+//! rolling window — "trip if N of the last M calls failed" — use
+//! [`RollingBreaker`], a const-generic, inline (zero-allocation) variant.
 
 #![no_std]
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
+
+mod rolling;
+
+pub use rolling::RollingBreaker;
 
 /// The state of a [`CircuitBreaker`].
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

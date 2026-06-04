@@ -121,6 +121,30 @@ trips, rejects fast, recovers, and closes again.
 | `state() -> State` | Current state (`Closed` / `Open` / `HalfOpen`). |
 | `trip(now)` / `reset()` | Force the breaker open or closed (e.g. from health signals). |
 
+## Failure rate over a window: `RollingBreaker`
+
+`CircuitBreaker` counts *consecutive* failures. When you want a *failure rate* —
+"trip if N of the last M calls failed" — use `RollingBreaker<const WINDOW>`, a
+const-generic variant that stores the last `WINDOW` outcomes inline (a
+`[bool; WINDOW]` ring, zero allocation, `no_std`). It shares the same cooldown
+and half-open recovery.
+
+```rust
+use reliakit_circuit::{RollingBreaker, State};
+
+// Trip if 3 of the last 5 calls fail (not necessarily consecutive).
+let mut breaker = RollingBreaker::<5>::new(3, 1_000);
+breaker.on_failure(0);
+breaker.on_success();
+breaker.on_failure(0);
+breaker.on_success();
+breaker.on_failure(0); // 3 failures within the window
+assert_eq!(breaker.state(), State::Open);
+```
+
+It exposes the same methods as `CircuitBreaker` plus `window_size()` and
+`failures_in_window()`.
+
 ## Pairs well with `reliakit-backoff`
 
 A circuit breaker decides **whether** to attempt a call; [`reliakit-backoff`](https://crates.io/crates/reliakit-backoff)
