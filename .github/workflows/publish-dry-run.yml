@@ -71,3 +71,6 @@ jobs:
 
       - name: Verify reliakit-timeout package
         run: cargo publish -p reliakit-timeout --dry-run --locked
+
+      - name: Verify reliakit-core package
+        run: cargo publish -p reliakit-core --dry-run --locked

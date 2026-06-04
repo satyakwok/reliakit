@@ -54,6 +54,11 @@ coverage:
         threshold: 1%
         flags:
           - reliakit-timeout
+      reliakit-core:
+        target: 90%
+        threshold: 1%
+        flags:
+          - reliakit-core
     patch:
       default:
         target: 90%

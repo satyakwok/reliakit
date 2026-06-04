@@ -10,6 +10,10 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 
 ### Added
 
+- Added the `reliakit-core` crate (not yet published): shared building blocks
+  for the workspace. A `Clock` trait (`now(&self) -> u64`) with `ManualClock`
+  (settable, `no_std`) and `MonotonicClock` (milliseconds since creation, `std`).
+  Zero dependencies, `#![forbid(unsafe_code)]`.
 - Hardened the JSON parser with JSONTestSuite-style accept/reject conformance
   tests and a dependency-free, deterministic in-test fuzzer (hand-written PRNG)
   that asserts parsing arbitrary bytes never panics and that every parsed value

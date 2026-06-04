@@ -250,7 +250,14 @@ Implemented types:
 
 ### `reliakit-core`
 
-Planned. Shared core types, traits, and errors used across Reliakit crates.
+Shared building blocks for the workspace. Provides a `Clock` trait (one method,
+`now(&self) -> u64`) plus ready-made clocks so you do not have to hand-roll the
+`u64` tick the resilience crates expect: `ManualClock` (settable, `no_std`, for
+deterministic tests) and `MonotonicClock` (milliseconds since creation, backed
+by `std::time::Instant`). Zero dependencies.
+
+Present in the workspace and pending its initial `0.1` release; not yet
+published to crates.io.
 
 ### `reliakit-derive`
 
@@ -363,7 +370,9 @@ reliakit/
 │   │   └── examples/
 │   ├── reliakit-json/
 │   │   └── examples/
-│   └── reliakit-timeout/
+│   ├── reliakit-timeout/
+│   │   └── examples/
+│   └── reliakit-core/
 │       └── examples/
 ├── Cargo.toml
 ├── README.md
@@ -398,9 +407,12 @@ Published:
 - `reliakit-json`
 - `reliakit-timeout`
 
-Planned:
+Pending initial release:
 
 - `reliakit-core`
+
+Planned:
+
 - `reliakit-derive`
 
 ## Contributing

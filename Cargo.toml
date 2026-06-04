@@ -10,6 +10,7 @@ members = [
     "crates/reliakit-ratelimit",
     "crates/reliakit-json",
     "crates/reliakit-timeout",
+    "crates/reliakit-core",
 ]
 resolver = "2"
 
