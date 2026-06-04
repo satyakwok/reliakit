@@ -216,3 +216,22 @@ jobs:
           fail_ci_if_error: true
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Generate reliakit-timeout coverage
+        run: |
+          cargo llvm-cov \
+            -p reliakit-timeout \
+            --all-features \
+            --locked \
+            --lcov \
+            --output-path lcov-reliakit-timeout.info
+
+      - name: Upload reliakit-timeout coverage
+        uses: codecov/codecov-action@v6
+        with:
+          files: lcov-reliakit-timeout.info
+          flags: reliakit-timeout
+          name: reliakit-timeout
+          fail_ci_if_error: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

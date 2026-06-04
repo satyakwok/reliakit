@@ -9,6 +9,7 @@ members = [
     "crates/reliakit-circuit",
     "crates/reliakit-ratelimit",
     "crates/reliakit-json",
+    "crates/reliakit-timeout",
 ]
 resolver = "2"
 

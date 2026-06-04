@@ -1,0 +1,21 @@
+[package]
+name = "reliakit-timeout"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme = "README.md"
+description = "Clock-agnostic deadlines and timeouts for retries and resilience. no_std and zero-dependency."
+keywords = ["timeout", "deadline", "reliability", "resilience", "no-std"]
+categories = ["algorithms", "no-std", "rust-patterns"]
+
+[dependencies]
+
+[[example]]
+name = "timeout_basic"
+path = "examples/basic.rs"
+
+[lints]
+workspace = true
