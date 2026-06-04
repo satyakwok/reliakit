@@ -11,6 +11,7 @@ members = [
     "crates/reliakit-json",
     "crates/reliakit-timeout",
 ]
+exclude = ["fuzz"]
 resolver = "2"
 
 [workspace.package]

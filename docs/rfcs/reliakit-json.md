@@ -112,7 +112,9 @@ Unicode ordering, idempotence, differential checks, and fuzzing all pass.
 1. Parser foundation — errors, limits, tokenizer, strict parser, dup-key
    rejection, `JsonValue`, `JsonNumber`. **(done)**
 2. Compact writer + exact-byte and roundtrip tests. **(done)**
-3. Hardening — JSONTestSuite, limit-boundary tests, fuzz targets, package audit.
+3. Hardening — JSONTestSuite-style conformance tests, limit-boundary tests, and
+   `cargo-fuzz` targets (parse, compact round-trip, canonical idempotence) plus a
+   `reliakit-codec` decode target. **(done)**
 4. Canonicalization — RFC 8785 design, number formatting (ECMAScript), key
    ordering (UTF-16). **(done behind the `canonical` feature; validated against
    the RFC 8785 number examples and a large randomized `f64` round-trip sample.

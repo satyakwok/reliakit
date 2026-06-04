@@ -1,0 +1,52 @@
+# Fuzzing harness for reliakit parsers/decoders. Not part of the published
+# workspace and never published (cargo-fuzz, nightly-only).
+[package]
+name = "reliakit-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+
+[dependencies.reliakit-json]
+path = "../crates/reliakit-json"
+features = ["canonical"]
+
+[dependencies.reliakit-codec]
+path = "../crates/reliakit-codec"
+features = ["std"]
+
+[[bin]]
+name = "json_parse"
+path = "fuzz_targets/json_parse.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "json_roundtrip"
+path = "fuzz_targets/json_roundtrip.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "json_canonical"
+path = "fuzz_targets/json_canonical.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "codec_decode"
+path = "fuzz_targets/codec_decode.rs"
+test = false
+doc = false
+bench = false
+
+# Detach from the parent workspace; this crate is nightly/cargo-fuzz only.
+[workspace]

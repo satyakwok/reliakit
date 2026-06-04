@@ -10,6 +10,12 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 
 ### Added
 
+- Added a `cargo-fuzz` harness (`fuzz/`) with libFuzzer targets for the
+  untrusted-input paths — JSON parse (no panic), JSON compact round-trip, RFC
+  8785 canonical idempotence, and `reliakit-codec` decode — plus a weekly
+  scheduled fuzzing workflow. The JSON parser also gained JSONTestSuite-style
+  accept/reject conformance tests and a deterministic in-test fuzz that
+  round-trips every parsed value.
 - Added a manual publish workflow for publishing one selected crate to
   crates.io after tests, version checks, and `cargo publish --dry-run`.
 
