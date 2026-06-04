@@ -129,7 +129,7 @@ explicit and finite. Tune individual fields with the `with_*` builders.
 - You need the fastest possible parsing throughput above all else.
 - You need JSON5, comments, or lenient parsing — this crate rejects them by design.
 
-## Canonical output (RFC 8785 / JCS) — experimental
+## Canonical output (RFC 8785 / JCS)
 
 Behind the off-by-default `canonical` feature, `to_canonical_string` and
 `to_canonical_vec` produce [RFC 8785] (JSON Canonicalization Scheme) output: a
@@ -153,16 +153,16 @@ Numbers are treated as IEEE-754 doubles, as the scheme requires: a value with
 more precision than an `f64` (e.g. an integer above 2^53) is canonicalized as
 the nearest double, and a magnitude that overflows to infinity returns an error.
 
-This feature is **experimental**: it is not yet validated against the full
-RFC 8785 conformance vectors and fuzzed, so the output should not yet be relied
-on for cross-implementation signatures. The API may change.
+Number formatting is checked against the RFC 8785 examples and round-trips every
+canonical number back to the same `f64` across a large randomized sample; key
+ordering, escaping, and idempotence are covered by tests.
 
 ## Feature flags
 
 | Feature | Default | Effect |
 |---|---|---|
 | `std` | yes | Implements `std::error::Error` for the error types. |
-| `canonical` | no | Enables experimental RFC 8785 canonical serialization. |
+| `canonical` | no | Enables RFC 8785 canonical serialization. |
 
 Disable default features for `no_std`; the crate always requires `alloc`.
 

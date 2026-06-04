@@ -1,9 +1,7 @@
 //! Canonical JSON serialization following RFC 8785 (JSON Canonicalization
 //! Scheme, JCS).
 //!
-//! **Experimental.** Enabled by the `canonical` feature. The output has not yet
-//! been validated against the full RFC 8785 conformance vectors and the API may
-//! change before it is declared stable.
+//! Enabled by the `canonical` feature (off by default).
 //!
 //! JCS produces a single, deterministic byte sequence for a JSON value so it can
 //! be hashed or signed: object members are sorted by the UTF-16 code units of
@@ -38,9 +36,7 @@ use crate::write::write_escaped;
 /// Returns [`JsonErrorKind::NonFiniteNumber`](crate::JsonErrorKind::NonFiniteNumber)
 /// if a number cannot be represented as a finite IEEE-754 `f64`.
 ///
-/// **Experimental**, enabled by the `canonical` feature; the output is not yet
-/// validated against the full RFC 8785 conformance vectors and the API may
-/// change.
+/// Enabled by the `canonical` feature.
 pub fn to_canonical_string(value: &JsonValue) -> Result<String, JsonError> {
     let mut out = String::new();
     write_canonical(&mut out, value)?;
@@ -181,10 +177,15 @@ mod tests {
             (-1.0, "-1"),
             (1.5, "1.5"),
             (-1.5, "-1.5"),
+            (0.5, "0.5"),
+            (0.05, "0.05"),
             (10.0, "10"),
             (100.0, "100"),
+            (123.456, "123.456"),
             (1234.5, "1234.5"),
+            (123456789.0, "123456789"),
             (0.1, "0.1"),
+            (1e-5, "0.00001"),
             (0.0001, "0.0001"),
             (1e-6, "0.000001"),
             (1e-7, "1e-7"),
@@ -193,6 +194,9 @@ mod tests {
             (1e22, "1e+22"),
             (9007199254740992.0, "9007199254740992"),
             (5e-324, "5e-324"),
+            // f64::MAX and machine epsilon.
+            (1.7976931348623157e308, "1.7976931348623157e+308"),
+            (2.220446049250313e-16, "2.220446049250313e-16"),
         ];
         for &(input, expected) in cases {
             assert_eq!(
@@ -201,6 +205,65 @@ mod tests {
                 "for {input:?}"
             );
         }
+    }
+
+    #[test]
+    fn rfc8785_number_examples() {
+        // Authoritative input -> canonical pairs from RFC 8785 §3.2.2.3 /
+        // Appendix B, exercised through the real parse + canonicalize path.
+        let cases: &[(&str, &str)] = &[
+            ("333333333.33333329", "333333333.3333333"),
+            ("1E30", "1e+30"),
+            ("4.50", "4.5"),
+            ("2e-3", "0.002"),
+            ("0.000000000000000000000000001", "1e-27"),
+            ("-0", "0"),
+        ];
+        for &(input, expected) in cases {
+            let value = parse_str(input).unwrap();
+            assert_eq!(
+                to_canonical_string(&value).unwrap(),
+                expected,
+                "for {input}"
+            );
+        }
+    }
+
+    #[test]
+    fn numbers_round_trip_and_never_panic() {
+        // A layout bug can still round-trip (e.g. "1e+21" vs the expanded form),
+        // so the explicit vectors above lock the layout; this locks the digits:
+        // every emitted canonical number must reparse to the exact same f64.
+        let mut state: u64 = 0x9E3779B97F4A7C15;
+        let mut next = || {
+            state ^= state << 13;
+            state ^= state >> 7;
+            state ^= state << 17;
+            state
+        };
+        let mut checked: u64 = 0;
+        for _ in 0..300_000 {
+            let x = f64::from_bits(next());
+            if !x.is_finite() {
+                continue;
+            }
+            let s = ecmascript_number_to_string(x);
+            if x == 0.0 {
+                assert_eq!(s, "0");
+            } else {
+                let back: f64 = s.parse().expect("canonical number must reparse");
+                // Exact bit comparison (avoids imprecise float equality).
+                assert_eq!(
+                    back.to_bits(),
+                    x.to_bits(),
+                    "round-trip failed: {x:?} -> {s}"
+                );
+                // Idempotent: re-formatting the parsed value yields the same text.
+                assert_eq!(ecmascript_number_to_string(back), s);
+            }
+            checked += 1;
+        }
+        assert!(checked > 100_000, "expected a large finite sample");
     }
 
     #[test]

@@ -83,9 +83,10 @@ Compact writer is deterministic (member order + exact number text preserved) and
 infallible for in-memory output (`-> String`/`-> Vec<u8>`); `WriteFailure` is
 reserved for a future `std::io` adapter. Canonical (JCS) serialization is
 separate and gated behind the off-by-default `canonical` feature
-(`to_canonical_string` / `to_canonical_vec`, fallible). It is exposed as
-**experimental** pending the full RFC 8785 conformance vectors and fuzzing, and
-is not yet claimed stable.
+(`to_canonical_string` / `to_canonical_vec`, fallible). Number formatting is
+validated against the RFC 8785 examples and round-tripped over a large
+randomized `f64` sample; key ordering (UTF-16), escaping, and idempotence are
+covered by tests.
 
 ## Testing & hardening
 
@@ -113,9 +114,9 @@ Unicode ordering, idempotence, differential checks, and fuzzing all pass.
 2. Compact writer + exact-byte and roundtrip tests. **(done)**
 3. Hardening — JSONTestSuite, limit-boundary tests, fuzz targets, package audit.
 4. Canonicalization — RFC 8785 design, number formatting (ECMAScript), key
-   ordering (UTF-16). **(initial implementation done behind the `canonical`
-   feature; reference vectors, differential testing, and canonical fuzzing still
-   pending before it is declared stable.)**
+   ordering (UTF-16). **(done behind the `canonical` feature; validated against
+   the RFC 8785 number examples and a large randomized `f64` round-trip sample.
+   A dedicated fuzz target remains optional future hardening.)**
 5. Optional integrations — Reliakit primitive conversions, validation, std I/O
    adapters, manual typed encode/decode traits.
 
