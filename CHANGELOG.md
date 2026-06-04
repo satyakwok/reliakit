@@ -10,6 +10,11 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 
 ### Added
 
+- `reliakit-collections`: added `RingBuffer<T>`, a fixed-capacity circular
+  buffer that overwrites the oldest element when full (a rolling window whose
+  `push` never fails, evicting and returning the oldest element instead). Behind
+  the `alloc` feature. Added `CollectionError::ZeroCapacity` for a zero-capacity
+  request.
 - Added the `reliakit-core` crate (not yet published): shared building blocks
   for the workspace. A `Clock` trait (`now(&self) -> u64`) with `ManualClock`
   (settable, `no_std`) and `MonotonicClock` (milliseconds since creation, `std`).

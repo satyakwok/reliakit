@@ -88,18 +88,35 @@ assert!(Triple::new(vec![1, 2]).is_err());
 assert!(Triple::new(vec![1, 2, 3, 4]).is_err());
 ```
 
+### Rolling window with a ring buffer
+
+```rust
+use reliakit_collections::RingBuffer;
+
+// Keep only the most recent 3 samples.
+let mut last3 = RingBuffer::new(3).unwrap();
+last3.push(1);
+last3.push(2);
+last3.push(3);
+
+// Pushing onto a full buffer evicts (and returns) the oldest element.
+assert_eq!(last3.push(4), Some(1));
+assert_eq!(last3.iter().copied().collect::<Vec<_>>(), [2, 3, 4]);
+```
+
 ## Available Types
 
 | Type | Description |
 |---|---|
 | `BoundedVec<T, MIN, MAX>` | `Vec<T>` constrained to hold between `MIN` and `MAX` elements |
+| `RingBuffer<T>` | Fixed-capacity circular buffer that overwrites the oldest element when full |
 
 ## Feature Flags
 
 | Flag | Default | Description |
 |---|---|---|
 | `std` | yes | Enables `std::error::Error` for `CollectionError`; implies `alloc` |
-| `alloc` | no | Enables `BoundedVec` (backed by `Vec<T>`) |
+| `alloc` | no | Enables `BoundedVec` and `RingBuffer` (backed by `alloc`) |
 
 ## `no_std`
 
