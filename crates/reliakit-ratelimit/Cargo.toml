@@ -1,0 +1,21 @@
+[package]
+name = "reliakit-ratelimit"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme = "README.md"
+description = "Clock-agnostic token-bucket rate limiter with retry-after. no_std and zero-dependency."
+keywords = ["rate-limiter", "token-bucket", "throttle", "no-std", "reliability"]
+categories = ["algorithms", "no-std", "rust-patterns"]
+
+[dependencies]
+
+[[example]]
+name = "basic"
+path = "examples/basic.rs"
+
+[lints]
+workspace = true

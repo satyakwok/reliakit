@@ -13,6 +13,20 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 - Added a manual publish workflow for publishing one selected crate to
   crates.io after tests, version checks, and `cargo publish --dry-run`.
 
+## reliakit-ratelimit 0.1.0 - 2026-06-04
+
+Initial release.
+
+### Added
+
+- Added the `reliakit-ratelimit` crate: a clock-agnostic token-bucket rate
+  limiter.
+  - `RateLimiter::new(capacity, refill_amount, refill_interval)`; `try_acquire`,
+    `try_acquire_one`, `available`, and `retry_after`. The caller supplies the
+    clock.
+  - `#![no_std]`, zero dependencies, `#![forbid(unsafe_code)]`. Integer-only
+    saturating arithmetic; no method panics, including on a non-monotonic clock.
+
 ## reliakit-circuit 0.1.0 - 2026-06-04
 
 Initial release.

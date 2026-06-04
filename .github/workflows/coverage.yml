@@ -178,3 +178,22 @@ jobs:
           fail_ci_if_error: true
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Generate reliakit-ratelimit coverage
+        run: |
+          cargo llvm-cov \
+            -p reliakit-ratelimit \
+            --all-features \
+            --locked \
+            --lcov \
+            --output-path lcov-reliakit-ratelimit.info
+
+      - name: Upload reliakit-ratelimit coverage
+        uses: codecov/codecov-action@v6
+        with:
+          files: lcov-reliakit-ratelimit.info
+          flags: reliakit-ratelimit
+          name: reliakit-ratelimit
+          fail_ci_if_error: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

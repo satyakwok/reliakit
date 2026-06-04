@@ -7,6 +7,7 @@ members = [
     "crates/reliakit-codec",
     "crates/reliakit-backoff",
     "crates/reliakit-circuit",
+    "crates/reliakit-ratelimit",
 ]
 resolver = "2"
 

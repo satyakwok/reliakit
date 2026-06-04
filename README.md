@@ -184,6 +184,18 @@ Implemented types:
 - `CircuitBreaker`
 - `State`
 
+### `reliakit-ratelimit` — [crates.io](https://crates.io/crates/reliakit-ratelimit) · [docs.rs](https://docs.rs/reliakit-ratelimit)
+
+Clock-agnostic token-bucket rate limiter. Caps how often something may happen,
+with a configurable burst capacity and refill rate, and reports how long to wait
+when a request is denied. It does not read the clock or allocate — you pass the
+time in. Depends only on `core`. Pairs with `reliakit-circuit` and
+`reliakit-backoff`.
+
+Implemented types:
+
+- `RateLimiter`
+
 ### `reliakit-core`
 
 Planned. Shared core types, traits, and errors used across Reliakit crates.
@@ -205,6 +217,7 @@ reliakit-collections = "0.2"
 reliakit-codec = "0.2"
 reliakit-backoff = "0.1"
 reliakit-circuit = "0.1"
+reliakit-ratelimit = "0.1"
 ```
 
 Add only the crates you need — each is usable independently.
@@ -290,7 +303,9 @@ reliakit/
 │   │   └── examples/
 │   ├── reliakit-backoff/
 │   │   └── examples/
-│   └── reliakit-circuit/
+│   ├── reliakit-circuit/
+│   │   └── examples/
+│   └── reliakit-ratelimit/
 │       └── examples/
 ├── Cargo.toml
 ├── README.md
@@ -303,9 +318,9 @@ Active. Reliakit is published as a real Rust library workspace and follows
 normal Rust crate versioning.
 
 `reliakit-primitives`, `reliakit-secret`, `reliakit-validate`,
-`reliakit-collections`, `reliakit-codec`, `reliakit-backoff`, and
-`reliakit-circuit` are published to crates.io. APIs may receive compatible
-refinements before a `1.0` release.
+`reliakit-collections`, `reliakit-codec`, `reliakit-backoff`,
+`reliakit-circuit`, and `reliakit-ratelimit` are published to crates.io. APIs
+may receive compatible refinements before a `1.0` release.
 
 Logo assets are stored under [`assets/`](./assets/).
 
@@ -320,6 +335,7 @@ Published:
 - `reliakit-codec`
 - `reliakit-backoff`
 - `reliakit-circuit`
+- `reliakit-ratelimit`
 
 Planned:
 
