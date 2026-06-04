@@ -13,9 +13,20 @@ categories = ["algorithms", "no-std", "rust-patterns"]
 
 [dependencies]
 
+# Dev-only: used by the `resilient_client` example to show the resilience crates
+# working together. These do not affect the runtime dependencies of the
+# published library, which remain zero.
+[dev-dependencies]
+reliakit-backoff = { path = "../reliakit-backoff", version = "0.1" }
+reliakit-ratelimit = { path = "../reliakit-ratelimit", version = "0.1" }
+
 [[example]]
 name = "basic"
 path = "examples/basic.rs"
+
+[[example]]
+name = "resilient_client"
+path = "examples/resilient_client.rs"
 
 [lints]
 workspace = true

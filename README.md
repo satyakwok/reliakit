@@ -4,7 +4,7 @@
 
 # Reliakit
 
-Small, composable reliability primitives for Rust libraries and applications.
+A toolkit of small, focused reliability building blocks for Rust — `no_std` and zero-dependency.
 
 [![CI](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml/badge.svg)](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/satyakwok/reliakit/branch/main/graph/badge.svg)](https://codecov.io/gh/satyakwok/reliakit)
@@ -13,13 +13,31 @@ Small, composable reliability primitives for Rust libraries and applications.
 [![GitHub issues](https://img.shields.io/github/issues/satyakwok/reliakit)](https://github.com/satyakwok/reliakit/issues)
 [![Last commit](https://img.shields.io/github/last-commit/satyakwok/reliakit)](https://github.com/satyakwok/reliakit/commits/main)
 
-Reliakit is a Rust workspace of focused crates that make common invariants
-explicit in the type system. Validate a value once, near the boundary, then
-carry the proof of that validation in its type — instead of passing unchecked
-`String`, `u16`, or `f64` values through your code.
+Reliakit is a Rust workspace of small, focused crates for building reliable
+software: validated types that make invalid states unrepresentable, secret
+redaction, bounded collections, canonical binary encoding, and runtime-agnostic
+resilience patterns — retry backoff, a circuit breaker, and a rate limiter.
 
-Each crate is small, dependency-free at runtime, `#![forbid(unsafe_code)]`, and
-usable independently.
+Each crate is small, dependency-free at runtime, `#![forbid(unsafe_code)]`,
+`no_std`-friendly, and usable independently — take only what you need.
+
+## Crates at a glance
+
+| Crate | What it does |
+|---|---|
+| [`reliakit-primitives`](https://crates.io/crates/reliakit-primitives) | Type-safe constrained values: `Port`, `Email`, `BoundedStr`, `SemVer`, `Uuid`, … |
+| [`reliakit-secret`](https://crates.io/crates/reliakit-secret) | Secret wrappers that redact in `Debug`/`Display` and logs |
+| [`reliakit-validate`](https://crates.io/crates/reliakit-validate) | A `Validate` trait and error type that collects all field violations |
+| [`reliakit-collections`](https://crates.io/crates/reliakit-collections) | Bounded collections (`BoundedVec`) whose size invariants can't be violated |
+| [`reliakit-codec`](https://crates.io/crates/reliakit-codec) | Deterministic canonical binary encoding and strict decoding |
+| [`reliakit-backoff`](https://crates.io/crates/reliakit-backoff) | Retry backoff policies (constant/linear/exponential) with jitter |
+| [`reliakit-circuit`](https://crates.io/crates/reliakit-circuit) | Circuit breaker that fails fast while a dependency is down |
+| [`reliakit-ratelimit`](https://crates.io/crates/reliakit-ratelimit) | Token-bucket rate limiter with `retry_after` |
+
+The last three are **clock-agnostic resilience patterns** — you pass the time
+in, so they work in sync, async, and embedded code, and compose: a rate limiter
+decides whether to call, a circuit breaker stops calling a failing dependency,
+and backoff spaces out retries.
 
 ## Why Reliakit?
 
