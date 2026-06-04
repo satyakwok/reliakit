@@ -221,8 +221,11 @@ impl fmt::Display for JsonError {
                 }
                 return Ok(());
             }
-            JsonErrorKind::WriteFailure => "failed to write output",
-            JsonErrorKind::NonFiniteNumber => "number is not representable as a finite f64",
+            // Serialization-side errors have no source position to report.
+            JsonErrorKind::WriteFailure => return f.write_str("failed to write output"),
+            JsonErrorKind::NonFiniteNumber => {
+                return f.write_str("number is not representable as a finite f64");
+            }
         };
         write!(
             f,
