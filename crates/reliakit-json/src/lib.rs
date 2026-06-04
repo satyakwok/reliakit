@@ -432,4 +432,215 @@ mod tests {
             let _ = parse(input);
         }
     }
+
+    #[test]
+    fn value_accessors_return_inner_or_none() {
+        let v = parse_ok(r#"{"b":true,"n":7,"s":"x","a":[1],"nil":null}"#);
+        let o = v.as_object().expect("object");
+        assert!(o.get("nil").unwrap().is_null());
+        assert_eq!(o.get("b").unwrap().as_bool(), Some(true));
+        assert_eq!(o.get("s").unwrap().as_str(), Some("x"));
+        assert_eq!(o.get("n").unwrap().as_number().unwrap().as_str(), "7");
+        assert_eq!(o.get("a").unwrap().as_array().unwrap().len(), 1);
+
+        // Wrong-variant accessors return None.
+        let b = JsonValue::Bool(true);
+        assert!(!b.is_null());
+        assert_eq!(b.as_str(), None);
+        assert_eq!(b.as_number(), None);
+        assert_eq!(b.as_array(), None);
+        assert!(b.as_object().is_none());
+        assert_eq!(JsonValue::Null.as_bool(), None);
+    }
+
+    #[test]
+    fn object_insert_get_iter_and_len() {
+        let mut obj = JsonObject::new();
+        assert!(obj.is_empty());
+        assert_eq!(obj.len(), 0);
+        assert!(!obj.contains_key("k"));
+
+        assert_eq!(obj.insert("k".to_string(), JsonValue::Bool(false)), None);
+        assert!(obj.contains_key("k"));
+        assert_eq!(obj.len(), 1);
+
+        // Insert with an existing key replaces in place and returns the old value.
+        let old = obj.insert("k".to_string(), JsonValue::Bool(true));
+        assert_eq!(old, Some(JsonValue::Bool(false)));
+        assert_eq!(obj.len(), 1);
+        assert_eq!(obj.get("k"), Some(&JsonValue::Bool(true)));
+        assert_eq!(obj.get("missing"), None);
+
+        obj.insert("k2".to_string(), JsonValue::Null);
+        let members: Vec<&str> = obj.iter().map(|m| m.key()).collect();
+        assert_eq!(members, ["k", "k2"]);
+        assert_eq!(obj.iter().next().unwrap().value(), &JsonValue::Bool(true));
+
+        assert_eq!(JsonObject::default().len(), 0);
+    }
+
+    #[test]
+    fn number_conversions_cover_each_error() {
+        let int = JsonNumber::new("42").unwrap();
+        assert!(int.is_integer());
+        assert_eq!(int.to_i64(), Ok(42));
+        assert_eq!(int.to_u64(), Ok(42));
+        assert_eq!(int.to_f64(), Ok(42.0));
+
+        let neg = JsonNumber::new("-1").unwrap();
+        assert_eq!(neg.to_u64(), Err(JsonNumberError::OutOfRange));
+
+        let frac = JsonNumber::new("1.5").unwrap();
+        assert!(!frac.is_integer());
+        assert_eq!(frac.to_i64(), Err(JsonNumberError::NotAnInteger));
+        assert_eq!(frac.to_u64(), Err(JsonNumberError::NotAnInteger));
+        assert_eq!(frac.to_f64(), Ok(1.5));
+
+        let huge = JsonNumber::new("99999999999999999999").unwrap();
+        assert_eq!(huge.to_i64(), Err(JsonNumberError::OutOfRange));
+
+        let overflow = JsonNumber::new("1e400").unwrap();
+        assert_eq!(overflow.to_f64(), Err(JsonNumberError::NotFinite));
+
+        assert_eq!(JsonNumber::new("+1"), Err(JsonNumberError::InvalidNumber));
+        assert_eq!(JsonNumber::try_from_f64(2.5).unwrap().to_f64(), Ok(2.5));
+        assert_eq!(
+            JsonNumber::try_from_f64(f64::NAN),
+            Err(JsonNumberError::NotFinite)
+        );
+        assert_eq!(
+            JsonNumber::try_from_f64(f64::INFINITY),
+            Err(JsonNumberError::NotFinite)
+        );
+    }
+
+    #[test]
+    fn limits_profiles_and_builders() {
+        assert_eq!(JsonLimits::default(), JsonLimits::new());
+        assert!(JsonLimits::conservative().max_input_bytes < JsonLimits::new().max_input_bytes);
+        assert!(JsonLimits::permissive().max_input_bytes > JsonLimits::new().max_input_bytes);
+
+        let tuned = JsonLimits::new()
+            .with_max_depth(8)
+            .with_max_input_bytes(1024)
+            .with_max_string_bytes(16)
+            .with_max_total_nodes(32);
+        assert_eq!(tuned.max_depth, 8);
+        assert_eq!(tuned.max_input_bytes, 1024);
+        assert_eq!(tuned.max_string_bytes, 16);
+        assert_eq!(tuned.max_total_nodes, 32);
+    }
+
+    #[test]
+    fn error_display_covers_each_kind() {
+        // One representative input per simple kind, then check Display text.
+        let cases: &[(&str, &str)] = &[
+            ("", "unexpected end of input"),
+            ("@", "unexpected byte"),
+            ("\"a\\xb\"", "invalid escape sequence"),
+            ("\"\\uZZZZ\"", "invalid unicode escape"),
+            ("\"\\uD800\"", "unpaired UTF-16 surrogate"),
+            ("01", "invalid number"),
+            ("{\"a\":1,\"a\":2}", "duplicate object key"),
+            ("true false", "trailing data after JSON value"),
+        ];
+        for (input, expected) in cases {
+            let err = parse_str(input).unwrap_err();
+            assert!(
+                err.to_string().contains(expected),
+                "input {input:?} -> {err} (expected to contain {expected:?})"
+            );
+        }
+
+        // A control character inside a string.
+        let ctrl = parse(b"\"\x01\"").unwrap_err();
+        assert!(ctrl.to_string().contains("unescaped control character"));
+
+        // Invalid UTF-8 input.
+        let utf8 = parse(b"\xff").unwrap_err();
+        assert!(utf8.to_string().contains("invalid UTF-8"));
+    }
+
+    #[test]
+    fn error_accessors_and_limit_display_with_path() {
+        let limits = JsonLimits::new().with_max_depth(1);
+        let err = parse_with_limits(b"[[1]]", limits).unwrap_err();
+        assert_eq!(
+            err.kind(),
+            &JsonErrorKind::LimitExceeded(JsonLimitKind::Depth)
+        );
+        assert!(err.offset() >= 1);
+        assert_eq!(err.line(), 1);
+        assert!(err.column() >= 1);
+        let shown = err.to_string();
+        assert!(shown.contains("limit exceeded: nesting depth"));
+        assert!(shown.contains("path: $"));
+        assert_eq!(JsonLimitKind::Depth.as_str(), "nesting depth");
+    }
+
+    #[test]
+    fn path_display_formats_keys_and_indices() {
+        let path = JsonPath::from_segments(vec![
+            JsonPathSegment::Key("users".to_string()),
+            JsonPathSegment::Index(3),
+            JsonPathSegment::Key("email".to_string()),
+        ]);
+        assert_eq!(path.to_string(), "$.users[3].email");
+        assert_eq!(path.segments().len(), 3);
+        assert_eq!(JsonPath::default().to_string(), "$");
+    }
+
+    #[test]
+    fn number_error_display_is_distinct() {
+        assert_eq!(
+            JsonNumberError::OutOfRange.to_string(),
+            "number out of range for target type"
+        );
+        assert_eq!(
+            JsonNumberError::NotAnInteger.to_string(),
+            "number is not an integer"
+        );
+        assert_eq!(
+            JsonNumberError::NotFinite.to_string(),
+            "number is not finite"
+        );
+        assert_eq!(
+            JsonNumberError::InvalidNumber.to_string(),
+            "not a valid JSON number"
+        );
+    }
+
+    #[test]
+    fn writer_serializes_all_branches() {
+        let mut obj = JsonObject::new();
+        obj.insert("off".to_string(), JsonValue::Bool(false));
+        obj.insert(
+            "esc".to_string(),
+            // Named escapes plus a control char that needs a hex nibble a-f.
+            JsonValue::String("\u{08}\u{0C}\n\r\t\u{1F}".to_string()),
+        );
+        obj.insert(
+            "arr".to_string(),
+            JsonValue::Array(vec![JsonValue::Null, JsonValue::Bool(true)]),
+        );
+        let value = JsonValue::Object(obj);
+
+        let s = to_compact_string(&value);
+        // Round-trips back to the same value (exercises every escape branch,
+        // including a control char whose hex escape uses an a-f nibble).
+        assert_eq!(parse_str(&s).unwrap(), value);
+        assert_eq!(to_compact_vec(&value), s.clone().into_bytes());
+        assert!(s.starts_with("{\"off\":false,"));
+        assert!(s.ends_with(",\"arr\":[null,true]}"));
+    }
+
+    #[cfg(feature = "std")]
+    #[test]
+    fn errors_implement_std_error() {
+        fn assert_error<E: std::error::Error>(_: &E) {}
+        let parse_err = parse_str("").unwrap_err();
+        assert_error(&parse_err);
+        let num_err = JsonNumber::new("1.5").unwrap().to_i64().unwrap_err();
+        assert_error(&num_err);
+    }
 }
