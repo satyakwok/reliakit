@@ -189,14 +189,14 @@ impl<const WINDOW: usize> RollingBreaker<WINDOW> {
         if self.filled == WINDOW {
             // Overwriting the oldest slot: drop its contribution first.
             if self.outcomes[self.head] {
-                self.failures_in_window -= 1;
+                self.failures_in_window = self.failures_in_window.saturating_sub(1);
             }
         } else {
             self.filled += 1;
         }
         self.outcomes[self.head] = failure;
         if failure {
-            self.failures_in_window += 1;
+            self.failures_in_window = self.failures_in_window.saturating_add(1);
         }
         self.head = (self.head + 1) % WINDOW;
     }
