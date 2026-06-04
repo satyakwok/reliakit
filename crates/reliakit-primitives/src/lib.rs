@@ -60,14 +60,16 @@
 //!
 //! - numeric: [`Percent`], [`PercentageF64`], [`Port`], [`PositiveInt`],
 //!   [`PositiveFloat`], [`ByteSize`],
-//! - [`Uuid`] and [`HumanDuration`] (parsing and `Display` do not allocate),
+//! - [`Uuid`], [`MacAddress`], and [`HumanDuration`] (parsing and `Display` do
+//!   not allocate),
 //! - the error types ([`PrimitiveError`], [`PrimitiveErrorKind`],
 //!   [`PrimitiveResult`]).
 //!
 //! Enabling the `alloc` feature additionally provides the owned, allocation-backed
-//! types: [`Slug`], [`Email`], [`HttpUrl`], [`HexString`], [`NonEmptyStr`],
-//! [`BoundedStr`], [`NonEmptyVec`], and [`SemVer`]. The default `std` build
-//! enables `alloc` for normal application use.
+//! types: [`Slug`], [`Email`], [`HttpUrl`], [`HexString`], [`Base64`],
+//! [`Identifier`], [`Hostname`], [`NonEmptyStr`], [`BoundedStr`], [`NonEmptyVec`],
+//! and [`SemVer`]. The default `std` build enables `alloc` for normal application
+//! use.
 
 #![cfg_attr(not(feature = "std"), no_std)]
 #![forbid(unsafe_code)]
@@ -86,6 +88,8 @@ pub mod collections;
 pub mod duration;
 /// Shared primitive error type.
 pub mod error;
+/// MAC address primitive.
+pub mod mac;
 /// Non-empty string primitive.
 #[cfg(feature = "alloc")]
 pub mod non_empty;
@@ -106,11 +110,12 @@ pub use bounded::BoundedStr;
 pub use collections::NonEmptyVec;
 pub use duration::HumanDuration;
 pub use error::{PrimitiveError, PrimitiveErrorKind, PrimitiveResult};
+pub use mac::MacAddress;
 #[cfg(feature = "alloc")]
 pub use non_empty::NonEmptyStr;
 pub use numeric::{ByteSize, Percent, PercentageF64, Port, PositiveFloat, PositiveInt};
 #[cfg(feature = "alloc")]
 pub use semver::SemVer;
 #[cfg(feature = "alloc")]
-pub use text::{Email, HexString, HttpUrl, Slug};
+pub use text::{Base64, Email, HexString, Hostname, HttpUrl, Identifier, Slug};
 pub use uuid::Uuid;

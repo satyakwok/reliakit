@@ -101,6 +101,53 @@ impl ValidationError {
         self
     }
 
+    /// Records `violation` only when `condition` is `false`, and returns `self`
+    /// for chaining. A `true` condition means the rule held, so nothing is added.
+    ///
+    /// Pair this with [`finish`](Self::finish) to express multi-field validation
+    /// without the easy-to-forget final emptiness check:
+    ///
+    /// ```
+    /// use reliakit_validate::{ValidationError, Violation};
+    ///
+    /// let result = ValidationError::empty()
+    ///     .require(!"".is_empty(), Violation::with_field("name", "must not be empty"))
+    ///     .require(15 >= 18, Violation::with_field("age", "must be at least 18"))
+    ///     .finish();
+    ///
+    /// assert_eq!(result.unwrap_err().len(), 2);
+    /// ```
+    pub fn require(mut self, condition: bool, violation: Violation) -> Self {
+        if !condition {
+            self.violations.push(violation);
+        }
+        self
+    }
+
+    /// Like [`require`](Self::require), building the [`Violation`] from a field
+    /// name and message.
+    pub fn require_field(
+        self,
+        condition: bool,
+        field: &'static str,
+        message: &'static str,
+    ) -> Self {
+        self.require(condition, Violation::with_field(field, message))
+    }
+
+    /// Converts the accumulated violations into a result: `Ok(())` when there
+    /// are none, otherwise `Err(self)`.
+    ///
+    /// This removes the footgun of returning an empty `ValidationError` as an
+    /// error (see [`empty`](Self::empty)).
+    pub fn finish(self) -> ValidateResult {
+        if self.is_empty() {
+            Ok(())
+        } else {
+            Err(self)
+        }
+    }
+
     /// Returns all violations.
     pub fn violations(&self) -> &[Violation] {
         &self.violations
@@ -130,6 +177,22 @@ impl From<Violation> for ValidationError {
 impl From<&'static str> for ValidationError {
     fn from(message: &'static str) -> Self {
         Self::new(message)
+    }
+}
+
+#[cfg(feature = "alloc")]
+impl FromIterator<Violation> for ValidationError {
+    fn from_iter<I: IntoIterator<Item = Violation>>(iter: I) -> Self {
+        Self {
+            violations: iter.into_iter().collect(),
+        }
+    }
+}
+
+#[cfg(feature = "alloc")]
+impl Extend<Violation> for ValidationError {
+    fn extend<I: IntoIterator<Item = Violation>>(&mut self, iter: I) {
+        self.violations.extend(iter);
     }
 }
 
@@ -260,5 +323,46 @@ mod tests {
         let err: ValidateResult = Err(ValidationError::new("fail"));
         assert!(ok.is_ok());
         assert!(err.is_err());
+    }
+
+    #[test]
+    fn require_adds_only_on_false_condition() {
+        let e = ValidationError::empty()
+            .require(true, Violation::new("kept ok"))
+            .require(false, Violation::with_field("name", "must not be empty"))
+            .require_field(false, "age", "must be at least 18");
+        assert_eq!(e.len(), 2);
+        assert_eq!(e.violations()[0].field, Some("name"));
+        assert_eq!(e.violations()[1].field, Some("age"));
+    }
+
+    #[test]
+    fn finish_maps_empty_to_ok_and_nonempty_to_err() {
+        assert!(ValidationError::empty().finish().is_ok());
+        let all_passing = ValidationError::empty()
+            .require(true, Violation::new("a"))
+            .require(true, Violation::new("b"))
+            .finish();
+        assert!(all_passing.is_ok());
+
+        let failing = ValidationError::empty()
+            .require_field(false, "x", "bad")
+            .finish();
+        assert_eq!(failing.unwrap_err().len(), 1);
+    }
+
+    #[test]
+    fn from_iter_and_extend_collect_violations() {
+        let e: ValidationError = [
+            Violation::new("first"),
+            Violation::with_field("name", "second"),
+        ]
+        .into_iter()
+        .collect();
+        assert_eq!(e.len(), 2);
+
+        let mut acc = ValidationError::empty();
+        acc.extend([Violation::new("a"), Violation::new("b")]);
+        assert_eq!(acc.len(), 2);
     }
 }

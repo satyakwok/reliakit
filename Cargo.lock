@@ -36,7 +36,7 @@ version = "0.2.0"
 
 [[package]]
 name = "reliakit-primitives"
-version = "0.4.0"
+version = "0.4.1"
 dependencies = [
  "reliakit-secret",
  "reliakit-validate",
@@ -62,4 +62,4 @@ dependencies = [
 
 [[package]]
 name = "reliakit-validate"
-version = "0.3.0"
+version = "0.3.1"
