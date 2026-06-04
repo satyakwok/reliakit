@@ -26,6 +26,10 @@ name = "reliakit-collections"
 version = "0.2.0"
 
 [[package]]
+name = "reliakit-core"
+version = "0.1.0"
+
+[[package]]
 name = "reliakit-json"
 version = "0.2.0"
 

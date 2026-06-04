@@ -1,0 +1,28 @@
+[package]
+name = "reliakit-core"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme = "README.md"
+description = "Shared building blocks for Reliakit: a clock-agnostic Clock trait with manual and monotonic clocks. no_std and zero-dependency."
+keywords = ["clock", "time", "reliability", "no-std", "monotonic"]
+categories = ["no-std", "rust-patterns", "date-and-time"]
+
+[package.metadata.docs.rs]
+all-features = true
+
+[features]
+default = ["std"]
+std = []
+
+[dependencies]
+
+[[example]]
+name = "clock_basic"
+path = "examples/basic.rs"
+
+[lints]
+workspace = true

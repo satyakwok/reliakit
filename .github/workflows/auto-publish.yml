@@ -23,6 +23,7 @@ on:
           - reliakit-ratelimit
           - reliakit-json
           - reliakit-timeout
+          - reliakit-core
 
 permissions:
   contents: read
