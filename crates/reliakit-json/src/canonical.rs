@@ -38,7 +38,9 @@ use crate::write::write_escaped;
 /// Returns [`JsonErrorKind::NonFiniteNumber`](crate::JsonErrorKind::NonFiniteNumber)
 /// if a number cannot be represented as a finite IEEE-754 `f64`.
 ///
-/// **Experimental** (`canonical` feature); see the [module docs](self).
+/// **Experimental**, enabled by the `canonical` feature; the output is not yet
+/// validated against the full RFC 8785 conformance vectors and the API may
+/// change.
 pub fn to_canonical_string(value: &JsonValue) -> Result<String, JsonError> {
     let mut out = String::new();
     write_canonical(&mut out, value)?;
