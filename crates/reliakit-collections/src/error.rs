@@ -10,6 +10,8 @@ pub enum CollectionError {
     TooMany { max: usize, actual: usize },
     /// The const generic bounds are invalid (`MIN > MAX`).
     InvalidBounds { min: usize, max: usize },
+    /// A capacity of zero was requested where a positive capacity is required.
+    ZeroCapacity,
 }
 
 /// Result alias for bounded collection operations.
@@ -33,6 +35,7 @@ impl fmt::Display for CollectionError {
             Self::InvalidBounds { min, max } => {
                 write!(f, "invalid bounds: MIN ({min}) must not exceed MAX ({max})")
             }
+            Self::ZeroCapacity => write!(f, "capacity must be greater than zero"),
         }
     }
 }
@@ -66,6 +69,14 @@ mod tests {
         assert_eq!(
             CollectionError::InvalidBounds { min: 5, max: 3 }.to_string(),
             "invalid bounds: MIN (5) must not exceed MAX (3)"
+        );
+    }
+
+    #[test]
+    fn display_zero_capacity() {
+        assert_eq!(
+            CollectionError::ZeroCapacity.to_string(),
+            "capacity must be greater than zero"
         );
     }
 }

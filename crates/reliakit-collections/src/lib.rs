@@ -9,6 +9,8 @@
 //!
 //! - [`BoundedVec<T, MIN, MAX>`] — an owned `Vec<T>` constrained to hold
 //!   between `MIN` and `MAX` elements inclusive.
+//! - [`RingBuffer<T>`] — a fixed-capacity circular buffer that overwrites the
+//!   oldest element when full (a rolling window that never fails to push).
 //!
 //! # Examples
 //!
@@ -55,7 +57,11 @@ extern crate alloc;
 #[cfg(feature = "alloc")]
 mod bounded_vec;
 mod error;
+#[cfg(feature = "alloc")]
+mod ring_buffer;
 
 #[cfg(feature = "alloc")]
 pub use bounded_vec::BoundedVec;
 pub use error::{CollectionError, CollectionResult};
+#[cfg(feature = "alloc")]
+pub use ring_buffer::RingBuffer;
