@@ -20,10 +20,6 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
   `push` never fails, evicting and returning the oldest element instead). Behind
   the `alloc` feature. Added `CollectionError::ZeroCapacity` for a zero-capacity
   request.
-- Added the `reliakit-core` crate (not yet published): shared building blocks
-  for the workspace. A `Clock` trait (`now(&self) -> u64`) with `ManualClock`
-  (settable, `no_std`) and `MonotonicClock` (milliseconds since creation, `std`).
-  Zero dependencies, `#![forbid(unsafe_code)]`.
 - Hardened the JSON parser with JSONTestSuite-style accept/reject conformance
   tests and a dependency-free, deterministic in-test fuzzer (hand-written PRNG)
   that asserts parsing arbitrary bytes never panics and that every parsed value
@@ -48,6 +44,16 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 - Each crate now ships its own `LICENSE` file in the published package, so the
   MIT license text travels with the crate on crates.io rather than only the SPDX
   identifier in the manifest.
+
+## reliakit-core 0.1.0 - 2026-06-04
+
+### Added
+
+- Initial release. Shared building blocks for the workspace: a `Clock` trait
+  (`now(&self) -> u64`) with `ManualClock` (settable, `no_std`, for deterministic
+  tests) and `MonotonicClock` (milliseconds since creation, backed by
+  `std::time::Instant`). Zero dependencies, `#![forbid(unsafe_code)]`, `no_std`
+  for the trait and `ManualClock`.
 
 ## reliakit-json 0.2.0 - 2026-06-04
 

@@ -4,6 +4,9 @@
 
 # reliakit-core
 
+[![Crates.io](https://img.shields.io/crates/v/reliakit-core.svg)](https://crates.io/crates/reliakit-core)
+[![Crates.io Downloads](https://img.shields.io/crates/d/reliakit-core.svg)](https://crates.io/crates/reliakit-core)
+[![Docs.rs](https://docs.rs/reliakit-core/badge.svg)](https://docs.rs/reliakit-core)
 [![CI](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml/badge.svg)](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/satyakwok/reliakit/branch/main/graph/badge.svg?flag=reliakit-core)](https://codecov.io/gh/satyakwok/reliakit/tree/main/crates/reliakit-core)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/satyakwok/reliakit/blob/main/LICENSE)
