@@ -12,6 +12,7 @@ A toolkit of small, focused reliability building blocks for Rust — `no_std` an
 [![GitHub stars](https://img.shields.io/github/stars/satyakwok/reliakit?style=flat)](https://github.com/satyakwok/reliakit/stargazers)
 [![GitHub issues](https://img.shields.io/github/issues/satyakwok/reliakit)](https://github.com/satyakwok/reliakit/issues)
 [![Last commit](https://img.shields.io/github/last-commit/satyakwok/reliakit)](https://github.com/satyakwok/reliakit/commits/main)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/satyakwok/reliakit)
 
 Reliakit is a Rust workspace of small, focused crates for building reliable
 software: validated types that make invalid states unrepresentable, secret
