@@ -29,6 +29,11 @@ coverage:
         threshold: 1%
         flags:
           - reliakit-codec
+      reliakit-backoff:
+        target: 90%
+        threshold: 1%
+        flags:
+          - reliakit-backoff
     patch:
       default:
         target: 90%
