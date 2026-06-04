@@ -1322,4 +1322,61 @@ mod tests {
         let too_long = alloc::format!("{}.com", String::from("a").repeat(252));
         assert!(Hostname::new(too_long).is_err());
     }
+
+    #[test]
+    fn base64_conversions_and_traits() {
+        let from_str: Base64 = "YWJj".parse().unwrap();
+        let try_ref = Base64::try_from("YWJj").unwrap();
+        let try_owned = Base64::try_from(String::from("YWJj")).unwrap();
+        assert_eq!(from_str, try_ref);
+        assert_eq!(try_ref, try_owned);
+
+        assert_eq!(try_ref.to_string(), "YWJj"); // Display
+        let as_ref: &str = try_ref.as_ref(); // AsRef
+        assert_eq!(as_ref, "YWJj");
+        assert_eq!(&*try_ref, "YWJj"); // Deref
+        assert!(try_ref == "YWJj"); // PartialEq<&str>
+        assert!(try_ref == *"YWJj"); // PartialEq<str>
+        assert!(try_ref == String::from("YWJj")); // PartialEq<String>
+        assert!(try_ref == &String::from("YWJj")); // PartialEq<&String>
+        assert_eq!(String::from(try_owned), "YWJj"); // From<Base64> for String
+    }
+
+    #[test]
+    fn identifier_conversions_and_traits() {
+        let from_str: Identifier = "user_id".parse().unwrap();
+        let try_ref = Identifier::try_from("user_id").unwrap();
+        let try_owned = Identifier::try_from(String::from("user_id")).unwrap();
+        assert_eq!(from_str, try_ref);
+        assert_eq!(try_ref, try_owned);
+
+        assert_eq!(try_ref.to_string(), "user_id");
+        let as_ref: &str = try_ref.as_ref();
+        assert_eq!(as_ref, "user_id");
+        assert_eq!(&*try_ref, "user_id");
+        assert!(try_ref == "user_id");
+        assert!(try_ref == *"user_id");
+        assert!(try_ref == String::from("user_id"));
+        assert!(try_ref == &String::from("user_id"));
+        assert_eq!(String::from(try_owned), "user_id");
+    }
+
+    #[test]
+    fn hostname_conversions_and_traits() {
+        let from_str: Hostname = "example.com".parse().unwrap();
+        let try_ref = Hostname::try_from("example.com").unwrap();
+        let try_owned = Hostname::try_from(String::from("example.com")).unwrap();
+        assert_eq!(from_str, try_ref);
+        assert_eq!(try_ref, try_owned);
+
+        assert_eq!(try_ref.to_string(), "example.com");
+        let as_ref: &str = try_ref.as_ref();
+        assert_eq!(as_ref, "example.com");
+        assert_eq!(&*try_ref, "example.com");
+        assert!(try_ref == "example.com");
+        assert!(try_ref == *"example.com");
+        assert!(try_ref == String::from("example.com"));
+        assert!(try_ref == &String::from("example.com"));
+        assert_eq!(String::from(try_owned), "example.com");
+    }
 }

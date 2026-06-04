@@ -172,6 +172,18 @@ mod tests {
     }
 
     #[test]
+    fn conversions_round_trip() {
+        let parsed = MacAddress::try_from("aa:bb:cc:dd:ee:ff").unwrap(); // TryFrom<&str>
+        let from_str: MacAddress = "aa:bb:cc:dd:ee:ff".parse().unwrap(); // FromStr
+        assert_eq!(parsed, from_str);
+
+        let octets: [u8; 6] = parsed.into(); // From<MacAddress> for [u8; 6]
+        assert_eq!(octets, [0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff]);
+        let rebuilt = MacAddress::from(octets); // From<[u8; 6]>
+        assert_eq!(rebuilt, parsed);
+    }
+
+    #[test]
     fn classification_bits() {
         // Multicast: low bit of first octet set.
         assert!(MacAddress::from_octets([0x01, 0, 0, 0, 0, 0]).is_multicast());
