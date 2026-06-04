@@ -438,6 +438,120 @@ mod tests {
     }
 
     #[test]
+    fn json_test_suite_conformance() {
+        // Curated accept/reject cases in the spirit of nst/JSONTestSuite. The
+        // parser must accept every `y_` case and reject every `n_` case.
+        let must_accept: &[&[u8]] = &[
+            b"[]",
+            b"{}",
+            b"[1]",
+            b"[1,2,3]",
+            b"{\"a\":1}",
+            b"{\"a\":1,\"b\":2}",
+            b"[null,true,false]",
+            b"\"\\u0061\"",
+            b"\"\\uD834\\uDD1E\"", // valid surrogate pair (U+1D11E)
+            b"0",
+            b"-0",
+            b"123",
+            b"-123",
+            b"1.5",
+            b"1E10",
+            b"1e-10",
+            b"-1.2e+3",
+            b"  7  ",
+            b"\"abc\"",
+            b"true",
+            b"[[[[1]]]]",
+            b"{\"a\":{\"b\":[1,{\"c\":null}]}}",
+        ];
+        let must_reject: &[&[u8]] = &[
+            b"",
+            b"[1,]",
+            b"{\"a\":1,}",
+            b"[1 2]",
+            b"{\"a\" 1}",
+            b"{\"a\":1 \"b\":2}",
+            b"[1,,2]",
+            b"01",
+            b"1.",
+            b".1",
+            b"+1",
+            b"1e",
+            b"1e+",
+            b"0x1",
+            b"--1",
+            b"NaN",
+            b"Infinity",
+            b"[",
+            b"]",
+            b"{",
+            b"}",
+            b"\"",
+            b"\"\\x\"",
+            b"\"\\uZZZZ\"",
+            b"\"\x01\"", // raw control char in string
+            b"'single'",
+            b"1 1", // trailing data
+            b"tru",
+            b"nul",
+            b"\xEF\xBB\xBF1", // leading byte-order mark
+            b"\xff\xfe",      // invalid UTF-8
+            b"\"\\uD800\"",   // lone surrogate
+            b"/* comment */ 1",
+            b"{1:2}", // non-string key
+        ];
+        for input in must_accept {
+            assert!(parse(input).is_ok(), "should accept {input:?}");
+        }
+        for input in must_reject {
+            assert!(parse(input).is_err(), "should reject {input:?}");
+        }
+    }
+
+    #[test]
+    fn fuzz_parse_is_panic_free_and_roundtrips() {
+        // Deterministic in-test fuzzing: parsing arbitrary bytes never panics,
+        // and any value that parses survives a compact round-trip unchanged.
+        let mut state: u64 = 0xD1B5_4A32_D192_ED03;
+        let mut next = || {
+            state ^= state << 13;
+            state ^= state >> 7;
+            state ^= state << 17;
+            state
+        };
+        // Alphabet biased toward JSON tokens so successful parses are exercised.
+        let alphabet = b"{}[]\":,0123456789-+.eEtruefalsn \t\n\\/u";
+        let mut buf: Vec<u8> = Vec::new();
+        for _ in 0..40_000 {
+            buf.clear();
+            let len = (next() % 40) as usize;
+            for _ in 0..len {
+                let r = next();
+                let byte = if r & 7 == 0 {
+                    (r >> 8) as u8 // occasionally a fully arbitrary byte
+                } else {
+                    alphabet[((r >> 8) as usize) % alphabet.len()]
+                };
+                buf.push(byte);
+            }
+            if let Ok(value) = parse(&buf) {
+                let compact = to_compact_string(&value);
+                let reparsed = parse_str(&compact).expect("compact output must reparse");
+                assert_eq!(reparsed, value);
+                assert_eq!(to_compact_string(&reparsed), compact);
+
+                // Canonical (JCS) output must be idempotent when available.
+                #[cfg(feature = "canonical")]
+                if let Ok(canonical) = to_canonical_string(&value) {
+                    let again = parse_str(&canonical).expect("canonical output must reparse");
+                    assert_eq!(to_canonical_string(&again).unwrap(), canonical);
+                }
+            }
+        }
+    }
+
+    #[test]
     fn value_accessors_return_inner_or_none() {
         let v = parse_ok(r#"{"b":true,"n":7,"s":"x","a":[1],"nil":null}"#);
         let o = v.as_object().expect("object");

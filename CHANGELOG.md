@@ -10,6 +10,10 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 
 ### Added
 
+- Hardened the JSON parser with JSONTestSuite-style accept/reject conformance
+  tests and a dependency-free, deterministic in-test fuzzer (hand-written PRNG)
+  that asserts parsing arbitrary bytes never panics and that every parsed value
+  survives a compact round-trip and canonical re-serialization unchanged.
 - Added a manual publish workflow for publishing one selected crate to
   crates.io after tests, version checks, and `cargo publish --dry-run`.
 
