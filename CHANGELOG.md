@@ -10,12 +10,22 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 
 ### Added
 
-- Added the `reliakit-circuit` crate (not yet published): a clock-agnostic
-  circuit breaker (`CircuitBreaker` state machine over `Closed`/`Open`/`HalfOpen`
-  with configurable failure/success thresholds and cooldown). `#![no_std]`, zero
-  dependencies, saturating arithmetic, no panics.
 - Added a manual publish workflow for publishing one selected crate to
   crates.io after tests, version checks, and `cargo publish --dry-run`.
+
+## reliakit-circuit 0.1.0 - 2026-06-04
+
+Initial release.
+
+### Added
+
+- Added the `reliakit-circuit` crate: a clock-agnostic circuit breaker.
+  - `CircuitBreaker`, a `Copy` state machine over `Closed`/`Open`/`HalfOpen`
+    with `failure_threshold`, `cooldown`, and `success_threshold`.
+  - `allow(now)`, `on_success()`, `on_failure(now)`, `state()`, and explicit
+    `trip(now)` / `reset()`. The caller supplies the clock.
+  - `#![no_std]`, zero dependencies, `#![forbid(unsafe_code)]`. All arithmetic
+    saturates; no method panics, including on a non-monotonic clock.
 
 ### Changed
 

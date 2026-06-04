@@ -4,6 +4,9 @@
 
 # reliakit-circuit
 
+[![Crates.io](https://img.shields.io/crates/v/reliakit-circuit.svg)](https://crates.io/crates/reliakit-circuit)
+[![Crates.io Downloads](https://img.shields.io/crates/d/reliakit-circuit.svg)](https://crates.io/crates/reliakit-circuit)
+[![Docs.rs](https://docs.rs/reliakit-circuit/badge.svg)](https://docs.rs/reliakit-circuit)
 [![CI](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml/badge.svg)](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/satyakwok/reliakit/branch/main/graph/badge.svg?flag=reliakit-circuit)](https://codecov.io/gh/satyakwok/reliakit/tree/main/crates/reliakit-circuit)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/satyakwok/reliakit/blob/main/LICENSE)
