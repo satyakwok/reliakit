@@ -171,6 +171,22 @@ Implemented types:
 - `Delays`
 - `full_jitter` / `equal_jitter`
 
+### `reliakit-circuit`
+
+Clock-agnostic circuit breaker. A small `Copy` state machine
+(`Closed`/`Open`/`HalfOpen`) that fails fast while a dependency is down and lets
+trial calls through to test recovery. It does not read the clock, sleep, or
+allocate — you pass the time in. Depends only on `core`. Pairs with
+`reliakit-backoff`.
+
+Implemented types:
+
+- `CircuitBreaker`
+- `State`
+
+Present in the workspace and pending its initial `0.1` release; not yet
+published to crates.io.
+
 ### `reliakit-core`
 
 Planned. Shared core types, traits, and errors used across Reliakit crates.
@@ -274,7 +290,9 @@ reliakit/
 │   ├── reliakit-collections/
 │   ├── reliakit-codec/
 │   │   └── examples/
-│   └── reliakit-backoff/
+│   ├── reliakit-backoff/
+│   │   └── examples/
+│   └── reliakit-circuit/
 │       └── examples/
 ├── Cargo.toml
 ├── README.md
@@ -302,6 +320,10 @@ Published:
 - `reliakit-collections`
 - `reliakit-codec`
 - `reliakit-backoff`
+
+Pending initial release:
+
+- `reliakit-circuit`
 
 Planned:
 

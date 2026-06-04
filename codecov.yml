@@ -34,6 +34,11 @@ coverage:
         threshold: 1%
         flags:
           - reliakit-backoff
+      reliakit-circuit:
+        target: 90%
+        threshold: 1%
+        flags:
+          - reliakit-circuit
     patch:
       default:
         target: 90%

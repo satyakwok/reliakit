@@ -10,6 +10,10 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 
 ### Added
 
+- Added the `reliakit-circuit` crate (not yet published): a clock-agnostic
+  circuit breaker (`CircuitBreaker` state machine over `Closed`/`Open`/`HalfOpen`
+  with configurable failure/success thresholds and cooldown). `#![no_std]`, zero
+  dependencies, saturating arithmetic, no panics.
 - Added a manual publish workflow for publishing one selected crate to
   crates.io after tests, version checks, and `cargo publish --dry-run`.
 

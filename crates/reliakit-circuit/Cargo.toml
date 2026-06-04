@@ -1,0 +1,21 @@
+[package]
+name = "reliakit-circuit"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme = "README.md"
+description = "Clock-agnostic circuit breaker for fault isolation and fast failure. no_std and zero-dependency."
+keywords = ["circuit-breaker", "reliability", "resilience", "no-std", "fault-tolerance"]
+categories = ["algorithms", "no-std", "rust-patterns"]
+
+[dependencies]
+
+[[example]]
+name = "basic"
+path = "examples/basic.rs"
+
+[lints]
+workspace = true
