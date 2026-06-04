@@ -57,6 +57,8 @@ extern crate alloc;
 #[cfg(feature = "canonical")]
 mod canonical;
 mod error;
+#[cfg(feature = "validate")]
+mod form;
 mod limits;
 mod number;
 mod parse;
@@ -70,6 +72,8 @@ pub use canonical::{to_canonical_string, to_canonical_vec};
 pub use error::{
     JsonError, JsonErrorKind, JsonLimitKind, JsonNumberError, JsonPath, JsonPathSegment,
 };
+#[cfg(feature = "validate")]
+pub use form::JsonForm;
 pub use limits::JsonLimits;
 pub use number::JsonNumber;
 pub use parse::{parse, parse_str, parse_with_limits};

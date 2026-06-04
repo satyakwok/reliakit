@@ -164,6 +164,7 @@ ordering, escaping, and idempotence are covered by tests.
 | `std` | yes | Implements `std::error::Error` for the error types. |
 | `canonical` | no | Enables RFC 8785 canonical serialization. |
 | `primitives` | no | Typed extraction into `reliakit-primitives` constrained types. |
+| `validate` | no | Accumulating field validation into a `reliakit-validate` error (implies `primitives`). |
 
 Disable default features for `no_std`; the crate always requires `alloc`.
 
@@ -191,6 +192,31 @@ let host: Hostname = obj.get_str_as("host").unwrap();
 // A bad value points at the field: "$.email: ..."
 let bad = parse_str(r#"{ "email": "nope" }"#).unwrap();
 assert!(bad.as_object().unwrap().get_str_as::<Email>("email").is_err());
+```
+
+### Accumulating validation (`validate`)
+
+The `validate` feature adds `JsonForm`, which collects every field failure into
+one `reliakit-validate` error instead of stopping at the first:
+
+```toml
+reliakit-json = { version = "0.2", features = ["validate"] }
+reliakit-primitives = "0.4"
+```
+
+```rust
+use reliakit_json::{JsonForm, parse_str};
+use reliakit_primitives::{Email, Hostname};
+
+let doc = parse_str(r#"{ "email": "nope", "host": 42 }"#).unwrap();
+let mut form = JsonForm::new(doc.as_object().unwrap());
+
+let _email: Option<Email> = form.str_field("email");
+let _host: Option<Hostname> = form.str_field("host");
+
+// Both failures are reported together.
+let errors = form.finish().unwrap_err();
+assert_eq!(errors.violations().len(), 2);
 ```
 
 ## Safety

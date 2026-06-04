@@ -24,6 +24,18 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
   publish time instead of reading a stored API token, so no long-lived registry
   token is kept in repository secrets.
 
+## reliakit-json 0.2.3 - 2026-06-04
+
+### Added
+
+- Optional `validate` feature (implies `primitives`): `JsonForm` collects
+  field-extraction failures from a `JsonObject` into a single
+  `reliakit_validate::ValidationError` instead of stopping at the first one.
+  `str_field::<T>(name)` extracts a string primitive and, on failure, records a
+  named `Violation`; `finish()` returns `Ok(())` or every collected violation at
+  once. Pulls in `reliakit-validate` only (`no_std` + `alloc`, zero third-party
+  dependencies).
+
 ## reliakit-json 0.2.2 - 2026-06-04
 
 ### Added
