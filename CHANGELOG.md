@@ -15,6 +15,10 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 
 ### Changed
 
+- Switched crates.io publishing to Trusted Publishing over GitHub Actions OIDC.
+  The tag-triggered and manual publish workflows now mint a short-lived token at
+  publish time instead of reading a stored API token, so no long-lived registry
+  token is kept in repository secrets.
 - Renamed the `basic` example target in `reliakit-backoff`, `reliakit-circuit`,
   `reliakit-ratelimit`, and `reliakit-json` to `backoff_basic`,
   `circuit_basic`, `ratelimit_basic`, and `json_basic` so the workspace can
