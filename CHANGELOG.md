@@ -10,6 +10,11 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 
 ### Added
 
+- Added the `reliakit-timeout` crate (not yet published): clock-agnostic
+  deadlines and timeouts. `Timeout` is a reusable budget; `Deadline` pins it to
+  a `u64` timeline and answers `remaining` / `elapsed` / `is_expired` / `check`
+  / `allows` / `clamp` with saturating arithmetic. Pure `core`, zero
+  dependencies, `#![no_std]`, `#![forbid(unsafe_code)]`.
 - Added a manual publish workflow for publishing one selected crate to
   crates.io after tests, version checks, and `cargo publish --dry-run`.
 

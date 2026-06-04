@@ -46,5 +46,9 @@ name = "reliakit-secret"
 version = "0.1.0"
 
 [[package]]
+name = "reliakit-timeout"
+version = "0.1.0"
+
+[[package]]
 name = "reliakit-validate"
 version = "0.3.0"

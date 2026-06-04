@@ -22,6 +22,7 @@ on:
           - reliakit-circuit
           - reliakit-ratelimit
           - reliakit-json
+          - reliakit-timeout
 
 permissions:
   contents: read

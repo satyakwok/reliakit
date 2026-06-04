@@ -68,3 +68,6 @@ jobs:
 
       - name: Verify reliakit-json package
         run: cargo publish -p reliakit-json --dry-run --locked
+
+      - name: Verify reliakit-timeout package
+        run: cargo publish -p reliakit-timeout --dry-run --locked

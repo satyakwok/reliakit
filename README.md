@@ -230,6 +230,22 @@ Implemented types:
 - `JsonLimits`
 - `JsonError` / `JsonErrorKind`
 
+### `reliakit-timeout`
+
+Clock-agnostic deadlines and timeouts — the time-limiter that rounds out the
+resilience set. You capture a start instant and a budget (`u64`, any monotonic
+unit) and ask whether the budget has run out and how much is left; it never
+reads the clock, sleeps, or cancels work. Pure `core`, zero dependencies,
+saturating arithmetic, no panics.
+
+Implemented types:
+
+- `Timeout` — a reusable budget; `start(now)` pins it to a `Deadline`.
+- `Deadline` — `remaining`, `elapsed`, `is_expired`, `check`, `allows`, `clamp`.
+
+Present in the workspace and pending its initial `0.1` release; not yet
+published to crates.io.
+
 ### `reliakit-core`
 
 Planned. Shared core types, traits, and errors used across Reliakit crates.
@@ -342,7 +358,9 @@ reliakit/
 │   │   └── examples/
 │   ├── reliakit-ratelimit/
 │   │   └── examples/
-│   └── reliakit-json/
+│   ├── reliakit-json/
+│   │   └── examples/
+│   └── reliakit-timeout/
 │       └── examples/
 ├── Cargo.toml
 ├── README.md
@@ -374,6 +392,10 @@ Published:
 - `reliakit-circuit`
 - `reliakit-ratelimit`
 - `reliakit-json`
+
+Pending initial release:
+
+- `reliakit-timeout`
 
 Planned:
 

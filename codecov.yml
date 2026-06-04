@@ -49,6 +49,11 @@ coverage:
         threshold: 1%
         flags:
           - reliakit-json
+      reliakit-timeout:
+        target: 90%
+        threshold: 1%
+        flags:
+          - reliakit-timeout
     patch:
       default:
         target: 90%
