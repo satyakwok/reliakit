@@ -1,9 +1,14 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/satyakwok/reliakit/main/assets/reliakit-logo.png" alt="Reliakit" width="400">
+</p>
+
 # reliakit-secret
 
 Secret-safe wrappers for Rust values that should not leak through formatting or
 diagnostics.
 
 [![Crates.io](https://img.shields.io/crates/v/reliakit-secret.svg)](https://crates.io/crates/reliakit-secret)
+[![Crates.io Downloads](https://img.shields.io/crates/d/reliakit-secret.svg)](https://crates.io/crates/reliakit-secret)
 [![Docs.rs](https://docs.rs/reliakit-secret/badge.svg)](https://docs.rs/reliakit-secret)
 [![CI](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml/badge.svg)](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/satyakwok/reliakit/branch/main/graph/badge.svg?flag=reliakit-secret)](https://codecov.io/gh/satyakwok/reliakit/tree/main/crates/reliakit-secret)

@@ -6,6 +6,7 @@ rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
 homepage.workspace = true
+documentation = "https://docs.rs/reliakit-collections"
 readme = "README.md"
 description = "Bounded and reliability-oriented collection types for Rust."
 keywords = ["collections", "bounded", "vec", "no-std", "reliability"]

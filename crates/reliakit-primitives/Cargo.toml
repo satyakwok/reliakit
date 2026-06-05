@@ -6,6 +6,7 @@ rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
 homepage.workspace = true
+documentation = "https://docs.rs/reliakit-primitives"
 readme = "README.md"
 description = "Reusable type-safe primitives for constrained and reliability-oriented Rust values."
 keywords = ["primitives", "validation", "types", "reliability", "no-std"]

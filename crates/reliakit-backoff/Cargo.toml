@@ -6,6 +6,7 @@ rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
 homepage.workspace = true
+documentation = "https://docs.rs/reliakit-backoff"
 readme = "README.md"
 description = "Clock-agnostic retry backoff policies (exponential, linear, constant) with jitter helpers. no_std and zero-dependency."
 keywords = ["backoff", "retry", "reliability", "exponential", "no-std"]

@@ -6,6 +6,7 @@ rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
 homepage.workspace = true
+documentation = "https://docs.rs/reliakit-core"
 readme = "README.md"
 description = "Shared building blocks for Reliakit: a clock-agnostic Clock trait with manual and monotonic clocks. no_std and zero-dependency."
 keywords = ["clock", "time", "reliability", "no-std", "monotonic"]

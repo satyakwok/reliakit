@@ -6,6 +6,7 @@ rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
 homepage.workspace = true
+documentation = "https://docs.rs/reliakit-secret"
 readme = "README.md"
 description = "Secret-safe wrappers for Rust values that should not leak through formatting or diagnostics."
 keywords = ["secret", "redaction", "security", "no-std", "reliability"]
