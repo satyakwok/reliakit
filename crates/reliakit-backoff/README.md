@@ -92,6 +92,16 @@ All are clamped to `with_max_delay(..)` and stop at `with_max_retries(..)`.
 `rand` is interpreted as the fraction `rand / u32::MAX`. Source it from `rand`,
 `getrandom`, or a hardware RNG.
 
+## Feature Flags
+
+This crate has no feature flags.
+
+## `no_std`
+
+`reliakit-backoff` is `#![no_std]` and allocation-free — it depends only on
+`core`, with no third-party crates. All delay arithmetic saturates, so large
+attempt numbers never overflow, panic, or hang.
+
 ## Safety
 
 This crate is `#![forbid(unsafe_code)]` and `#![no_std]`.
@@ -99,6 +109,11 @@ This crate is `#![forbid(unsafe_code)]` and `#![no_std]`.
 ## Minimum Supported Rust Version
 
 Rust `1.85` and newer. No nightly features are used.
+
+## Status
+
+Published to crates.io and pre-1.0. The API is small and stable; it may receive
+backward-compatible refinements before a `1.0` release.
 
 ## License
 

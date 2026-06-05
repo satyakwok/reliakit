@@ -55,9 +55,9 @@ and deterministic:
 
 ## When Not To Use
 
-Use a different tool when you need automatic derive support, schema negotiation,
-multi-format serialization, RPC abstractions, or broad ecosystem
-interoperability.
+Use a different tool when you need schema negotiation, multi-format
+serialization, RPC abstractions, or broad ecosystem interoperability. (For
+derive support, pair this crate with [`reliakit-derive`](https://crates.io/crates/reliakit-derive).)
 
 `reliakit-codec` is intentionally small. It focuses on explicit canonical binary
 encoding, strict decoding, and deterministic byte output.
@@ -113,7 +113,11 @@ fails when trailing bytes remain.
 
 ### Manual Trait Implementations
 
-There are no derive macros in this version.
+This crate ships no derive macro of its own — implementations are handwritten, so
+field order and validation stay visible. If you prefer to generate the
+mechanical cases, the optional [`reliakit-derive`](https://crates.io/crates/reliakit-derive)
+crate provides `#[derive(CanonicalEncode, CanonicalDecode)]` for structs and
+enums.
 
 ```rust
 use reliakit_codec::{CanonicalDecode, CanonicalEncode, CodecError, DecodeSource, EncodeSink};

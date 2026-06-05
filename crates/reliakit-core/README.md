@@ -69,6 +69,12 @@ feature adding `MonotonicClock`). Clock arithmetic saturates.
 
 Rust `1.85` and newer. No nightly features are used.
 
+## Status
+
+Published to crates.io and pre-1.0. The crate is intentionally minimal — a
+`Clock` trait plus two clocks — and its API may receive backward-compatible
+refinements before a `1.0` release.
+
 ## License
 
 Licensed under the MIT License. See [`LICENSE`](https://github.com/satyakwok/reliakit/blob/main/LICENSE).

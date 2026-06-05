@@ -175,6 +175,21 @@ its own copy.
 - It does not measure latency, error rates over sliding windows, or perform
   health checks on its own; it reacts to the success/failure outcomes you report.
 
+## Feature Flags
+
+| Flag | Default | Effect |
+|---|---:|---|
+| `core` | no | Adds `*_now(clock)` methods that read the time from a `reliakit_core::Clock` instead of taking an explicit `now: u64`. Pulls in `reliakit-core` (`no_std`, zero third-party dependencies). |
+
+The `now: u64` methods are the primitive API; the `core` feature is purely a
+convenience.
+
+## `no_std`
+
+`reliakit-circuit` is `#![no_std]` and allocation-free — pure `core`, zero
+third-party dependencies. The breaker is a small `Copy` value, so it runs on
+embedded targets without changes.
+
 ## Safety
 
 This crate is `#![forbid(unsafe_code)]` and `#![no_std]`. All arithmetic
@@ -183,6 +198,11 @@ saturates; no method panics on any input, including a non-monotonic clock.
 ## Minimum Supported Rust Version
 
 Rust `1.85` and newer. No nightly features are used.
+
+## Status
+
+Published to crates.io and pre-1.0. The state machine is stable; the API may
+receive backward-compatible refinements before a `1.0` release.
 
 ## License
 

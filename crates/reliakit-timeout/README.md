@@ -97,6 +97,21 @@ if !deadline.is_expired(now) {
 | `check(now)` | `Some(remaining)` while live, else `None` |
 | `clamp(now, d)` | `min(d, remaining(now))` |
 
+## Feature Flags
+
+| Flag | Default | Effect |
+|---|---:|---|
+| `core` | no | Adds `*_now(clock)` methods on `Timeout` and `Deadline` that read the time from a `reliakit_core::Clock` instead of taking an explicit `now: u64`. Pulls in `reliakit-core` (`no_std`, zero third-party dependencies). |
+
+The `now: u64` methods are the primitive API; the `core` feature is purely a
+convenience.
+
+## `no_std`
+
+`reliakit-timeout` is `#![no_std]` and allocation-free — pure `core`, with no
+required dependencies. Every query method is a `const fn` over saturating
+arithmetic.
+
 ## Safety
 
 This crate is `#![forbid(unsafe_code)]` and `#![no_std]`. Every method is a
@@ -106,6 +121,11 @@ backwards clock or an overflowing `start + budget` — that panics.
 ## Minimum Supported Rust Version
 
 Rust `1.85` and newer. No nightly features are used.
+
+## Status
+
+Published to crates.io and pre-1.0. The API is small and stable; it may receive
+backward-compatible refinements before a `1.0` release.
 
 ## License
 
