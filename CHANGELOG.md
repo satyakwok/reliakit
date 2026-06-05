@@ -10,13 +10,6 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 
 ### Added
 
-- `reliakit-derive`: enum derive support for `CanonicalEncode`/`CanonicalDecode`,
-  covering unit, tuple, and struct variants. Each variant is tagged by its
-  zero-based declaration index as a little-endian `u32`, followed by the
-  variant's fields in declaration order; decoding reads the tag first and an
-  unknown tag is a clear decode error. Unsupported enum forms — explicit
-  discriminants, `#[repr(...)]`, generic enums, and empty enums — are rejected
-  with descriptive compile errors. Existing struct derive behavior is unchanged.
 - Added a CI job that fails if any workspace crate gains a third-party
   dependency (of any kind), enforcing the zero-dependency policy, and extended
   the bare-metal `no_std` checks to cover every `no_std` crate. Added
@@ -30,6 +23,18 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
   The tag-triggered and manual publish workflows now mint a short-lived token at
   publish time instead of reading a stored API token, so no long-lived registry
   token is kept in repository secrets.
+
+## reliakit-derive 0.1.1 - 2026-06-05
+
+### Added
+
+- Enum derive support for `CanonicalEncode`/`CanonicalDecode`, covering unit,
+  tuple, and struct variants. Each variant is tagged by its zero-based
+  declaration index as a little-endian `u32`, followed by the variant's fields
+  in declaration order; decoding reads the tag first and an unknown tag is a
+  clear decode error. Unsupported enum forms — explicit discriminants,
+  `#[repr(...)]`, generic enums, and empty enums — are rejected with descriptive
+  compile errors. Existing struct derive behavior is unchanged.
 
 ## reliakit-derive 0.1.0 - 2026-06-05
 
