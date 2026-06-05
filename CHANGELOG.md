@@ -10,6 +10,17 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 
 ### Added
 
+- `reliakit-json`: typed JSON encoding and decoding. `JsonEncode` turns a value
+  into a deterministic `JsonValue` (and `to_json_string`/`to_json_vec` into
+  compact text/bytes); `JsonDecode` reads it back strictly, with `from_json_str`
+  parsing and decoding in one step. Implementations cover the integer types,
+  `bool`, `String`/`str`, `Option<T>`, `Vec<T>`, and slices. Adds
+  `JsonDecodeError`/`JsonDecodeErrorKind`, `JsonFromStrError`, and a
+  `JsonValue::array` constructor. Strict, zero-dependency, `no_std` + `alloc`.
+- `reliakit-derive`: `#[derive(JsonEncode, JsonDecode)]` for the new
+  `reliakit-json` traits. A struct with named fields becomes a JSON object in
+  declaration order, a tuple struct becomes an array, and a unit struct becomes
+  `null`; enums are rejected for now. Existing codec derives are unchanged.
 - Added a CI job that fails if any workspace crate gains a third-party
   dependency (of any kind), enforcing the zero-dependency policy, and extended
   the bare-metal `no_std` checks to cover every `no_std` crate. Added
