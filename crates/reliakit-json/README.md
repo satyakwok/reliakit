@@ -101,6 +101,30 @@ automatically — there is no implicitly unlimited entry point.
 | `JsonLimits` | `new` / `conservative` / `permissive` profiles + `with_*` builders. |
 | `JsonError` / `JsonErrorKind` / `JsonLimitKind` / `JsonPath` | Located, classified errors. |
 | `to_compact_string` / `to_compact_vec` | Deterministic compact serialization. |
+| `JsonEncode` / `JsonDecode` | Map your own types to and from JSON. |
+| `to_json_string` / `to_json_vec` / `from_json_str` | One-call typed encode/decode. |
+
+## Typed encoding
+
+`JsonEncode` turns a value into a deterministic `JsonValue`, and `JsonDecode`
+reads it back strictly. `to_json_string` and `from_json_str` do both ends in one
+call. Implementations are provided for the integer types, `bool`, `String`/`str`,
+`Option<T>`, `Vec<T>`, and slices; the `reliakit-derive` crate provides
+`#[derive(JsonEncode, JsonDecode)]` for your own structs.
+
+```rust
+use reliakit_json::{from_json_str, to_json_string};
+
+assert_eq!(to_json_string(&vec![1u8, 2, 3]), "[1,2,3]");
+assert_eq!(from_json_str::<Vec<u8>>("[1,2,3]").unwrap(), vec![1u8, 2, 3]);
+
+// Strict: a fractional number is rejected for an integer target.
+assert!(from_json_str::<u8>("25.0").is_err());
+```
+
+Decoding is strict: the JSON type must match the target, required object fields
+must be present (unknown fields are ignored), and numbers must be plain integers
+that fit the target type.
 
 ## Numbers
 

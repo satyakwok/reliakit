@@ -7,8 +7,11 @@
 //! serializes deterministically. It has no external dependencies, forbids
 //! unsafe code, and supports `no_std` (with `alloc`).
 //!
-//! It deliberately does **not** provide derive macros, schema validation,
-//! JSON5, comments, trailing commas, lenient parsing, or SIMD throughput.
+//! It maps to and from your own types through the [`JsonEncode`] / [`JsonDecode`]
+//! traits — the optional `reliakit-derive` crate provides
+//! `#[derive(JsonEncode, JsonDecode)]`. It deliberately does **not** include
+//! schema validation, JSON5, comments, trailing commas, lenient parsing, or
+//! SIMD throughput.
 //!
 //! # Example
 //!
@@ -23,6 +26,22 @@
 //!
 //! // Strict by default: duplicate keys are rejected, not silently resolved.
 //! assert!(parse_str(r#"{"a":1,"a":2}"#).is_err());
+//! ```
+//!
+//! # Typed encoding
+//!
+//! [`JsonEncode`] turns a value into deterministic JSON text and [`JsonDecode`]
+//! reads it back strictly. [`to_json_string`] and [`from_json_str`] do both ends
+//! in one call.
+//!
+//! ```
+//! use reliakit_json::{from_json_str, to_json_string};
+//!
+//! assert_eq!(to_json_string(&vec![1u8, 2, 3]), "[1,2,3]");
+//! assert_eq!(from_json_str::<Vec<u8>>("[1,2,3]").unwrap(), vec![1u8, 2, 3]);
+//!
+//! // Strict: a number with a fraction is rejected for an integer target.
+//! assert!(from_json_str::<u8>("25.0").is_err());
 //! ```
 //!
 //! # Limits
@@ -56,6 +75,8 @@ extern crate alloc;
 
 #[cfg(feature = "canonical")]
 mod canonical;
+mod decode;
+mod encode;
 mod error;
 #[cfg(feature = "validate")]
 mod form;
@@ -69,8 +90,11 @@ mod write;
 
 #[cfg(feature = "canonical")]
 pub use canonical::{to_canonical_string, to_canonical_vec};
+pub use decode::{from_json_str, JsonDecode};
+pub use encode::{to_json_string, to_json_vec, JsonEncode};
 pub use error::{
-    JsonError, JsonErrorKind, JsonLimitKind, JsonNumberError, JsonPath, JsonPathSegment,
+    JsonDecodeError, JsonDecodeErrorKind, JsonError, JsonErrorKind, JsonFromStrError,
+    JsonLimitKind, JsonNumberError, JsonPath, JsonPathSegment,
 };
 #[cfg(feature = "validate")]
 pub use form::JsonForm;

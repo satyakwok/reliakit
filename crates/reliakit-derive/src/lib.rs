@@ -15,7 +15,8 @@
 //! - enums with unit, tuple, and struct variants
 //!
 //! Unions, generic types, generic enums, enums with explicit discriminants or a
-//! `#[repr(...)]`, and empty enums are rejected with a compile error.
+//! `#[repr(...)]`, and empty enums are rejected with a compile error. The JSON
+//! derives currently cover structs only; enums are rejected for now.
 //!
 //! # `reliakit-codec`
 //!
@@ -59,6 +60,28 @@
 //! assert_eq!(encode_to_vec(&Message::Pong).unwrap(), [1, 0, 0, 0]);
 //! assert_eq!(decode_from_slice_exact::<Message>(&[1, 0, 0, 0]).unwrap(), Message::Pong);
 //! ```
+//!
+//! # `reliakit-json`
+//!
+//! [`JsonEncode`] and [`JsonDecode`] generate implementations of the same-named
+//! `reliakit-json` traits. A struct with named fields becomes a JSON object in
+//! declaration order, a tuple struct becomes an array, and a unit struct
+//! becomes `null`. Decoding is strict; unknown object fields are ignored.
+//!
+//! ```
+//! use reliakit_derive::{JsonDecode, JsonEncode};
+//! use reliakit_json::{from_json_str, to_json_string};
+//!
+//! #[derive(Debug, PartialEq, JsonEncode, JsonDecode)]
+//! struct Point {
+//!     x: u16,
+//!     y: u16,
+//! }
+//!
+//! let json = to_json_string(&Point { x: 10, y: 20 });
+//! assert_eq!(json, r#"{"x":10,"y":20}"#);
+//! assert_eq!(from_json_str::<Point>(&json).unwrap(), Point { x: 10, y: 20 });
+//! ```
 
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
@@ -85,6 +108,32 @@ pub fn derive_canonical_encode(input: TokenStream) -> TokenStream {
 pub fn derive_canonical_decode(input: TokenStream) -> TokenStream {
     match Parsed::from_input(input) {
         Ok(parsed) => parsed.canonical_decode_impl(),
+        Err(message) => compile_error(&message),
+    }
+}
+
+/// Derives `reliakit_json::JsonEncode`: a struct with named fields becomes a
+/// JSON object (in declaration order), a tuple struct becomes a JSON array, and
+/// a unit struct becomes `null`.
+///
+/// Enums are not supported yet. See the [crate] documentation.
+#[proc_macro_derive(JsonEncode)]
+pub fn derive_json_encode(input: TokenStream) -> TokenStream {
+    match Parsed::from_input(input).and_then(|parsed| parsed.json_encode_impl()) {
+        Ok(tokens) => tokens,
+        Err(message) => compile_error(&message),
+    }
+}
+
+/// Derives `reliakit_json::JsonDecode`, the inverse of [`macro@JsonEncode`].
+/// Decoding is strict: the JSON shape must match, and required object fields
+/// must be present; unknown object fields are ignored.
+///
+/// Enums are not supported yet. See the [crate] documentation.
+#[proc_macro_derive(JsonDecode)]
+pub fn derive_json_decode(input: TokenStream) -> TokenStream {
+    match Parsed::from_input(input).and_then(|parsed| parsed.json_decode_impl()) {
+        Ok(tokens) => tokens,
         Err(message) => compile_error(&message),
     }
 }
@@ -195,6 +244,129 @@ impl Parsed {
         )
         .parse()
         .expect("reliakit-derive generated invalid CanonicalDecode tokens")
+    }
+
+    fn json_encode_impl(&self) -> Result<TokenStream, String> {
+        let value = match &self.body {
+            Body::Struct(shape) => json_encode_value(shape),
+            Body::Enum(_) => {
+                return Err("reliakit-derive: JsonEncode does not support enums yet".into())
+            }
+        };
+
+        Ok(format!(
+            "impl ::reliakit_json::JsonEncode for {name} {{\n\
+             fn to_json_value(&self) -> ::reliakit_json::JsonValue {{\n\
+             {value}\n\
+             }}\n\
+             }}",
+            name = self.name,
+        )
+        .parse()
+        .expect("reliakit-derive generated invalid JsonEncode tokens"))
+    }
+
+    fn json_decode_impl(&self) -> Result<TokenStream, String> {
+        let body = match &self.body {
+            Body::Struct(shape) => json_decode_body(shape),
+            Body::Enum(_) => {
+                return Err("reliakit-derive: JsonDecode does not support enums yet".into())
+            }
+        };
+
+        Ok(format!(
+            "impl ::reliakit_json::JsonDecode for {name} {{\n\
+             fn from_json_value(__value: &::reliakit_json::JsonValue) \
+             -> ::core::result::Result<Self, ::reliakit_json::JsonDecodeError> {{\n\
+             {body}\n\
+             }}\n\
+             }}",
+            name = self.name,
+        )
+        .parse()
+        .expect("reliakit-derive generated invalid JsonDecode tokens"))
+    }
+}
+
+/// The JSON object key for a field: a raw identifier's `r#` prefix is dropped.
+fn json_key(field: &str) -> &str {
+    field.strip_prefix("r#").unwrap_or(field)
+}
+
+/// The body of a struct's `JsonEncode::to_json_value`.
+fn json_encode_value(shape: &Shape) -> String {
+    match shape {
+        Shape::Named(fields) => {
+            let mut inserts = String::new();
+            for field in fields {
+                let key = json_key(field);
+                inserts.push_str(&format!(
+                    "__object.insert({key:?}.into(), \
+                     ::reliakit_json::JsonEncode::to_json_value(&self.{field}));",
+                ));
+            }
+            format!(
+                "let mut __object = ::reliakit_json::JsonObject::new();\n\
+                 {inserts}\n\
+                 ::reliakit_json::JsonValue::Object(__object)"
+            )
+        }
+        Shape::Tuple(count) => {
+            let mut items = String::new();
+            for index in 0..*count {
+                items.push_str(&format!(
+                    "::reliakit_json::JsonEncode::to_json_value(&self.{index}),"
+                ));
+            }
+            format!("::reliakit_json::JsonValue::array([{items}])")
+        }
+        Shape::Unit => "::reliakit_json::JsonValue::Null".to_string(),
+    }
+}
+
+/// The body of a struct's `JsonDecode::from_json_value`.
+fn json_decode_body(shape: &Shape) -> String {
+    match shape {
+        Shape::Named(fields) => {
+            let mut inner = String::new();
+            for field in fields {
+                let key = json_key(field);
+                let missing = format!("missing field `{key}`");
+                inner.push_str(&format!(
+                    "{field}: ::reliakit_json::JsonDecode::from_json_value(\
+                     __object.get({key:?}).ok_or_else(|| \
+                     ::reliakit_json::JsonDecodeError::missing_field({missing:?}))?)?,",
+                ));
+            }
+            format!(
+                "let __object = __value.as_object().ok_or_else(|| \
+                 ::reliakit_json::JsonDecodeError::unexpected_type(\"expected a JSON object\"))?;\n\
+                 ::core::result::Result::Ok(Self {{ {inner} }})"
+            )
+        }
+        Shape::Tuple(count) => {
+            let mut inner = String::new();
+            for index in 0..*count {
+                inner.push_str(&format!(
+                    "::reliakit_json::JsonDecode::from_json_value(&__array[{index}])?,"
+                ));
+            }
+            format!(
+                "let __array = __value.as_array().ok_or_else(|| \
+                 ::reliakit_json::JsonDecodeError::unexpected_type(\"expected a JSON array\"))?;\n\
+                 if __array.len() != {count} {{ return ::core::result::Result::Err(\
+                 ::reliakit_json::JsonDecodeError::unexpected_type(\
+                 \"JSON array has the wrong number of elements\")); }}\n\
+                 ::core::result::Result::Ok(Self({inner}))"
+            )
+        }
+        Shape::Unit => "if !__value.is_null() {\n\
+             return ::core::result::Result::Err(\
+             ::reliakit_json::JsonDecodeError::unexpected_type(\
+             \"expected JSON null for a unit struct\"));\n\
+             }\n\
+             ::core::result::Result::Ok(Self)"
+            .to_string(),
     }
 }
 

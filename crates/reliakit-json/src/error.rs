@@ -271,3 +271,102 @@ impl fmt::Display for JsonNumberError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for JsonNumberError {}
+
+/// The kind of a typed-JSON decoding error.
+///
+/// `#[non_exhaustive]`: new kinds may be added in a future release.
+#[non_exhaustive]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum JsonDecodeErrorKind {
+    /// A value had a different JSON type than the target expected.
+    UnexpectedType,
+    /// A required object field was missing.
+    MissingField,
+    /// A number could not be represented by the target type.
+    Number,
+}
+
+/// An error from decoding a [`JsonValue`](crate::JsonValue) into a typed value.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct JsonDecodeError {
+    kind: JsonDecodeErrorKind,
+    message: &'static str,
+}
+
+impl JsonDecodeError {
+    /// Creates a decode error with a stable kind and an actionable message.
+    pub const fn new(kind: JsonDecodeErrorKind, message: &'static str) -> Self {
+        Self { kind, message }
+    }
+
+    /// Returns the stable error category.
+    pub const fn kind(&self) -> JsonDecodeErrorKind {
+        self.kind
+    }
+
+    /// Returns a human-readable message.
+    pub const fn message(&self) -> &'static str {
+        self.message
+    }
+
+    /// A value had a different JSON type than expected.
+    pub const fn unexpected_type(message: &'static str) -> Self {
+        Self::new(JsonDecodeErrorKind::UnexpectedType, message)
+    }
+
+    /// A required object field was missing.
+    pub const fn missing_field(message: &'static str) -> Self {
+        Self::new(JsonDecodeErrorKind::MissingField, message)
+    }
+
+    /// A number could not be represented by the target type.
+    pub const fn number(message: &'static str) -> Self {
+        Self::new(JsonDecodeErrorKind::Number, message)
+    }
+}
+
+impl fmt::Display for JsonDecodeError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(self.message)
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for JsonDecodeError {}
+
+/// The error type of [`from_json_str`](crate::from_json_str): either the input
+/// was not valid JSON, or the parsed value did not match the target type.
+///
+/// `#[non_exhaustive]`: new variants may be added in a future release.
+#[non_exhaustive]
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum JsonFromStrError {
+    /// The input was not valid JSON.
+    Parse(JsonError),
+    /// The JSON parsed but did not match the target type.
+    Decode(JsonDecodeError),
+}
+
+impl fmt::Display for JsonFromStrError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Parse(error) => write!(f, "invalid JSON: {error}"),
+            Self::Decode(error) => write!(f, "JSON did not match the target type: {error}"),
+        }
+    }
+}
+
+impl From<JsonError> for JsonFromStrError {
+    fn from(error: JsonError) -> Self {
+        Self::Parse(error)
+    }
+}
+
+impl From<JsonDecodeError> for JsonFromStrError {
+    fn from(error: JsonDecodeError) -> Self {
+        Self::Decode(error)
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for JsonFromStrError {}

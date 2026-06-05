@@ -26,6 +26,11 @@ pub enum JsonValue {
 }
 
 impl JsonValue {
+    /// Builds a [`JsonValue::Array`] from an iterator of values.
+    pub fn array<I: IntoIterator<Item = JsonValue>>(items: I) -> Self {
+        JsonValue::Array(items.into_iter().collect())
+    }
+
     /// Returns `true` if this is [`JsonValue::Null`].
     pub fn is_null(&self) -> bool {
         matches!(self, JsonValue::Null)

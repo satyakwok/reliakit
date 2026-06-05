@@ -17,6 +17,7 @@ proc-macro = true
 
 [dev-dependencies]
 reliakit-codec = { path = "../reliakit-codec", version = "0.2", default-features = false, features = ["alloc"] }
+reliakit-json = { path = "../reliakit-json", version = "0.2" }
 
 [[example]]
 name = "protocol"

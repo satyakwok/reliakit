@@ -36,10 +36,15 @@ descriptive error on constructs it does not handle.
 This crate provides:
 
 - `#[derive(CanonicalEncode)]` and `#[derive(CanonicalDecode)]` for the
-  same-named `reliakit-codec` traits,
+  same-named `reliakit-codec` (binary) traits,
+- `#[derive(JsonEncode)]` and `#[derive(JsonDecode)]` for the same-named
+  `reliakit-json` traits,
 - generated implementations identical to a handwritten one — each field encoded
   and decoded in declaration order,
 - clear compile errors for unsupported inputs.
+
+One `#[derive(...)]` line can target both formats at once, so the same struct
+round-trips through canonical binary and through JSON.
 
 ## Supported Types
 
@@ -62,6 +67,11 @@ ignored.
 Unions, generic types (including generic enums and `where` clauses), enums with
 explicit discriminants or a `#[repr(...)]`, and empty enums are rejected with a
 compile error that names exactly what is unsupported.
+
+The `JsonEncode`/`JsonDecode` derives currently cover structs only (named fields
+become a JSON object in declaration order, a tuple struct an array, a unit
+struct `null`); enums are rejected for now. The `CanonicalEncode`/
+`CanonicalDecode` derives cover both structs and enums as listed above.
 
 ## When To Use
 
