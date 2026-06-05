@@ -13,26 +13,31 @@
 use std::path::PathBuf;
 use std::process::Command;
 
-/// One bad construct and the substring its compile error must contain.
+/// One bad construct and the substring its compile error must contain. Each
+/// uses a distinct type name so the only errors are the derive's own.
 const CASES: &[(&str, &str)] = &[
     (
-        "#[derive(CanonicalEncode)] enum E { A = 1, B = 2 }",
+        "#[derive(CanonicalEncode)] enum Disc { A = 1, B = 2 }",
         "does not support explicit enum discriminants",
     ),
     (
-        "#[derive(CanonicalEncode)] #[repr(u8)] enum E { A, B }",
+        "#[derive(CanonicalEncode)] #[repr(u8)] enum Repr { A, B }",
         "does not support `#[repr(...)]` on enums",
     ),
     (
-        "#[derive(CanonicalEncode)] enum E<T> { A(T) }",
+        "#[derive(CanonicalEncode)] enum GenericEnum<T> { A(T) }",
         "does not support generic types yet",
     ),
     (
-        "#[derive(CanonicalEncode)] enum E {}",
+        "#[derive(CanonicalEncode)] struct GenericStruct<T> { a: T }",
+        "does not support generic types yet",
+    ),
+    (
+        "#[derive(CanonicalEncode)] enum Empty {}",
         "cannot derive for an empty enum",
     ),
     (
-        "#[derive(CanonicalEncode)] union E { a: u32 }",
+        "#[derive(CanonicalEncode)] union Onion { a: u32 }",
         "does not support unions",
     ),
 ];

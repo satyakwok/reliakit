@@ -90,9 +90,10 @@ pub fn derive_canonical_decode(input: TokenStream) -> TokenStream {
 }
 
 /// Which item keyword the derive input started with.
-enum Keyword {
+enum Kind {
     Struct,
     Enum,
+    Union,
 }
 
 /// The field shape of a struct body or a single enum variant, reduced to
@@ -106,13 +107,13 @@ enum Shape {
     Unit,
 }
 
-/// One enum variant: its name and field shape.
+/// One validated enum variant: its name and field shape.
 struct Variant {
     name: String,
     shape: Shape,
 }
 
-/// The body the derive will implement.
+/// The validated body the derive will implement.
 enum Body {
     /// A struct with the given field shape.
     Struct(Shape),
@@ -120,102 +121,41 @@ enum Body {
     Enum(Vec<Variant>),
 }
 
+/// A validated item ready for code generation.
 struct Parsed {
     name: String,
     body: Body,
 }
 
+/// One enum variant as read from tokens, before validation.
+struct RawVariant {
+    name: String,
+    /// The variant's field shape, or a message if its syntax is unsupported.
+    shape: Result<Shape, String>,
+    /// Whether the variant carried an explicit `= discriminant`.
+    has_discriminant: bool,
+}
+
+/// The item body as read from tokens, before validation.
+enum RawBody {
+    Struct(Shape),
+    Enum(Vec<RawVariant>),
+    Union,
+}
+
+/// The whole item as read from tokens, before any semantic validation. Kept
+/// free of `proc_macro` types so [`validate`] is pure and unit-testable.
+struct Raw {
+    name: String,
+    has_generics: bool,
+    saw_repr: bool,
+    body: RawBody,
+}
+
 impl Parsed {
-    /// Reads the type name and body shape from a derive input, rejecting
-    /// anything outside the supported subset with a descriptive message.
+    /// Reads and validates a derive input.
     fn from_input(input: TokenStream) -> Result<Self, String> {
-        let tokens: Vec<TokenTree> = input.into_iter().collect();
-
-        // Find the item keyword, skipping outer attributes and visibility.
-        // Note whether a `#[repr(...)]` attribute is present so enums can reject
-        // it; struct behavior is unchanged (repr is simply ignored there).
-        let mut idx = 0;
-        let mut saw_repr = false;
-        let keyword = loop {
-            match tokens.get(idx) {
-                Some(TokenTree::Ident(ident)) => match ident.to_string().as_str() {
-                    "struct" => break Keyword::Struct,
-                    "enum" => break Keyword::Enum,
-                    "union" => return Err("reliakit-derive does not support unions".into()),
-                    // Visibility (`pub`) or anything else before the keyword.
-                    _ => idx += 1,
-                },
-                // An outer attribute body `[ ... ]` (the leading `#` is a Punct
-                // handled by the catch-all below).
-                Some(TokenTree::Group(group)) if group.delimiter() == Delimiter::Bracket => {
-                    if attr_is_repr(group.stream()) {
-                        saw_repr = true;
-                    }
-                    idx += 1;
-                }
-                Some(_) => idx += 1,
-                None => return Err("reliakit-derive: expected a struct or enum".into()),
-            }
-        };
-
-        // The type name follows the keyword.
-        idx += 1;
-        let name = match tokens.get(idx) {
-            Some(TokenTree::Ident(ident)) => ident.to_string(),
-            _ => return Err("reliakit-derive: expected a type name after the item keyword".into()),
-        };
-        idx += 1;
-
-        // Reject generics rather than mis-parsing them.
-        if let Some(TokenTree::Punct(punct)) = tokens.get(idx) {
-            if punct.as_char() == '<' {
-                return Err("reliakit-derive does not support generic types yet".into());
-            }
-        }
-
-        // The body is a group (struct/enum) or `;` (unit struct).
-        match tokens.get(idx) {
-            Some(TokenTree::Group(group)) => match keyword {
-                Keyword::Struct => {
-                    let shape = match group.delimiter() {
-                        Delimiter::Brace => Shape::Named(named_fields(group.stream())),
-                        Delimiter::Parenthesis => Shape::Tuple(count_fields(group.stream())),
-                        _ => return Err("reliakit-derive: unexpected struct body".into()),
-                    };
-                    Ok(Self {
-                        name,
-                        body: Body::Struct(shape),
-                    })
-                }
-                Keyword::Enum => {
-                    if saw_repr {
-                        return Err("reliakit-derive does not support `#[repr(...)]` on enums; \
-                                    variant tags are always the u32 declaration index"
-                            .into());
-                    }
-                    if group.delimiter() != Delimiter::Brace {
-                        return Err("reliakit-derive: expected a braced enum body".into());
-                    }
-                    let variants = parse_variants(group.stream())?;
-                    Ok(Self {
-                        name,
-                        body: Body::Enum(variants),
-                    })
-                }
-            },
-            Some(TokenTree::Punct(punct))
-                if punct.as_char() == ';' && matches!(keyword, Keyword::Struct) =>
-            {
-                Ok(Self {
-                    name,
-                    body: Body::Struct(Shape::Unit),
-                })
-            }
-            _ => Err(match keyword {
-                Keyword::Struct => "reliakit-derive: unexpected struct body".into(),
-                Keyword::Enum => "reliakit-derive: expected a braced enum body".into(),
-            }),
-        }
+        validate(classify(input)?)
     }
 
     fn canonical_encode_impl(&self) -> TokenStream {
@@ -256,6 +196,140 @@ impl Parsed {
         .parse()
         .expect("reliakit-derive generated invalid CanonicalDecode tokens")
     }
+}
+
+/// Validates a [`Raw`] item, rejecting unsupported forms with a descriptive
+/// message. Pure — it touches no `proc_macro` types, so it is unit-testable.
+fn validate(raw: Raw) -> Result<Parsed, String> {
+    match raw.body {
+        RawBody::Union => Err("reliakit-derive does not support unions".into()),
+        RawBody::Struct(shape) => {
+            if raw.has_generics {
+                return Err("reliakit-derive does not support generic types yet".into());
+            }
+            Ok(Parsed {
+                name: raw.name,
+                body: Body::Struct(shape),
+            })
+        }
+        RawBody::Enum(raw_variants) => {
+            if raw.has_generics {
+                return Err("reliakit-derive does not support generic types yet".into());
+            }
+            if raw.saw_repr {
+                return Err("reliakit-derive does not support `#[repr(...)]` on enums; \
+                            variant tags are always the u32 declaration index"
+                    .into());
+            }
+            let mut variants = Vec::new();
+            for raw_variant in raw_variants {
+                if raw_variant.has_discriminant {
+                    return Err(format!(
+                        "reliakit-derive does not support explicit enum discriminants \
+                         (`{} = ...`); variant tags are the u32 declaration index",
+                        raw_variant.name
+                    ));
+                }
+                match raw_variant.shape {
+                    Ok(shape) => variants.push(Variant {
+                        name: raw_variant.name,
+                        shape,
+                    }),
+                    Err(message) => return Err(message),
+                }
+            }
+            if variants.is_empty() {
+                return Err("reliakit-derive cannot derive for an empty enum \
+                            (there is no variant to encode or decode)"
+                    .into());
+            }
+            Ok(Parsed {
+                name: raw.name,
+                body: Body::Enum(variants),
+            })
+        }
+    }
+}
+
+/// Reads a derive input into a [`Raw`] item. Touches `proc_macro` types; its
+/// happy paths are exercised by the integration and example tests.
+fn classify(input: TokenStream) -> Result<Raw, String> {
+    let tokens: Vec<TokenTree> = input.into_iter().collect();
+
+    // Find the item keyword, skipping outer attributes and visibility, noting a
+    // `#[repr(...)]` so enums can reject it (struct behavior is unchanged).
+    let mut idx = 0;
+    let mut saw_repr = false;
+    let kind = loop {
+        match tokens.get(idx) {
+            Some(TokenTree::Ident(ident)) => match ident.to_string().as_str() {
+                "struct" => break Kind::Struct,
+                "enum" => break Kind::Enum,
+                "union" => break Kind::Union,
+                _ => idx += 1,
+            },
+            Some(TokenTree::Group(group)) if group.delimiter() == Delimiter::Bracket => {
+                if attr_is_repr(group.stream()) {
+                    saw_repr = true;
+                }
+                idx += 1;
+            }
+            Some(_) => idx += 1,
+            None => return Err("reliakit-derive: expected a struct, enum, or union".into()),
+        }
+    };
+
+    idx += 1;
+    let name = match tokens.get(idx) {
+        Some(TokenTree::Ident(ident)) => ident.to_string(),
+        _ => return Err("reliakit-derive: expected a type name after the item keyword".into()),
+    };
+    idx += 1;
+
+    let has_generics =
+        matches!(tokens.get(idx), Some(TokenTree::Punct(punct)) if punct.as_char() == '<');
+
+    let body = if has_generics {
+        // A generic item is rejected by validation before its body is used, and
+        // `idx` here points at the `<` parameters rather than the body, so don't
+        // try to read it. The placeholder body is never inspected.
+        match kind {
+            Kind::Struct => RawBody::Struct(Shape::Unit),
+            Kind::Enum => RawBody::Enum(Vec::new()),
+            Kind::Union => RawBody::Union,
+        }
+    } else {
+        match kind {
+            // The union body is never read: validation rejects unions outright.
+            Kind::Union => RawBody::Union,
+            Kind::Struct => match tokens.get(idx) {
+                Some(TokenTree::Group(group)) => match group.delimiter() {
+                    Delimiter::Brace => RawBody::Struct(Shape::Named(named_fields(group.stream()))),
+                    Delimiter::Parenthesis => {
+                        RawBody::Struct(Shape::Tuple(count_fields(group.stream())))
+                    }
+                    _ => return Err("reliakit-derive: unexpected struct body".into()),
+                },
+                Some(TokenTree::Punct(punct)) if punct.as_char() == ';' => {
+                    RawBody::Struct(Shape::Unit)
+                }
+                _ => return Err("reliakit-derive: unexpected struct body".into()),
+            },
+            Kind::Enum => match tokens.get(idx) {
+                Some(TokenTree::Group(group)) if group.delimiter() == Delimiter::Brace => {
+                    RawBody::Enum(raw_variants(group.stream()))
+                }
+                _ => return Err("reliakit-derive: expected a braced enum body".into()),
+            },
+        }
+    };
+
+    Ok(Raw {
+        name,
+        has_generics,
+        saw_repr,
+        body,
+    })
 }
 
 /// Encode statements for a struct body (one `encode` call per field, in order).
@@ -397,9 +471,8 @@ fn enum_decode_value(name: &str, variants: &[Variant]) -> String {
     )
 }
 
-/// Parses enum variants in declaration order, rejecting explicit discriminants
-/// and unsupported variant syntax.
-fn parse_variants(stream: TokenStream) -> Result<Vec<Variant>, String> {
+/// Reads enum variants into [`RawVariant`]s without validating them.
+fn raw_variants(stream: TokenStream) -> Vec<RawVariant> {
     let mut variants = Vec::new();
     for segment in top_level_segments(stream) {
         if segment.is_empty() {
@@ -414,46 +487,48 @@ fn parse_variants(stream: TokenStream) -> Result<Vec<Variant>, String> {
             .position(|t| matches!(t, TokenTree::Ident(_)))
         {
             Some(i) => i,
-            None => return Err("reliakit-derive: expected an enum variant name".into()),
+            None => {
+                variants.push(RawVariant {
+                    name: String::new(),
+                    shape: Err("reliakit-derive: expected an enum variant name".into()),
+                    has_discriminant: false,
+                });
+                continue;
+            }
         };
         let name = match &segment[name_idx] {
             TokenTree::Ident(ident) => ident.to_string(),
             _ => unreachable!("position matched an ident"),
         };
 
+        let mut has_discriminant = false;
         let shape = match segment.get(name_idx + 1) {
-            None => Shape::Unit,
+            None => Ok(Shape::Unit),
             Some(TokenTree::Group(group)) => match group.delimiter() {
-                Delimiter::Parenthesis => Shape::Tuple(count_fields(group.stream())),
-                Delimiter::Brace => Shape::Named(named_fields(group.stream())),
-                _ => {
-                    return Err(format!(
-                        "reliakit-derive: unsupported syntax in enum variant `{name}`"
-                    ))
-                }
-            },
-            Some(TokenTree::Punct(punct)) if punct.as_char() == '=' => {
-                return Err(format!(
-                    "reliakit-derive does not support explicit enum discriminants \
-                     (`{name} = ...`); variant tags are the u32 declaration index"
-                ));
-            }
-            Some(_) => {
-                return Err(format!(
+                Delimiter::Parenthesis => Ok(Shape::Tuple(count_fields(group.stream()))),
+                Delimiter::Brace => Ok(Shape::Named(named_fields(group.stream()))),
+                _ => Err(format!(
                     "reliakit-derive: unsupported syntax in enum variant `{name}`"
-                ))
+                )),
+            },
+            // An explicit discriminant: record it; validation rejects it. The
+            // placeholder shape is never used.
+            Some(TokenTree::Punct(punct)) if punct.as_char() == '=' => {
+                has_discriminant = true;
+                Ok(Shape::Unit)
             }
+            Some(_) => Err(format!(
+                "reliakit-derive: unsupported syntax in enum variant `{name}`"
+            )),
         };
 
-        variants.push(Variant { name, shape });
+        variants.push(RawVariant {
+            name,
+            shape,
+            has_discriminant,
+        });
     }
-
-    if variants.is_empty() {
-        return Err("reliakit-derive cannot derive for an empty enum \
-                    (there is no variant to encode or decode)"
-            .into());
-    }
-    Ok(variants)
+    variants
 }
 
 /// Returns `true` if an outer-attribute body `[ ... ]` is a `repr` attribute.
@@ -510,4 +585,152 @@ fn compile_error(message: &str) -> TokenStream {
     format!("::core::compile_error!({message:?});")
         .parse()
         .expect("compile_error message produced invalid tokens")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn enum_raw(variants: Vec<RawVariant>, saw_repr: bool, has_generics: bool) -> Raw {
+        Raw {
+            name: "E".to_string(),
+            has_generics,
+            saw_repr,
+            body: RawBody::Enum(variants),
+        }
+    }
+
+    fn unit_variant(name: &str) -> RawVariant {
+        RawVariant {
+            name: name.to_string(),
+            shape: Ok(Shape::Unit),
+            has_discriminant: false,
+        }
+    }
+
+    // `Parsed` deliberately has no `Debug`, so these avoid `unwrap`/`unwrap_err`.
+    fn err_of(raw: Raw) -> String {
+        match validate(raw) {
+            Err(message) => message,
+            Ok(_) => panic!("expected validation to reject the item"),
+        }
+    }
+
+    fn ok_of(raw: Raw) -> Parsed {
+        match validate(raw) {
+            Ok(parsed) => parsed,
+            Err(message) => panic!("unexpected validation error: {message}"),
+        }
+    }
+
+    #[test]
+    fn rejects_union() {
+        let raw = Raw {
+            name: "U".to_string(),
+            has_generics: false,
+            saw_repr: false,
+            body: RawBody::Union,
+        };
+        assert!(err_of(raw).contains("does not support unions"));
+    }
+
+    #[test]
+    fn rejects_generic_struct() {
+        let raw = Raw {
+            name: "S".to_string(),
+            has_generics: true,
+            saw_repr: false,
+            body: RawBody::Struct(Shape::Unit),
+        };
+        assert!(err_of(raw).contains("does not support generic types yet"));
+    }
+
+    #[test]
+    fn rejects_generic_enum() {
+        let raw = enum_raw(vec![unit_variant("A")], false, true);
+        assert!(err_of(raw).contains("does not support generic types yet"));
+    }
+
+    #[test]
+    fn rejects_repr_enum() {
+        let raw = enum_raw(vec![unit_variant("A")], true, false);
+        assert!(err_of(raw).contains("does not support `#[repr(...)]` on enums"));
+    }
+
+    #[test]
+    fn rejects_explicit_discriminant() {
+        let raw = enum_raw(
+            vec![RawVariant {
+                name: "A".to_string(),
+                shape: Ok(Shape::Unit),
+                has_discriminant: true,
+            }],
+            false,
+            false,
+        );
+        let err = err_of(raw);
+        assert!(err.contains("does not support explicit enum discriminants"));
+        assert!(err.contains("`A = ...`"));
+    }
+
+    #[test]
+    fn rejects_empty_enum() {
+        let raw = enum_raw(vec![], false, false);
+        assert!(err_of(raw).contains("cannot derive for an empty enum"));
+    }
+
+    #[test]
+    fn rejects_unsupported_variant_syntax() {
+        let raw = enum_raw(
+            vec![RawVariant {
+                name: "A".to_string(),
+                shape: Err("reliakit-derive: unsupported syntax in enum variant `A`".to_string()),
+                has_discriminant: false,
+            }],
+            false,
+            false,
+        );
+        assert!(err_of(raw).contains("unsupported syntax"));
+    }
+
+    #[test]
+    fn accepts_struct() {
+        let raw = Raw {
+            name: "S".to_string(),
+            has_generics: false,
+            saw_repr: false,
+            body: RawBody::Struct(Shape::Named(vec!["x".to_string()])),
+        };
+        let parsed = ok_of(raw);
+        assert_eq!(parsed.name, "S");
+        assert!(matches!(parsed.body, Body::Struct(Shape::Named(_))));
+    }
+
+    #[test]
+    fn accepts_enum_preserving_variant_order() {
+        let raw = enum_raw(
+            vec![
+                unit_variant("A"),
+                RawVariant {
+                    name: "B".to_string(),
+                    shape: Ok(Shape::Tuple(1)),
+                    has_discriminant: false,
+                },
+                RawVariant {
+                    name: "C".to_string(),
+                    shape: Ok(Shape::Named(vec!["id".to_string()])),
+                    has_discriminant: false,
+                },
+            ],
+            false,
+            false,
+        );
+        match ok_of(raw).body {
+            Body::Enum(variants) => {
+                let names: Vec<&str> = variants.iter().map(|v| v.name.as_str()).collect();
+                assert_eq!(names, ["A", "B", "C"]);
+            }
+            Body::Struct(_) => panic!("expected an enum body"),
+        }
+    }
 }
