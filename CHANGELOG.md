@@ -24,6 +24,49 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
   publish time instead of reading a stored API token, so no long-lived registry
   token is kept in repository secrets.
 
+## reliakit-codec 0.2.2 - 2026-06-05
+
+### Changed
+
+- Documentation only: the README now points to `reliakit-derive` for
+  `#[derive(CanonicalEncode, CanonicalDecode)]` support. No API or behavior
+  changes.
+
+## reliakit-circuit 0.2.3 - 2026-06-05
+
+### Changed
+
+- Documentation only: add Feature Flags, `no_std`, and Status sections to the
+  README. No API or behavior changes.
+
+## reliakit-backoff 0.1.3 - 2026-06-05
+
+### Changed
+
+- Documentation only: add Feature Flags, `no_std`, and Status sections to the
+  README. No API or behavior changes.
+
+## reliakit-ratelimit 0.1.3 - 2026-06-05
+
+### Changed
+
+- Documentation only: add Feature Flags, `no_std`, and Status sections to the
+  README. No API or behavior changes.
+
+## reliakit-timeout 0.1.3 - 2026-06-05
+
+### Changed
+
+- Documentation only: add Feature Flags, `no_std`, and Status sections to the
+  README. No API or behavior changes.
+
+## reliakit-core 0.1.2 - 2026-06-05
+
+### Changed
+
+- Documentation only: add a Status section to the README. No API or behavior
+  changes.
+
 ## reliakit-json 0.2.5 - 2026-06-05
 
 ### Added
