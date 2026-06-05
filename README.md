@@ -4,313 +4,85 @@
 
 # Reliakit
 
-A toolkit of small, focused reliability building blocks for Rust — `no_std` and zero-dependency.
+Small Rust reliability crates for explicit invariants, redacted secrets, bounded
+inputs, deterministic data, and runtime-agnostic resilience.
 
 [![CI](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml/badge.svg)](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/satyakwok/reliakit/branch/main/graph/badge.svg)](https://codecov.io/gh/satyakwok/reliakit)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/satyakwok/reliakit?style=flat)](https://github.com/satyakwok/reliakit/stargazers)
-[![GitHub issues](https://img.shields.io/github/issues/satyakwok/reliakit)](https://github.com/satyakwok/reliakit/issues)
 [![Last commit](https://img.shields.io/github/last-commit/satyakwok/reliakit)](https://github.com/satyakwok/reliakit/commits/main)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/satyakwok/reliakit)
 
-Reliakit is a Rust workspace of small, focused crates for building reliable
-software: validated types that make invalid states unrepresentable, secret
-redaction, bounded collections, canonical binary encoding, and runtime-agnostic
-resilience patterns — retry backoff, a circuit breaker, and a rate limiter.
+Reliakit is a workspace of small, focused crates for building reliable Rust
+software — CLIs, services, bots, libraries, and infrastructure tools. The core
+idea is simple: **validate and constrain data at the boundary, then carry the
+trusted invariant deeper into your program** so the rest of the code cannot hold
+an invalid state.
 
-Each crate is small, dependency-free at runtime, `#![forbid(unsafe_code)]`,
-`no_std`-friendly, and usable independently — take only what you need.
+It is a general-purpose reliability toolkit. Validated primitives, secret
+redaction, bounded collections, deterministic encoding, and runtime-agnostic
+resilience utilities (retry backoff, circuit breaker, rate limiter, timeouts)
+are useful in web backends, command-line tools, embedded code, data pipelines,
+and protocol or blockchain work alike — none of those is the primary target.
 
-## Crates at a glance
-
-| Crate | What it does |
-|---|---|
-| [`reliakit-primitives`](https://crates.io/crates/reliakit-primitives) | Type-safe constrained values: `Port`, `Email`, `BoundedStr`, `SemVer`, `Uuid`, … |
-| [`reliakit-secret`](https://crates.io/crates/reliakit-secret) | Secret wrappers that redact in `Debug`/`Display` and logs |
-| [`reliakit-validate`](https://crates.io/crates/reliakit-validate) | A `Validate` trait and error type that collects all field violations |
-| [`reliakit-collections`](https://crates.io/crates/reliakit-collections) | Bounded collections (`BoundedVec`) whose size invariants can't be violated |
-| [`reliakit-codec`](https://crates.io/crates/reliakit-codec) | Deterministic canonical binary encoding and strict decoding |
-| [`reliakit-backoff`](https://crates.io/crates/reliakit-backoff) | Retry backoff policies (constant/linear/exponential) with jitter |
-| [`reliakit-circuit`](https://crates.io/crates/reliakit-circuit) | Circuit breaker that fails fast while a dependency is down |
-| [`reliakit-ratelimit`](https://crates.io/crates/reliakit-ratelimit) | Token-bucket rate limiter with `retry_after` |
-| [`reliakit-json`](https://crates.io/crates/reliakit-json) | Strict, bounded, deterministic JSON for untrusted input |
-| [`reliakit-timeout`](https://crates.io/crates/reliakit-timeout) | Clock-agnostic deadlines and timeouts (time-limiter) |
-| [`reliakit-core`](https://crates.io/crates/reliakit-core) | Shared `Clock` trait and ready-made clocks for the resilience crates |
-| [`reliakit-derive`](https://crates.io/crates/reliakit-derive) | Derive macros for the `reliakit-codec` traits, with no third-party dependencies |
-
-`reliakit-backoff`, `reliakit-circuit`, `reliakit-ratelimit`, and
-`reliakit-timeout` are **clock-agnostic resilience patterns** — you pass the
-time in, so they work in
-sync, async, and embedded code, and compose: a rate limiter decides whether to
-call, a circuit breaker stops calling a failing dependency, and backoff spaces
-out retries.
+Every crate is small, dependency-free at runtime (only the standard library and
+other `reliakit-*` crates — a CI check fails the build if any third-party
+dependency appears), `#![forbid(unsafe_code)]`, and usable on its own. You adopt
+**one crate at a time**, not a framework.
 
 ## Why Reliakit?
 
 - **Validate once, at the boundary.** Construct a typed value where data enters
   your program (config, request, CLI, environment) and never re-check it again.
-- **Carry invariants in types.** A `Port` is always `1..=65535`; a
-  `BoundedStr<3, 32>` always has 3–32 characters. Function signatures document
-  and enforce these rules for you.
-- **Fewer unchecked strings and numbers.** Replace raw `String`/`u16`/`u8` with
-  types that cannot hold invalid states.
-- **No framework lock-in.** No runtime, no macros required, no global state.
-  Reliakit is plain types and traits you can adopt one at a time.
-- **Small independent crates.** Take only what you need. Each crate compiles
-  fast and has zero runtime dependencies.
+- **Make invalid states hard to represent.** A `Port` is always `1..=65535`; a
+  `BoundedStr<3, 32>` always has 3–32 characters. The type signature documents
+  and enforces the rule for you.
+- **Stop leaking secrets.** Wrap sensitive values in `Secret<T>` / `SecretString`
+  so they render as `[REDACTED]` in `Debug`, `Display`, logs, and error reports.
+- **Bound your inputs and collections.** `BoundedVec<T, MIN, MAX>` cannot be
+  built outside its size limits.
+- **Encode data deterministically.** `reliakit-codec` (binary) and
+  `reliakit-json` (text) produce the same bytes for the same value — handy for
+  cache keys, fixtures, hashing, and signing.
+- **Handle resilience explicitly.** Backoff, circuit breaking, rate limiting,
+  and timeouts are plain values you pass the current time into — no runtime, no
+  hidden threads, no global state.
+- **Keep adoption cost low.** Small independent crates compile fast and pull in
+  nothing extra.
 
-## When should I use this?
+## Core features
 
-Reliakit is most useful at the edges of your program, where untrusted or
-loosely-typed data becomes domain data:
+| Area | Crate(s) | What you get |
+|---|---|---|
+| Validated primitives | `reliakit-primitives` | `Port`, `Email`, `HttpUrl`, `Hostname`, `BoundedStr`, `Percent`, `SemVer`, `Uuid`, `HumanDuration`, … |
+| Secret redaction | `reliakit-secret` | `Secret<T>`, `SecretString`, opt-in `expose_secret` |
+| Validation traits | `reliakit-validate` | `Validate` trait, `ValidationError` that collects every field violation |
+| Bounded collections | `reliakit-collections` | `BoundedVec<T, MIN, MAX>` with enforced size invariants |
+| Canonical binary codec | `reliakit-codec` | `CanonicalEncode` / `CanonicalDecode`, strict decoding |
+| Strict JSON | `reliakit-json` | Strict parser + limits, deterministic output, typed `JsonEncode` / `JsonDecode` |
+| Resilience | `reliakit-backoff`, `reliakit-circuit`, `reliakit-ratelimit`, `reliakit-timeout` | Retry backoff, circuit breaker, token-bucket rate limiter, deadlines — all clock-agnostic |
+| Shared clock | `reliakit-core` | `Clock` trait + `ManualClock` / `MonotonicClock` |
+| Derive helpers | `reliakit-derive` | `#[derive(CanonicalEncode, CanonicalDecode, JsonEncode, JsonDecode)]` |
 
-- **Config parsing** — turn a TOML/JSON/env value into a `Port`, `Percent`, or
-  `BoundedStr` once, and fail early with a clear error.
-- **CLI input** — validate flags and arguments into typed values before they
-  reach your logic.
-- **API payload validation** — collect every field error at once with
-  `reliakit-validate` and return a precise message per field.
-- **Service settings** — model "must have between 1 and 10 endpoints" with
-  `BoundedVec`, or "this must be non-empty" with `NonEmptyStr`.
-- **Safe diagnostic / log output** — wrap secrets in `SecretString` so they
-  show as `[REDACTED]` in `Debug`, `Display`, logs, and error reports.
+## Real-world use cases
 
-## Before / After
+### 1. Backend / API input validation
 
-Before — every field can hold an invalid state, and the API key can leak into
-logs through `Debug`:
-
-```rust
-struct ServiceConfig {
-    name: String,      // could be empty or 500 chars
-    port: u16,         // could be 0
-    error_budget: u8,  // could be 250
-    api_key: String,   // leaks in {:?} / logs
-}
-```
-
-After — invalid states are unrepresentable, and the secret never appears in
-output:
+Validate request fields into typed values once, near the edge:
 
 ```rust
-use reliakit_primitives::{BoundedStr, Percent, Port};
-use reliakit_secret::SecretString;
+use reliakit_primitives::{Email, Port};
 
-struct ServiceConfig {
-    name: BoundedStr<3, 32>, // always 3–32 characters
-    port: Port,              // always 1..=65535
-    error_budget: Percent,   // always 0..=100
-    api_key: SecretString,   // redacted in Debug/Display
-}
+let contact = Email::new("ops@example.com")?;
+let port = Port::new(8080)?;
+assert_eq!(contact.domain(), "example.com");
+assert_eq!(port.get(), 8080);
 ```
 
-See [`examples/service_config.rs`](./crates/reliakit-primitives/examples/service_config.rs)
-for a complete, runnable version that combines primitives, secret redaction, and
-struct-level validation.
+### 2. CLI tools / config parsing + secret-safe logging
 
-## Crates
-
-### `reliakit-primitives` — [crates.io](https://crates.io/crates/reliakit-primitives) · [docs.rs](https://docs.rs/reliakit-primitives)
-
-Type-safe primitives for constrained values such as non-empty strings, bounded
-strings, slugs, email addresses, HTTP URLs, percentages, ports, byte sizes,
-semantic versions, UUIDs, and human-readable durations.
-
-Implemented types:
-
-- `NonEmptyStr`
-- `BoundedStr`
-- `Slug`
-- `Email`
-- `HttpUrl`
-- `HexString`
-- `Percent`
-- `PercentageF64`
-- `Port`
-- `PositiveInt`
-- `PositiveFloat`
-- `ByteSize`
-- `NonEmptyVec<T>`
-- `SemVer`
-- `Uuid`
-- `HumanDuration`
-
-### `reliakit-secret` — [crates.io](https://crates.io/crates/reliakit-secret) · [docs.rs](https://docs.rs/reliakit-secret)
-
-Secret-safe wrappers for values that should not leak through `Debug`, `Display`,
-logs, reports, or diagnostic output.
-
-Implemented types:
-
-- `Secret<T>`
-- `SecretString`
-- `ExposeSecret<T>`
-- `ExposeSecretMut<T>`
-
-### `reliakit-validate` — [crates.io](https://crates.io/crates/reliakit-validate) · [docs.rs](https://docs.rs/reliakit-validate)
-
-Composable validation traits and error types for Rust structs and values.
-
-Implemented types:
-
-- `Validate` trait
-- `Valid<T>`
-- `ValidationError`
-- `Violation`
-
-### `reliakit-collections` — [crates.io](https://crates.io/crates/reliakit-collections) · [docs.rs](https://docs.rs/reliakit-collections)
-
-Bounded and reliability-oriented collection types.
-
-Implemented types:
-
-- `BoundedVec<T, MIN, MAX>`
-
-### `reliakit-codec` — [crates.io](https://crates.io/crates/reliakit-codec) · [docs.rs](https://docs.rs/reliakit-codec)
-
-Deterministic canonical binary encoding and decoding. It defines one canonical
-binary representation per supported type and keeps encoding explicit through
-handwritten trait implementations. It supports `no_std` with `alloc` and offers
-optional `reliakit-primitives` integration.
-
-Implemented types:
-
-- `CanonicalEncode`
-- `CanonicalDecode`
-- `EncodeSink`
-- `DecodeSource`
-- `SliceReader`
-- `CodecError`
-
-### `reliakit-backoff` — [crates.io](https://crates.io/crates/reliakit-backoff) · [docs.rs](https://docs.rs/reliakit-backoff)
-
-Clock-agnostic retry backoff policies. It computes the delay to wait before each
-retry (constant, linear, or exponential, with optional cap and retry limit) and
-provides pure jitter helpers. It does not sleep or read the clock, so it works
-in sync, async, and `no_std` contexts. Depends only on `core`.
-
-Implemented types:
-
-- `Backoff`
-- `Delays`
-- `full_jitter` / `equal_jitter`
-
-### `reliakit-circuit` — [crates.io](https://crates.io/crates/reliakit-circuit) · [docs.rs](https://docs.rs/reliakit-circuit)
-
-Clock-agnostic circuit breaker. A small `Copy` state machine
-(`Closed`/`Open`/`HalfOpen`) that fails fast while a dependency is down and lets
-trial calls through to test recovery. It does not read the clock, sleep, or
-allocate — you pass the time in. Depends only on `core`. Pairs with
-`reliakit-backoff`.
-
-Implemented types:
-
-- `CircuitBreaker`
-- `State`
-
-### `reliakit-ratelimit` — [crates.io](https://crates.io/crates/reliakit-ratelimit) · [docs.rs](https://docs.rs/reliakit-ratelimit)
-
-Clock-agnostic token-bucket rate limiter. Caps how often something may happen,
-with a configurable burst capacity and refill rate, and reports how long to wait
-when a request is denied. It does not read the clock or allocate — you pass the
-time in. Depends only on `core`. Pairs with `reliakit-circuit` and
-`reliakit-backoff`.
-
-Implemented types:
-
-- `RateLimiter`
-
-### `reliakit-json` — [crates.io](https://crates.io/crates/reliakit-json) · [docs.rs](https://docs.rs/reliakit-json)
-
-Strict, bounded, and deterministic JSON for untrusted input and predictable
-output. Rejects duplicate keys, enforces explicit resource limits, preserves
-number precision, reports errors with location and path, and serializes
-deterministically. Depends only on `core` + `alloc`. Deliberately narrow in
-scope: no derive macros, schema validation, JSON5, comments, or lenient parsing.
-
-Implemented types:
-
-- `JsonValue`, `JsonNumber`, `JsonObject`
-- `JsonLimits`
-- `JsonError` / `JsonErrorKind`
-
-An opt-in `canonical` feature adds RFC 8785 (JCS) canonical output
-(`to_canonical_string` / `to_canonical_vec`) for hashing and signing.
-
-### `reliakit-timeout` — [crates.io](https://crates.io/crates/reliakit-timeout) · [docs.rs](https://docs.rs/reliakit-timeout)
-
-Clock-agnostic deadlines and timeouts — the time-limiter that rounds out the
-resilience set. You capture a start instant and a budget (`u64`, any monotonic
-unit) and ask whether the budget has run out and how much is left; it never
-reads the clock, sleeps, or cancels work. Pure `core`, zero dependencies,
-saturating arithmetic, no panics.
-
-Implemented types:
-
-- `Timeout` — a reusable budget; `start(now)` pins it to a `Deadline`.
-- `Deadline` — `remaining`, `elapsed`, `is_expired`, `check`, `allows`, `clamp`.
-
-### `reliakit-core` — [crates.io](https://crates.io/crates/reliakit-core) · [docs.rs](https://docs.rs/reliakit-core)
-
-Shared building blocks for the workspace. Provides a `Clock` trait (one method,
-`now(&self) -> u64`) plus ready-made clocks so you do not have to hand-roll the
-`u64` tick the resilience crates expect: `ManualClock` (settable, `no_std`, for
-deterministic tests) and `MonotonicClock` (milliseconds since creation, backed
-by `std::time::Instant`). Zero dependencies.
-
-### `reliakit-derive`
-
-Planned. Derive macros for validation and constrained types.
-
-## Installation
-
-From crates.io:
-
-```toml
-[dependencies]
-reliakit-primitives = "0.4"
-reliakit-secret = "0.1"
-reliakit-validate = "0.3"
-reliakit-collections = "0.3"
-reliakit-codec = "0.2"
-reliakit-backoff = "0.1"
-reliakit-circuit = "0.2"
-reliakit-ratelimit = "0.1"
-reliakit-json = "0.2"
-reliakit-timeout = "0.1"
-reliakit-core = "0.1"
-reliakit-derive = "0.1"
-```
-
-Add only the crates you need — each is usable independently.
-
-Or depend on the Git repository directly:
-
-```toml
-[dependencies]
-reliakit-primitives = { git = "https://github.com/satyakwok/reliakit", package = "reliakit-primitives" }
-```
-
-## Workspace vs Crates
-
-This repository is a Cargo workspace. The workspace lets Reliakit develop
-multiple related crates in one repository with shared CI, tests, examples, and
-metadata.
-
-Users do not depend on the workspace directly. Add only the crate you need:
-
-- Use `reliakit-primitives` for constrained primitive types.
-- Use `reliakit-secret` for redacted secret wrappers.
-- Use `reliakit-validate` for validation traits and errors.
-- Use `reliakit-collections` for bounded collection types.
-- Use `reliakit-codec` for deterministic canonical binary encoding.
-
-## MSRV
-
-Reliakit currently supports Rust `1.85` and newer.
-
-## Example
+Turn loosely-typed config into trusted types, and keep credentials out of logs:
 
 ```rust
 use reliakit_primitives::{BoundedStr, Percent, Port};
@@ -323,94 +95,175 @@ let success_rate = Percent::new(99)?;
 let port = Port::new(8080)?;
 let api_key = SecretString::from_string("rk_live_example");
 
-assert_eq!(api_key.to_string(), "[REDACTED]");
-assert_eq!(api_key.expose_secret(), "rk_live_example");
+assert_eq!(api_key.to_string(), "[REDACTED]"); // never leaks in Display/Debug/logs
+assert_eq!(api_key.expose_secret(), "rk_live_example"); // explicit opt-in to read it
 ```
 
-## Design Goals
+### 3. Microservices / external calls — rate limiting and circuit breaking
 
-- Reusable library primitives.
-- Clear type semantics.
-- Minimal dependencies.
-- No hidden runtime.
-- No framework lock-in.
-- Optional feature flags.
-- `no_std` support where practical.
-- Safe diagnostic output.
-- Stable, documented APIs.
-- Composable crates.
+Clock-agnostic resilience values you drive with your own time source:
 
-## Scope
+```rust
+use reliakit_ratelimit::RateLimiter;
+use reliakit_circuit::{CircuitBreaker, State};
 
-Reliakit focuses on small, explicit building blocks for reliability-oriented
-Rust code.
+// Allow bursts of up to 10, refilling 1 token every 100 ms (~10/sec).
+let mut limiter = RateLimiter::new(10, 1, 100);
+assert!(limiter.try_acquire_one(0));
 
-It is intentionally not a framework. It does not provide a runtime, web stack,
-ORM, logging system, or broad application platform.
-
-Each crate is designed to be adopted independently, with minimal API surface,
-clear invariants, and no hidden runtime behavior.
-
-## Workspace Layout
-
-```text
-reliakit/
-├── crates/
-│   ├── reliakit-primitives/
-│   │   └── examples/
-│   ├── reliakit-secret/
-│   │   └── examples/
-│   ├── reliakit-validate/
-│   ├── reliakit-collections/
-│   ├── reliakit-codec/
-│   │   └── examples/
-│   ├── reliakit-backoff/
-│   │   └── examples/
-│   ├── reliakit-circuit/
-│   │   └── examples/
-│   ├── reliakit-ratelimit/
-│   │   └── examples/
-│   ├── reliakit-json/
-│   │   └── examples/
-│   ├── reliakit-timeout/
-│   │   └── examples/
-│   ├── reliakit-core/
-│   │   └── examples/
-│   └── reliakit-derive/
-├── Cargo.toml
-├── README.md
-└── LICENSE
+// Trip after 3 consecutive failures; stay open for 30_000 ms.
+let mut breaker = CircuitBreaker::new(3, 30_000);
+for _ in 0..3 {
+    let _ = breaker.allow(0);
+    breaker.on_failure(0);
+}
+assert_eq!(breaker.state(), State::Open); // fail fast instead of hammering a down service
 ```
 
-## Status
+### 4. Data pipelines / bounded input handling
 
-Active. Reliakit is published as a real Rust library workspace and follows
-normal Rust crate versioning.
+```rust
+use reliakit_codec::{decode_from_slice_exact, encode_to_vec};
+use reliakit_derive::{CanonicalDecode, CanonicalEncode};
 
-`reliakit-primitives`, `reliakit-secret`, `reliakit-validate`,
-`reliakit-collections`, `reliakit-codec`, `reliakit-backoff`,
-`reliakit-circuit`, `reliakit-ratelimit`, `reliakit-json`,
-`reliakit-timeout`, `reliakit-core`, and `reliakit-derive` are published to
-crates.io. APIs may receive compatible refinements before a `1.0` release.
+#[derive(Debug, PartialEq, CanonicalEncode, CanonicalDecode)]
+struct Record { id: u64, ok: bool }
 
-Logo assets are stored under [`assets/`](./assets/).
+let bytes = encode_to_vec(&Record { id: 7, ok: true })?;
+assert_eq!(decode_from_slice_exact::<Record>(&bytes)?, Record { id: 7, ok: true });
+```
 
-## Roadmap
+### 5. Typed JSON for APIs and storage
 
-Published:
+```rust
+use reliakit_derive::{JsonDecode, JsonEncode};
+use reliakit_json::{from_json_str, to_json_string};
 
-- `reliakit-primitives`
-- `reliakit-secret`
-- `reliakit-validate`
-- `reliakit-collections`
-- `reliakit-codec`
-- `reliakit-backoff`
-- `reliakit-circuit`
-- `reliakit-ratelimit`
-- `reliakit-json`
-- `reliakit-timeout`
-- `reliakit-core`
-- `reliakit-derive`
+#[derive(Debug, PartialEq, JsonEncode, JsonDecode)]
+struct Event { id: u64, name: String }
+
+let json = to_json_string(&Event { id: 1, name: "deploy".into() });
+assert_eq!(json, r#"{"id":1,"name":"deploy"}"#);
+assert_eq!(from_json_str::<Event>(&json).unwrap(), Event { id: 1, name: "deploy".into() });
+```
+
+### 6. Embedded / `no_std`-friendly constraints
+
+The resilience crates and the allocation-free primitives work without `std` or
+even `alloc`. A `CircuitBreaker` or `RateLimiter` is a small `Copy` value with
+saturating, panic-free integer math — you pass a `u64` tick in, so it runs on
+embedded targets just as well as on a server.
+
+### 7. Protocols and deterministic encoding (incl. blockchain)
+
+Because `reliakit-codec` defines one canonical byte representation per type and
+`reliakit-json` can emit RFC 8785 (JCS) canonical JSON (opt-in `canonical`
+feature), the same value always produces the same bytes — useful for cache keys,
+content addressing, and hashing or signing in protocol and blockchain work. This
+is one use case among many, not the focus.
+
+## Quick start / installation
+
+All crates are published to crates.io. Add only the ones you need:
+
+```toml
+[dependencies]
+reliakit-primitives  = "0.4"
+reliakit-secret      = "0.1"
+reliakit-validate    = "0.3"
+reliakit-collections = "0.3"
+reliakit-codec       = "0.2"
+reliakit-json        = "0.2"
+reliakit-backoff     = "0.1"
+reliakit-circuit     = "0.2"
+reliakit-ratelimit   = "0.1"
+reliakit-timeout     = "0.1"
+reliakit-core        = "0.1"
+reliakit-derive      = "0.1"
+```
+
+Each crate is independent — most projects use two or three. The minimum
+supported Rust version is **1.85**.
+
+## Crate overview
+
+| Crate | Purpose | Use when | Status |
+|---|---|---|---|
+| [`reliakit-primitives`](https://crates.io/crates/reliakit-primitives) | Validated primitive types | You want `Email`, `Port`, `Percent`, `BoundedStr`, … instead of unchecked strings/numbers. | Published (pre-1.0) |
+| [`reliakit-secret`](https://crates.io/crates/reliakit-secret) | Secret redaction wrappers | A value must not leak through `Debug`/`Display`/logs. | Published (pre-1.0) |
+| [`reliakit-validate`](https://crates.io/crates/reliakit-validate) | Validation trait + error aggregation | You want to collect every field error at once. | Published (pre-1.0) |
+| [`reliakit-collections`](https://crates.io/crates/reliakit-collections) | Bounded collection types | A collection must stay within a fixed size range. | Published (pre-1.0) |
+| [`reliakit-codec`](https://crates.io/crates/reliakit-codec) | Canonical binary encoding/decoding | You need deterministic bytes (cache keys, fixtures, framing). | Published (pre-1.0) |
+| [`reliakit-json`](https://crates.io/crates/reliakit-json) | Strict, deterministic JSON + typed encode/decode | You parse untrusted JSON or need predictable output. | Published (pre-1.0) |
+| [`reliakit-backoff`](https://crates.io/crates/reliakit-backoff) | Retry backoff delays + jitter | You retry an operation and want explicit spacing. | Published (pre-1.0) |
+| [`reliakit-circuit`](https://crates.io/crates/reliakit-circuit) | Circuit breaker state machine | You want to stop calling a failing dependency. | Published (pre-1.0) |
+| [`reliakit-ratelimit`](https://crates.io/crates/reliakit-ratelimit) | Token-bucket rate limiter | You cap how often something may happen. | Published (pre-1.0) |
+| [`reliakit-timeout`](https://crates.io/crates/reliakit-timeout) | Deadlines / time budgets | You track whether a budget has run out. | Published (pre-1.0) |
+| [`reliakit-core`](https://crates.io/crates/reliakit-core) | Shared `Clock` trait + clocks | You want a ready-made `u64` time source for the resilience crates. | Published (pre-1.0) |
+| [`reliakit-derive`](https://crates.io/crates/reliakit-derive) | Derive macros for codec + JSON traits | You want `#[derive(...)]` instead of hand-writing encode/decode. | Published (pre-1.0) |
+
+The four resilience crates (`backoff`, `circuit`, `ratelimit`, `timeout`) are
+**clock-agnostic** — you pass the time in, so they compose and work in sync,
+async, and embedded code: a rate limiter decides whether to call, a circuit
+breaker stops calling a failing dependency, backoff spaces out retries, and a
+timeout bounds how long you wait.
+
+## Design philosophy
+
+- **Small, independent crates** you adopt one at a time — no framework lock-in.
+- **Explicit invariants** validated at construction; invalid states are hard to
+  represent.
+- **Boring, predictable APIs** — plain types and traits, no hidden runtime,
+  threads, or global state.
+- **Zero runtime dependencies** (standard library + other `reliakit-*` crates
+  only) and `#![forbid(unsafe_code)]` throughout.
+- **Deterministic behavior** — same input, same output; saturating arithmetic in
+  the resilience crates.
+- **Feature-gated integrations** — cross-crate links (e.g. codec ↔ primitives,
+  JSON ↔ validate) are opt-in features, never default.
+
+## When to use Reliakit
+
+- Validating config, CLI flags, environment, or request payloads at the boundary.
+- Backend services, bots, and libraries that need small typed constraints.
+- Keeping secrets out of logs and diagnostics.
+- Deterministic encoding for cache keys, fixtures, protocols, or signing.
+- Adding explicit retry/backoff/rate-limit/circuit-breaker/timeout logic without
+  pulling in an async runtime.
+- Embedded or `no_std` code that needs constrained values or resilience math.
+
+## When not to use Reliakit
+
+Reliakit is a set of small building blocks, not a platform. Reach for something
+else when you need:
+
+- a full web framework, HTTP stack, or async runtime integration;
+- a complete serialization ecosystem with format plugins and zero-copy
+  deserialization;
+- schema validation, query/database tooling, or an ORM;
+- domain-specific validators beyond Reliakit's intentionally narrow checks
+  (its `Email`/`HttpUrl` validation is pragmatic, not a full RFC implementation).
+
+## Feature flags & `no_std`
+
+Reliakit is `no_std`-friendly where it makes sense, but the details differ per
+crate — check each crate's README for the exact flags.
+
+- **Default features** enable `std`, which implies `alloc`. Building with
+  `--no-default-features` gives the `no_std` subset.
+- **Allocation-backed APIs need `alloc`.** Owned types (`String`/`Vec`-backed,
+  e.g. `Email`, `BoundedStr`, `SecretString`, `BoundedVec`, all of
+  `reliakit-json`) require the `alloc` feature; the allocation-free primitives
+  (`Port`, `Percent`, `Uuid`, `MacAddress`, `HumanDuration`, numeric types) work
+  with neither.
+- **The resilience crates are pure `core`.** `reliakit-backoff`,
+  `reliakit-circuit`, `reliakit-ratelimit`, `reliakit-timeout`, and
+  `reliakit-core` need no allocation at all. `circuit`, `ratelimit`, and
+  `timeout` offer an optional `core` feature that adds `*_now(clock)` convenience
+  methods.
+- **`reliakit-derive` is a proc-macro crate.** It runs at compile time on the
+  host, so the usual `no_std`/`alloc` discussion does not apply to it; the code
+  it generates inherits the `no_std` support of the trait crate.
 
 ## Contributing
 
@@ -421,13 +274,9 @@ for non-trivial changes so the direction can be discussed first.
 - Add tests for any new public API surface.
 - Run `cargo fmt`, `cargo clippy`, and `cargo test` before submitting.
 
-See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for contribution guidelines,
-[`CHANGELOG.md`](./CHANGELOG.md) for release notes, [`RELEASING.md`](./RELEASING.md)
-for the release process, and [`SECURITY.md`](./SECURITY.md) for vulnerability
-reporting.
-
-Every crate depends only on the standard library and on other `reliakit-*`
-crates; a CI check fails the build if any third-party dependency is introduced.
+See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for guidelines, [`CHANGELOG.md`](./CHANGELOG.md)
+for release notes, [`RELEASING.md`](./RELEASING.md) for the release process, and
+[`SECURITY.md`](./SECURITY.md) for vulnerability reporting.
 
 ## Star History
 
