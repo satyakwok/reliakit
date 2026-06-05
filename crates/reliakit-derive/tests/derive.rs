@@ -295,3 +295,60 @@ fn mixed_enum_roundtrip() {
         assert_eq!(decode_from_slice_exact::<Mixed>(&bytes).unwrap(), value);
     }
 }
+
+#[derive(Debug, PartialEq, CanonicalEncode, CanonicalDecode)]
+struct Inner {
+    a: u8,
+    b: u16,
+}
+
+#[derive(Debug, PartialEq, CanonicalEncode, CanonicalDecode)]
+enum Nested {
+    Wrap(Inner),
+    Pair { left: Inner, right: u8 },
+    List(Vec<u8>),
+    Maybe(Option<u16>),
+}
+
+#[test]
+fn nested_and_composite_roundtrip() {
+    // A derived struct used as a field, and codec's own composite types
+    // (`Vec`, `Option`), compose through the derived enum.
+    for value in [
+        Nested::Wrap(Inner { a: 1, b: 2 }),
+        Nested::Pair {
+            left: Inner { a: 3, b: 4 },
+            right: 5,
+        },
+        Nested::List(vec![10, 20, 30]),
+        Nested::Maybe(Some(700)),
+        Nested::Maybe(None),
+    ] {
+        let bytes = encode_to_vec(&value).unwrap();
+        assert_eq!(decode_from_slice_exact::<Nested>(&bytes).unwrap(), value);
+    }
+}
+
+// Raw-identifier variants are necessarily keywords, hence lower case.
+#[allow(non_camel_case_types)]
+#[derive(Debug, PartialEq, CanonicalEncode, CanonicalDecode)]
+enum Keywords {
+    r#type,
+    r#match(u8),
+    Pair { r#fn: u8, r#struct: u16 },
+}
+
+#[test]
+fn raw_identifier_variants_and_fields_roundtrip() {
+    for value in [
+        Keywords::r#type,
+        Keywords::r#match(9),
+        Keywords::Pair {
+            r#fn: 1,
+            r#struct: 2,
+        },
+    ] {
+        let bytes = encode_to_vec(&value).unwrap();
+        assert_eq!(decode_from_slice_exact::<Keywords>(&bytes).unwrap(), value);
+    }
+}

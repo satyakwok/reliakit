@@ -157,6 +157,13 @@ enum Event {
 }
 ```
 
+A complete runnable example — all three variant kinds plus a nested derived
+struct inside a struct variant — is in `examples/protocol.rs`:
+
+```sh
+cargo run -p reliakit-derive --example protocol
+```
+
 ### Unsupported enum forms
 
 These are rejected with a compile error rather than encoded with a guessed
