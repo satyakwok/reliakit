@@ -4,7 +4,11 @@
 
 # reliakit-derive
 
+[![Crates.io](https://img.shields.io/crates/v/reliakit-derive.svg)](https://crates.io/crates/reliakit-derive)
+[![Crates.io Downloads](https://img.shields.io/crates/d/reliakit-derive.svg)](https://crates.io/crates/reliakit-derive)
+[![Docs.rs](https://docs.rs/reliakit-derive/badge.svg)](https://docs.rs/reliakit-derive)
 [![CI](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml/badge.svg)](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/satyakwok/reliakit/branch/main/graph/badge.svg?flag=reliakit-derive)](https://codecov.io/gh/satyakwok/reliakit/tree/main/crates/reliakit-derive)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/satyakwok/reliakit/blob/main/LICENSE)
 
 Derive macros for `reliakit` traits, implemented with only the standard library
@@ -65,8 +69,13 @@ for those to be explicit, and this derive does not try to express them.
 ## Installation
 
 The generated code refers to `reliakit-codec`, so the two crates are used
-together. `reliakit-derive` ships as part of the reliakit workspace; the
-crates.io install snippet and live badges are added when it is published.
+together:
+
+```toml
+[dependencies]
+reliakit-codec = "0.2"
+reliakit-derive = "0.1"
+```
 
 ```rust
 use reliakit_codec::{decode_from_slice_exact, encode_to_vec};

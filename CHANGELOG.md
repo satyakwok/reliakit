@@ -10,13 +10,6 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 
 ### Added
 
-- Added `reliakit-derive`, a procedural-macro crate providing
-  `#[derive(CanonicalEncode)]` and `#[derive(CanonicalDecode)]` for the
-  `reliakit-codec` traits. The generated code matches a handwritten
-  implementation — one encode/decode call per field in declaration order — and
-  supports named, tuple, and unit structs; enums, unions, and generics are
-  rejected with a descriptive compile error. It is built on only the standard
-  library proc-macro API and adds no third-party dependencies.
 - Added a CI job that fails if any workspace crate gains a third-party
   dependency (of any kind), enforcing the zero-dependency policy, and extended
   the bare-metal `no_std` checks to cover every `no_std` crate. Added
@@ -30,6 +23,17 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
   The tag-triggered and manual publish workflows now mint a short-lived token at
   publish time instead of reading a stored API token, so no long-lived registry
   token is kept in repository secrets.
+
+## reliakit-derive 0.1.0 - 2026-06-05
+
+### Added
+
+- Initial release of `reliakit-derive`: `#[derive(CanonicalEncode)]` and
+  `#[derive(CanonicalDecode)]` for the `reliakit-codec` traits. The generated
+  code matches a handwritten implementation — one encode/decode call per field
+  in declaration order — and supports named, tuple, and unit structs; enums,
+  unions, and generics are rejected with a descriptive compile error. Built on
+  only the standard library proc-macro API with no third-party dependencies.
 
 ## reliakit-json 0.2.3 - 2026-06-04
 

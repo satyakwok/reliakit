@@ -37,6 +37,7 @@ Each crate is small, dependency-free at runtime, `#![forbid(unsafe_code)]`,
 | [`reliakit-json`](https://crates.io/crates/reliakit-json) | Strict, bounded, deterministic JSON for untrusted input |
 | [`reliakit-timeout`](https://crates.io/crates/reliakit-timeout) | Clock-agnostic deadlines and timeouts (time-limiter) |
 | [`reliakit-core`](https://crates.io/crates/reliakit-core) | Shared `Clock` trait and ready-made clocks for the resilience crates |
+| [`reliakit-derive`](https://crates.io/crates/reliakit-derive) | Derive macros for the `reliakit-codec` traits, with no third-party dependencies |
 
 `reliakit-backoff`, `reliakit-circuit`, `reliakit-ratelimit`, and
 `reliakit-timeout` are **clock-agnostic resilience patterns** — you pass the
@@ -279,6 +280,7 @@ reliakit-ratelimit = "0.1"
 reliakit-json = "0.2"
 reliakit-timeout = "0.1"
 reliakit-core = "0.1"
+reliakit-derive = "0.1"
 ```
 
 Add only the crates you need — each is usable independently.
@@ -388,8 +390,8 @@ normal Rust crate versioning.
 `reliakit-primitives`, `reliakit-secret`, `reliakit-validate`,
 `reliakit-collections`, `reliakit-codec`, `reliakit-backoff`,
 `reliakit-circuit`, `reliakit-ratelimit`, `reliakit-json`,
-`reliakit-timeout`, and `reliakit-core` are published to crates.io. APIs may
-receive compatible refinements before a `1.0` release.
+`reliakit-timeout`, `reliakit-core`, and `reliakit-derive` are published to
+crates.io. APIs may receive compatible refinements before a `1.0` release.
 
 Logo assets are stored under [`assets/`](./assets/).
 
@@ -408,9 +410,6 @@ Published:
 - `reliakit-json`
 - `reliakit-timeout`
 - `reliakit-core`
-
-Planned:
-
 - `reliakit-derive`
 
 ## Contributing
