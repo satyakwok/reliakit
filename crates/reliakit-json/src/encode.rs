@@ -135,4 +135,14 @@ mod tests {
             r#"{"b":2,"a":1}"#
         );
     }
+
+    #[test]
+    fn array_constructor_and_reference_forwarding() {
+        let array = JsonValue::array([1u8.to_json_value(), 2u8.to_json_value()]);
+        assert_eq!(to_compact_string(&array), "[1,2]");
+
+        // The `&T` blanket impl forwards to the inner value.
+        let n = 5u8;
+        assert_eq!(to_json_string(&&n), "5");
+    }
 }

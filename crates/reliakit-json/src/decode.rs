@@ -167,4 +167,23 @@ mod tests {
         let err = from_json_str::<u8>("nope").unwrap_err();
         assert!(matches!(err, JsonFromStrError::Parse(_)));
     }
+
+    #[test]
+    fn error_messages_are_readable() {
+        use crate::error::JsonDecodeError;
+        use alloc::string::ToString;
+
+        let error = JsonDecodeError::number("bad number");
+        assert_eq!(error.message(), "bad number");
+        assert_eq!(error.to_string(), "bad number");
+
+        // Both `JsonFromStrError` arms render their inner error.
+        assert!(JsonFromStrError::Decode(error)
+            .to_string()
+            .contains("bad number"));
+        assert!(from_json_str::<u8>("nope")
+            .unwrap_err()
+            .to_string()
+            .contains("invalid JSON"));
+    }
 }

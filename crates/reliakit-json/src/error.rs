@@ -284,8 +284,6 @@ pub enum JsonDecodeErrorKind {
     MissingField,
     /// A number could not be represented by the target type.
     Number,
-    /// An enum tag did not match any known variant.
-    UnknownVariant,
 }
 
 /// An error from decoding a [`JsonValue`](crate::JsonValue) into a typed value.
@@ -324,11 +322,6 @@ impl JsonDecodeError {
     /// A number could not be represented by the target type.
     pub const fn number(message: &'static str) -> Self {
         Self::new(JsonDecodeErrorKind::Number, message)
-    }
-
-    /// An enum tag matched no known variant.
-    pub const fn unknown_variant(message: &'static str) -> Self {
-        Self::new(JsonDecodeErrorKind::UnknownVariant, message)
     }
 }
 
