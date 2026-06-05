@@ -4,11 +4,11 @@ version = 4
 
 [[package]]
 name = "reliakit-backoff"
-version = "0.1.1"
+version = "0.1.2"
 
 [[package]]
 name = "reliakit-circuit"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "reliakit-backoff",
  "reliakit-core",
@@ -24,11 +24,11 @@ dependencies = [
 
 [[package]]
 name = "reliakit-collections"
-version = "0.3.0"
+version = "0.3.1"
 
 [[package]]
 name = "reliakit-core"
-version = "0.1.0"
+version = "0.1.1"
 
 [[package]]
 name = "reliakit-derive"
@@ -39,7 +39,7 @@ dependencies = [
 
 [[package]]
 name = "reliakit-json"
-version = "0.2.3"
+version = "0.2.4"
 dependencies = [
  "reliakit-primitives",
  "reliakit-validate",
@@ -47,7 +47,7 @@ dependencies = [
 
 [[package]]
 name = "reliakit-primitives"
-version = "0.4.1"
+version = "0.4.2"
 dependencies = [
  "reliakit-secret",
  "reliakit-validate",
@@ -55,22 +55,22 @@ dependencies = [
 
 [[package]]
 name = "reliakit-ratelimit"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "reliakit-core",
 ]
 
 [[package]]
 name = "reliakit-secret"
-version = "0.1.1"
+version = "0.1.2"
 
 [[package]]
 name = "reliakit-timeout"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "reliakit-core",
 ]
 
 [[package]]
 name = "reliakit-validate"
-version = "0.3.1"
+version = "0.3.2"

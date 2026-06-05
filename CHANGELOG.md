@@ -24,6 +24,77 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
   publish time instead of reading a stored API token, so no long-lived registry
   token is kept in repository secrets.
 
+## reliakit-backoff 0.1.2 - 2026-06-05
+
+### Changed
+
+- Add the `documentation` link to the crate manifest. Packaging metadata only;
+  no API or behavior changes.
+
+## reliakit-circuit 0.2.2 - 2026-06-05
+
+### Changed
+
+- Add the `documentation` link to the crate manifest. Packaging metadata only;
+  no API or behavior changes.
+
+## reliakit-collections 0.3.1 - 2026-06-05
+
+### Changed
+
+- Add the `documentation` link to the crate manifest. Packaging metadata only;
+  no API or behavior changes.
+
+## reliakit-core 0.1.1 - 2026-06-05
+
+### Changed
+
+- Add the `documentation` link to the crate manifest. Packaging metadata only;
+  no API or behavior changes.
+
+## reliakit-json 0.2.4 - 2026-06-05
+
+### Changed
+
+- Add the `documentation` link to the crate manifest. Packaging metadata only;
+  no API or behavior changes.
+
+## reliakit-primitives 0.4.2 - 2026-06-05
+
+### Changed
+
+- Add the `documentation` link to the crate manifest. Packaging metadata only;
+  no API or behavior changes.
+
+## reliakit-ratelimit 0.1.2 - 2026-06-05
+
+### Changed
+
+- Add the `documentation` link to the crate manifest. Packaging metadata only;
+  no API or behavior changes.
+
+## reliakit-secret 0.1.2 - 2026-06-05
+
+### Changed
+
+- Add the `documentation` link to the crate manifest, and add the workspace logo
+  header and crates.io downloads badge to the README. Documentation and
+  packaging only; no API or behavior changes.
+
+## reliakit-timeout 0.1.2 - 2026-06-05
+
+### Changed
+
+- Add the `documentation` link to the crate manifest. Packaging metadata only;
+  no API or behavior changes.
+
+## reliakit-validate 0.3.2 - 2026-06-05
+
+### Changed
+
+- Add the `documentation` link to the crate manifest. Packaging metadata only;
+  no API or behavior changes.
+
 ## reliakit-derive 0.1.1 - 2026-06-05
 
 ### Added
