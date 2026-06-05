@@ -32,7 +32,7 @@ version = "0.1.1"
 
 [[package]]
 name = "reliakit-derive"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "reliakit-codec",
  "reliakit-json",
@@ -40,7 +40,7 @@ dependencies = [
 
 [[package]]
 name = "reliakit-json"
-version = "0.2.4"
+version = "0.2.5"
 dependencies = [
  "reliakit-primitives",
  "reliakit-validate",
