@@ -1,0 +1,22 @@
+[package]
+name = "reliakit-derive"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation = "https://docs.rs/reliakit-derive"
+readme = "README.md"
+description = "Derive macros for reliakit traits, implemented with only the standard library proc-macro API and no third-party dependencies."
+keywords = ["derive", "codec", "macros", "canonical", "reliability"]
+categories = ["development-tools::procedural-macro-helpers", "encoding", "rust-patterns"]
+
+[lib]
+proc-macro = true
+
+[dev-dependencies]
+reliakit-codec = { path = "../reliakit-codec", version = "0.2", default-features = false, features = ["alloc"] }
+
+[lints]
+workspace = true

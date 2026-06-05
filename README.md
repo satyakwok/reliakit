@@ -372,8 +372,9 @@ reliakit/
 │   │   └── examples/
 │   ├── reliakit-timeout/
 │   │   └── examples/
-│   └── reliakit-core/
-│       └── examples/
+│   ├── reliakit-core/
+│   │   └── examples/
+│   └── reliakit-derive/
 ├── Cargo.toml
 ├── README.md
 └── LICENSE

@@ -31,6 +31,13 @@ name = "reliakit-core"
 version = "0.1.0"
 
 [[package]]
+name = "reliakit-derive"
+version = "0.1.0"
+dependencies = [
+ "reliakit-codec",
+]
+
+[[package]]
 name = "reliakit-json"
 version = "0.2.3"
 dependencies = [
