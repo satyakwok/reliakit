@@ -18,5 +18,9 @@ proc-macro = true
 [dev-dependencies]
 reliakit-codec = { path = "../reliakit-codec", version = "0.2", default-features = false, features = ["alloc"] }
 
+[[example]]
+name = "protocol"
+path = "examples/protocol.rs"
+
 [lints]
 workspace = true
