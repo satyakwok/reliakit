@@ -10,6 +10,13 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 
 ### Added
 
+- Added `reliakit-derive`, a procedural-macro crate providing
+  `#[derive(CanonicalEncode)]` and `#[derive(CanonicalDecode)]` for the
+  `reliakit-codec` traits. The generated code matches a handwritten
+  implementation — one encode/decode call per field in declaration order — and
+  supports named, tuple, and unit structs; enums, unions, and generics are
+  rejected with a descriptive compile error. It is built on only the standard
+  library proc-macro API and adds no third-party dependencies.
 - Added a CI job that fails if any workspace crate gains a third-party
   dependency (of any kind), enforcing the zero-dependency policy, and extended
   the bare-metal `no_std` checks to cover every `no_std` crate. Added

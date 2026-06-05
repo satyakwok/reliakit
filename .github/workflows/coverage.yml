@@ -254,3 +254,22 @@ jobs:
           fail_ci_if_error: true
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Generate reliakit-derive coverage
+        run: |
+          cargo llvm-cov \
+            -p reliakit-derive \
+            --all-features \
+            --locked \
+            --lcov \
+            --output-path lcov-reliakit-derive.info
+
+      - name: Upload reliakit-derive coverage
+        uses: codecov/codecov-action@v6
+        with:
+          files: lcov-reliakit-derive.info
+          flags: reliakit-derive
+          name: reliakit-derive
+          fail_ci_if_error: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

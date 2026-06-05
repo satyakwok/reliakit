@@ -11,6 +11,7 @@ members = [
     "crates/reliakit-json",
     "crates/reliakit-timeout",
     "crates/reliakit-core",
+    "crates/reliakit-derive",
 ]
 resolver = "2"
 
