@@ -147,6 +147,21 @@ retries). All three are clock-agnostic and `no_std`.
 - Precise sub-token (fractional) rates — the bucket works in whole tokens; scale
   your unit (e.g. count in tenths) if you need finer granularity.
 
+## Feature Flags
+
+| Flag | Default | Effect |
+|---|---:|---|
+| `core` | no | Adds `*_now(clock)` methods that read the time from a `reliakit_core::Clock` instead of taking an explicit `now: u64`. Pulls in `reliakit-core` (`no_std`, zero third-party dependencies). |
+
+The `now: u64` methods are the primitive API; the `core` feature is purely a
+convenience.
+
+## `no_std`
+
+`reliakit-ratelimit` is `#![no_std]` and allocation-free — pure `core`, zero
+third-party dependencies. The limiter is a small `Copy` value, so it runs on
+embedded targets without changes.
+
 ## Safety
 
 This crate is `#![forbid(unsafe_code)]` and `#![no_std]`. All arithmetic
@@ -155,6 +170,11 @@ saturates; no method panics on any input, including a non-monotonic clock.
 ## Minimum Supported Rust Version
 
 Rust `1.85` and newer. No nightly features are used.
+
+## Status
+
+Published to crates.io and pre-1.0. The token-bucket API is stable; it may
+receive backward-compatible refinements before a `1.0` release.
 
 ## License
 
