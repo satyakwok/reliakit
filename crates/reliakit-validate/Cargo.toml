@@ -6,6 +6,7 @@ rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
 homepage.workspace = true
+documentation = "https://docs.rs/reliakit-validate"
 readme = "README.md"
 description = "Composable validation traits and error types for Rust structs and values."
 keywords = ["validation", "rules", "constraints", "no-std", "reliability"]

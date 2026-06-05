@@ -6,6 +6,7 @@ rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
 homepage.workspace = true
+documentation = "https://docs.rs/reliakit-ratelimit"
 readme = "README.md"
 description = "Clock-agnostic token-bucket rate limiter with retry-after. no_std and zero-dependency."
 keywords = ["rate-limiter", "token-bucket", "throttle", "no-std", "reliability"]

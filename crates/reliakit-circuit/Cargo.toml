@@ -6,6 +6,7 @@ rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
 homepage.workspace = true
+documentation = "https://docs.rs/reliakit-circuit"
 readme = "README.md"
 description = "Clock-agnostic circuit breaker for fault isolation and fast failure. no_std and zero-dependency."
 keywords = ["circuit-breaker", "reliability", "resilience", "no-std", "fault-tolerance"]
