@@ -1,0 +1,23 @@
+[package]
+name = "reliakit-decide"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation = "https://docs.rs/reliakit-decide"
+readme = "README.md"
+description = "Deterministic, zero-dependency utility-based decision engine for agents and control logic. no_std + alloc."
+keywords = ["decision", "utility-ai", "agent", "deterministic", "no-std"]
+categories = ["algorithms", "no-std"]
+
+[package.metadata.docs.rs]
+all-features = true
+
+[features]
+default = ["std"]
+std = []
+
+[lints]
+workspace = true

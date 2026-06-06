@@ -12,6 +12,7 @@ members = [
     "crates/reliakit-timeout",
     "crates/reliakit-core",
     "crates/reliakit-derive",
+    "crates/reliakit-decide",
 ]
 resolver = "2"
 
