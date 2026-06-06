@@ -341,6 +341,51 @@ impl<A: Clone> Reasoner<A> {
         })
     }
 
+    /// Chooses an action at random with probability proportional to its utility
+    /// (roulette selection), so repeated decisions vary instead of always
+    /// returning the single best.
+    ///
+    /// `rand` is any uniformly-distributed `u32` you supply (e.g. from `rand` or
+    /// `getrandom`), interpreted as the fraction `rand / 2^32`. The same `rand`
+    /// and candidates always yield the same choice — the engine never owns a
+    /// random source, so it stays deterministic and testable.
+    ///
+    /// Returns `None` if there are no actions. If every utility is zero, the
+    /// earliest-declared action is returned.
+    pub fn decide_weighted(&self, rand: u32) -> Option<Decision<A>> {
+        if self.actions.is_empty() {
+            return None;
+        }
+        let total: u64 = self.actions.iter().map(|a| a.utility().raw() as u64).sum();
+        if total == 0 {
+            let a = &self.actions[0];
+            return Some(Decision {
+                id: a.id.clone(),
+                utility: a.utility(),
+            });
+        }
+        // `target` lands in `0..total` because `rand <= u32::MAX`; the u128
+        // multiply cannot overflow.
+        let target = ((rand as u128 * total as u128) >> 32) as u64;
+        let mut cumulative: u64 = 0;
+        for a in &self.actions {
+            cumulative += a.utility().raw() as u64;
+            if target < cumulative {
+                return Some(Decision {
+                    id: a.id.clone(),
+                    utility: a.utility(),
+                });
+            }
+        }
+        // Unreachable while `target < total`; the index is valid because
+        // `actions` is non-empty.
+        let a = &self.actions[self.actions.len() - 1];
+        Some(Decision {
+            id: a.id.clone(),
+            utility: a.utility(),
+        })
+    }
+
     /// Explains the winning decision: the chosen id, its utility, and the
     /// per-consideration breakdown that produced it. `None` if there are no
     /// actions. The winner matches [`decide`](Reasoner::decide).
@@ -533,5 +578,35 @@ mod tests {
     fn quadratic_extremes() {
         assert_eq!(Curve::Quadratic.eval(Score::MAX), Score::MAX); // 1.0^2 = 1.0
         assert_eq!(Curve::Quadratic.eval(Score::ZERO), Score::ZERO); // 0^2 = 0
+    }
+
+    #[test]
+    fn decide_weighted_is_proportional_and_deterministic() {
+        let mut r = Reasoner::new();
+        r.add(Action::new("a").consider(Curve::Linear, Score::from_raw(2_500))); // util 0.25
+        r.add(Action::new("b").consider(Curve::Linear, Score::from_raw(7_500))); // util 0.75
+
+        // bottom of the range picks the first slice, top picks the last
+        assert_eq!(r.decide_weighted(0).unwrap().id, "a");
+        assert_eq!(r.decide_weighted(u32::MAX).unwrap().id, "b");
+        // deterministic: the same rand always yields the same choice
+        assert_eq!(
+            r.decide_weighted(1_234_567).unwrap().id,
+            r.decide_weighted(1_234_567).unwrap().id
+        );
+    }
+
+    #[test]
+    fn decide_weighted_zero_total_returns_first() {
+        let mut r = Reasoner::new();
+        r.add(Action::new("x").with_base(Score::ZERO));
+        r.add(Action::new("y").with_base(Score::ZERO));
+        assert_eq!(r.decide_weighted(999).unwrap().id, "x");
+    }
+
+    #[test]
+    fn decide_weighted_empty_is_none() {
+        let r: Reasoner<&str> = Reasoner::new();
+        assert!(r.decide_weighted(0).is_none());
     }
 }

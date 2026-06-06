@@ -45,15 +45,16 @@ Core (always on, this crate's `0.1`):
   `Threshold`, `Constant`; more later).
 - `Consideration` — one signal run through a curve.
 - `Action<A>` — a candidate decision: a base weight + considerations.
-- `Reasoner<A>` — holds actions, `decide()` / `rank()` by utility.
-- `Decision<A>` — the chosen id + its utility (the basis for `explain`).
+- `Reasoner<A>` — holds actions: `decide()` / `rank()` by utility, `explain()`
+  for the per-consideration breakdown, and `decide_weighted(rand)` for roulette
+  selection (caller-supplied RNG; dep-free, so it lives in core, not behind a
+  feature).
+- `Decision<A>` / `Explanation<A>` / `Contribution` — the chosen id + utility,
+  and the breakdown of why it won.
 
 Planned opt-in layers (later releases, behind features — none compromise the
 small core):
 
-- `explain` — full per-consideration breakdown of why an action won.
-- `variety` — weighted-random pick among the top candidates (caller RNG), so an
-  agent is not monotonous.
 - `bandit` — exploration vs exploitation (epsilon-greedy / softmax) so feedback
   actually improves choices over time.
 - `adapt` — bounded integer weight adjustment from outcome feedback, plus
@@ -77,8 +78,8 @@ making fast, consistent, explainable, improvable decisions — and that is enoug
 ## Roadmap
 
 - `0.1` deterministic utility core (`Score`/`Curve`/`Consideration`/`Action`/
-  `Reasoner`) with exact-output tests. Can already replace rule-based routing /
-  selection.
-- `0.2` `explain` + `variety`.
-- `0.3` `adapt` + persistable weights.
-- `0.4` `bandit`, `constraint`, `personas`.
+  `Reasoner`) with exact-output tests — including `explain()` and dep-free
+  weighted selection (`decide_weighted`). Can already replace rule-based routing
+  / selection.
+- `0.2` `adapt` + persistable weights.
+- `0.3` `bandit`, `constraint`, `personas`.
