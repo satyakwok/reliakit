@@ -45,7 +45,10 @@ assert_eq!(brain.decide().unwrap().id, "flee"); // low health -> flee wins
   `Threshold`, `Constant`).
 - `Consideration` — one signal run through a curve.
 - `Action` — multiplies its considerations (product-veto: any near-zero
-  consideration vetoes the action) to form a utility.
+  consideration vetoes the action) to form a utility. `gate(allowed)` makes a
+  decision constraint-aware with no dependency: pass whatever you already know (a
+  deadline, rate limiter, circuit breaker, business hours, a feature flag) as a
+  `bool`; a gated-off action has zero utility. Keep one ungated fallback.
 - `Reasoner` — holds the candidate actions: `decide()` / `rank()` by utility,
   `explain()` for the per-consideration breakdown of why an action won, and
   `decide_weighted(rand)` for roulette selection (caller-supplied RNG) so an agent

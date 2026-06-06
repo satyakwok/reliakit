@@ -195,6 +195,10 @@ pub struct Action<A> {
     pub id: A,
     /// The base weight before considerations (defaults to [`Score::MAX`]).
     pub base: Score,
+    /// Whether this action is permitted. A gated-off action (`false`) always has
+    /// zero utility, so it is never chosen by `decide`/`decide_weighted`. Set it
+    /// with [`gate`](Action::gate). Defaults to `true`.
+    pub allowed: bool,
     /// The considerations multiplied together to form the utility.
     pub considerations: Vec<Consideration>,
 }
@@ -205,8 +209,22 @@ impl<A> Action<A> {
         Action {
             id,
             base: Score::MAX,
+            allowed: true,
             considerations: Vec::new(),
         }
+    }
+
+    /// Gates the action on a caller-supplied condition (builder style). Calls
+    /// combine with AND, so `.gate(a).gate(b)` is allowed only when both hold.
+    ///
+    /// This is how decisions become constraint-aware without any dependency: the
+    /// caller passes whatever it already knows — a deadline, a rate limiter, a
+    /// circuit breaker, business hours, a feature flag — as a `bool`. A gated-off
+    /// action has zero utility and is never chosen. Keep one ungated fallback
+    /// action so a decision still resolves when everything else is gated off.
+    pub fn gate(mut self, allowed: bool) -> Action<A> {
+        self.allowed = self.allowed && allowed;
+        self
     }
 
     /// Sets the base weight (builder style).
@@ -234,8 +252,13 @@ impl<A> Action<A> {
         self
     }
 
-    /// Computes the action's utility: `base * product(considerations)`.
+    /// Computes the action's utility: `base * product(considerations)`, or
+    /// [`Score::ZERO`] if the action is gated off ([`allowed`](Action::allowed)
+    /// is `false`).
     pub fn utility(&self) -> Score {
+        if !self.allowed {
+            return Score::ZERO;
+        }
         let mut u = self.base;
         for c in &self.considerations {
             u = u.mul(c.score());
@@ -791,5 +814,49 @@ mod tests {
         assert_eq!(restored.weight(&"a"), p.weight(&"a"));
         assert_eq!(restored.weight(&"b").raw(), 3_000);
         assert_eq!(restored.len(), p.len());
+    }
+
+    #[test]
+    fn gate_vetoes_and_combines() {
+        // gate(true) is a no-op
+        let ok = Action::new("x")
+            .gate(true)
+            .consider(Curve::Linear, Score::from_raw(8_000));
+        assert_eq!(ok.utility().raw(), 8_000);
+
+        // gate(false) zeroes the action even with a maxed consideration
+        let blocked = Action::new("x")
+            .gate(false)
+            .consider(Curve::Linear, Score::MAX);
+        assert_eq!(blocked.utility(), Score::ZERO);
+
+        // gates AND together
+        assert!(Action::new("x").gate(true).gate(true).allowed);
+        assert!(!Action::new("x").gate(true).gate(false).allowed);
+    }
+
+    #[test]
+    fn gated_action_loses_to_ungated_fallback() {
+        let mut r = Reasoner::new();
+        r.add(
+            Action::new("call_llm")
+                .gate(false) // blocked despite high utility
+                .consider(Curve::Linear, Score::MAX),
+        );
+        r.add(Action::new("defer").consider(Curve::Linear, Score::from_raw(1_000)));
+        assert_eq!(r.decide().unwrap().id, "defer");
+    }
+
+    #[test]
+    fn gated_action_excluded_from_weighted() {
+        let mut r = Reasoner::new();
+        r.add(
+            Action::new("blocked")
+                .gate(false)
+                .consider(Curve::Linear, Score::MAX),
+        );
+        r.add(Action::new("open").consider(Curve::Linear, Score::from_raw(5_000)));
+        // even at the bottom of the random range, a zero-weight action is skipped
+        assert_eq!(r.decide_weighted(0).unwrap().id, "open");
     }
 }
