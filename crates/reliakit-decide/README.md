@@ -50,6 +50,10 @@ assert_eq!(brain.decide().unwrap().id, "flee"); // low health -> flee wins
   `explain()` for the per-consideration breakdown of why an action won, and
   `decide_weighted(rand)` for roulette selection (caller-supplied RNG) so an agent
   varies instead of always repeating the single best.
+- `Policy` — an optional persistent table of learned weights per key. `reward(key,
+  outcome)` nudges a weight toward what worked (bounded integer moving average,
+  deterministic); fold `weight(&key)` back into an action so choices improve over
+  time. Not machine learning — just feedback-tuned weights.
 
 ## `no_std`
 

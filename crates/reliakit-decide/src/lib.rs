@@ -427,6 +427,89 @@ impl<A: Clone> Reasoner<A> {
     }
 }
 
+/// A persistent table of learned weights, one per key, nudged by feedback.
+///
+/// Decision logic is stateless per call; `Policy` is the small mutable state that
+/// lets an agent improve over time. Read a key's learned weight and fold it into
+/// an action (as its base or a consideration); after an outcome, call
+/// [`reward`](Policy::reward) to move that weight toward what actually worked.
+///
+/// The update is a **bounded integer moving average**, so it is deterministic and
+/// can never run away — it is not machine learning, just `weight += rate * (outcome
+/// - weight)` in fixed point, clamped to `0.0..=1.0`.
+///
+/// # Example
+///
+/// ```
+/// use reliakit_decide::{Policy, Score};
+///
+/// // Start every key at 0.5, learning at rate 0.5.
+/// let mut policy = Policy::new(Score::from_ratio(1, 2), Score::from_ratio(1, 2));
+/// assert_eq!(policy.weight(&"route_a"), Score::from_ratio(1, 2)); // unseen -> default
+///
+/// // "route_a" worked well (outcome 1.0): its weight rises toward 1.0.
+/// policy.reward("route_a", Score::MAX);
+/// assert_eq!(policy.weight(&"route_a").raw(), 7_500); // 0.5 + 0.5*(1.0-0.5)
+/// ```
+#[derive(Debug, Clone)]
+pub struct Policy<K> {
+    entries: Vec<(K, Score)>,
+    rate: Score,
+    default: Score,
+}
+
+impl<K> Policy<K> {
+    /// Creates an empty policy with a learning `rate` and a `default` weight for
+    /// keys that have not been seen yet.
+    pub fn new(rate: Score, default: Score) -> Policy<K> {
+        Policy {
+            entries: Vec::new(),
+            rate,
+            default,
+        }
+    }
+
+    /// The number of keys that have learned weights.
+    pub fn len(&self) -> usize {
+        self.entries.len()
+    }
+
+    /// Returns `true` if no key has a learned weight yet.
+    pub fn is_empty(&self) -> bool {
+        self.entries.is_empty()
+    }
+
+    /// Bounded integer EMA: `w + rate * (outcome - w)`, clamped to `0.0..=1.0`.
+    fn step(rate: Score, current: Score, outcome: Score) -> Score {
+        let delta = outcome.raw() as i64 - current.raw() as i64; // [-SCALE, SCALE]
+        let moved = current.raw() as i64 + (rate.raw() as i64 * delta) / Score::SCALE as i64;
+        let clamped = moved.clamp(0, Score::SCALE as i64);
+        Score::from_raw(clamped as u32)
+    }
+}
+
+impl<K: PartialEq> Policy<K> {
+    /// The learned weight for `key`, or the configured default if it is unseen.
+    pub fn weight(&self, key: &K) -> Score {
+        self.entries
+            .iter()
+            .find(|(k, _)| k == key)
+            .map(|(_, w)| *w)
+            .unwrap_or(self.default)
+    }
+
+    /// Nudges `key`'s weight toward `outcome` by the learning rate. A previously
+    /// unseen key starts from the default before moving.
+    pub fn reward(&mut self, key: K, outcome: Score) {
+        if let Some(entry) = self.entries.iter_mut().find(|(k, _)| *k == key) {
+            entry.1 = Self::step(self.rate, entry.1, outcome);
+        } else {
+            let moved = Self::step(self.rate, self.default, outcome);
+            self.entries.push((key, moved));
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -593,7 +676,7 @@ mod tests {
         // one below stays in "a" (target 2499) and the boundary crosses to "b".
         assert_eq!(r.decide_weighted(1_073_741_823).unwrap().id, "a"); // target 2499 < 2500
         assert_eq!(r.decide_weighted(1_073_741_824).unwrap().id, "b"); // target 2500, crosses
-        // deterministic: the same rand always yields the same choice
+                                                                       // deterministic: the same rand always yields the same choice
         assert_eq!(
             r.decide_weighted(1_234_567).unwrap().id,
             r.decide_weighted(1_234_567).unwrap().id
@@ -612,5 +695,47 @@ mod tests {
     fn decide_weighted_empty_is_none() {
         let r: Reasoner<&str> = Reasoner::new();
         assert!(r.decide_weighted(0).is_none());
+    }
+
+    #[test]
+    fn policy_unseen_key_returns_default() {
+        let p: Policy<&str> = Policy::new(Score::from_ratio(1, 2), Score::from_raw(3_000));
+        assert_eq!(p.weight(&"x").raw(), 3_000);
+        assert!(p.is_empty());
+    }
+
+    #[test]
+    fn policy_reward_moves_toward_outcome_and_converges() {
+        // rate 0.5, default 0.5
+        let mut p = Policy::new(Score::from_ratio(1, 2), Score::from_ratio(1, 2));
+        p.reward("a", Score::MAX); // 0.5 + 0.5*(1.0-0.5) = 0.75
+        assert_eq!(p.weight(&"a").raw(), 7_500);
+        p.reward("a", Score::MAX); // 0.75 + 0.5*0.25 = 0.875
+        assert_eq!(p.weight(&"a").raw(), 8_750);
+        for _ in 0..50 {
+            p.reward("a", Score::MAX);
+        }
+        // converges upward toward 1.0, never exceeding it
+        assert!(p.weight(&"a").raw() > 9_900);
+        assert!(p.weight(&"a").raw() <= Score::SCALE);
+    }
+
+    #[test]
+    fn policy_rate_extremes() {
+        // rate 0.0 -> never changes
+        let mut still = Policy::new(Score::ZERO, Score::from_ratio(1, 2));
+        still.reward("a", Score::MAX);
+        assert_eq!(still.weight(&"a").raw(), 5_000);
+        // rate 1.0 -> jumps straight to the outcome
+        let mut fast = Policy::new(Score::MAX, Score::from_ratio(1, 2));
+        fast.reward("a", Score::from_raw(2_000));
+        assert_eq!(fast.weight(&"a").raw(), 2_000);
+    }
+
+    #[test]
+    fn policy_reward_toward_zero_clamps_at_zero() {
+        let mut p = Policy::new(Score::MAX, Score::from_ratio(1, 2)); // rate 1.0
+        p.reward("a", Score::ZERO);
+        assert_eq!(p.weight(&"a"), Score::ZERO);
     }
 }
