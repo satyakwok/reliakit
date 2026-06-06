@@ -58,7 +58,8 @@ assert_eq!(brain.decide().unwrap().id, "flee"); // low health -> flee wins
   deterministic); fold `weight(&key)` back into an action so choices improve over
   time. `entries()` / `set()` snapshot and restore the weights so the host can
   persist them (no built-in serializer). Not machine learning — just feedback-tuned
-  weights.
+  weights. Key it by `(agent, action)` to give each agent its own learned weights —
+  distinct "personas" with no extra types.
 
 ## `no_std`
 

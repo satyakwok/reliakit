@@ -877,4 +877,18 @@ mod tests {
         // even at the bottom of the random range, a zero-weight action is skipped
         assert_eq!(r.decide_weighted(0).unwrap().id, "open");
     }
+
+    #[test]
+    fn personas_emerge_from_per_agent_policy_keys() {
+        // One Policy keyed by (agent, action) gives each agent its own weights,
+        // so distinct "personalities" emerge with no new machinery.
+        let mut p = Policy::new(Score::MAX, Score::from_ratio(1, 2)); // rate 1.0 for a sharp test
+        p.reward(("vale", "trade"), Score::MAX); // Vale learns trading works
+        p.reward(("mason", "trade"), Score::ZERO); // Mason learns it does not
+
+        let vale = Action::new("trade").with_base(p.weight(&("vale", "trade")));
+        let mason = Action::new("trade").with_base(p.weight(&("mason", "trade")));
+        assert_eq!(vale.utility(), Score::MAX); // same action, opposite learned bias
+        assert_eq!(mason.utility(), Score::ZERO);
+    }
 }
