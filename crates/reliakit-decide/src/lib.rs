@@ -589,6 +589,10 @@ mod tests {
         // bottom of the range picks the first slice, top picks the last
         assert_eq!(r.decide_weighted(0).unwrap().id, "a");
         assert_eq!(r.decide_weighted(u32::MAX).unwrap().id, "b");
+        // the split sits at 25%: rand = 2^30 maps to target == 2500 exactly, so
+        // one below stays in "a" (target 2499) and the boundary crosses to "b".
+        assert_eq!(r.decide_weighted(1_073_741_823).unwrap().id, "a"); // target 2499 < 2500
+        assert_eq!(r.decide_weighted(1_073_741_824).unwrap().id, "b"); // target 2500, crosses
         // deterministic: the same rand always yields the same choice
         assert_eq!(
             r.decide_weighted(1_234_567).unwrap().id,
