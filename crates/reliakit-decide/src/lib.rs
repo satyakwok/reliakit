@@ -479,6 +479,13 @@ impl<K> Policy<K> {
         self.entries.is_empty()
     }
 
+    /// The learned `(key, weight)` pairs, for snapshotting to storage. The host
+    /// serializes these however it likes — the engine pulls in no serializer.
+    /// Restore them later with [`set`](Policy::set).
+    pub fn entries(&self) -> &[(K, Score)] {
+        &self.entries
+    }
+
     /// Bounded integer EMA: `w + rate * (outcome - w)`, clamped to `0.0..=1.0`.
     fn step(rate: Score, current: Score, outcome: Score) -> Score {
         let delta = outcome.raw() as i64 - current.raw() as i64; // [-SCALE, SCALE]
@@ -506,6 +513,17 @@ impl<K: PartialEq> Policy<K> {
         } else {
             let moved = Self::step(self.rate, self.default, outcome);
             self.entries.push((key, moved));
+        }
+    }
+
+    /// Sets `key`'s weight directly (insert or replace) — used to restore learned
+    /// weights from storage. Unlike [`reward`](Policy::reward) this does not apply
+    /// the learning rate; it stores the value as given.
+    pub fn set(&mut self, key: K, weight: Score) {
+        if let Some(entry) = self.entries.iter_mut().find(|(k, _)| *k == key) {
+            entry.1 = weight;
+        } else {
+            self.entries.push((key, weight));
         }
     }
 }
@@ -737,5 +755,41 @@ mod tests {
         let mut p = Policy::new(Score::MAX, Score::from_ratio(1, 2)); // rate 1.0
         p.reward("a", Score::ZERO);
         assert_eq!(p.weight(&"a"), Score::ZERO);
+    }
+
+    #[test]
+    fn policy_reward_same_key_updates_in_place() {
+        let mut p = Policy::new(Score::from_ratio(1, 2), Score::from_ratio(1, 2));
+        p.reward("a", Score::MAX);
+        p.reward("a", Score::MAX); // same key again
+        assert_eq!(p.len(), 1); // updated, not duplicated
+        p.reward("b", Score::MAX); // distinct key grows the table
+        assert_eq!(p.len(), 2);
+    }
+
+    #[test]
+    fn policy_set_replaces_existing() {
+        let mut p = Policy::new(Score::MAX, Score::ZERO);
+        p.set("a", Score::from_raw(1_000));
+        p.set("a", Score::from_raw(9_000)); // replace, not duplicate
+        assert_eq!(p.len(), 1);
+        assert_eq!(p.weight(&"a").raw(), 9_000);
+    }
+
+    #[test]
+    fn policy_entries_snapshot_round_trips_via_set() {
+        let mut p = Policy::new(Score::from_ratio(1, 2), Score::ZERO);
+        p.reward("a", Score::MAX);
+        p.set("b", Score::from_raw(3_000));
+
+        // snapshot for "storage", then restore into a fresh policy
+        let saved: Vec<(&str, Score)> = p.entries().to_vec();
+        let mut restored = Policy::new(Score::from_ratio(1, 2), Score::ZERO);
+        for (k, w) in saved {
+            restored.set(k, w);
+        }
+        assert_eq!(restored.weight(&"a"), p.weight(&"a"));
+        assert_eq!(restored.weight(&"b").raw(), 3_000);
+        assert_eq!(restored.len(), p.len());
     }
 }

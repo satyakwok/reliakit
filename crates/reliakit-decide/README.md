@@ -53,7 +53,9 @@ assert_eq!(brain.decide().unwrap().id, "flee"); // low health -> flee wins
 - `Policy` — an optional persistent table of learned weights per key. `reward(key,
   outcome)` nudges a weight toward what worked (bounded integer moving average,
   deterministic); fold `weight(&key)` back into an action so choices improve over
-  time. Not machine learning — just feedback-tuned weights.
+  time. `entries()` / `set()` snapshot and restore the weights so the host can
+  persist them (no built-in serializer). Not machine learning — just feedback-tuned
+  weights.
 
 ## `no_std`
 
