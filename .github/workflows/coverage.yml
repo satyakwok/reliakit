@@ -46,6 +46,19 @@ jobs:
       - name: Install cargo-llvm-cov
         run: cargo install cargo-llvm-cov --locked
 
+      # Workaround: codecov's own GPG key URL (keybase.io/codecovsecurity) is
+      # currently 404, so codecov-action's CLI signature check fails with
+      # "No public key". Pre-import the genuine Codecov Uploader key by
+      # fingerprint from a public keyserver so the signature still verifies
+      # against the real key (this does not skip verification). Remove once
+      # codecov restores its key endpoint.
+      - name: Pre-import Codecov signing key
+        run: |
+          gpg --batch --keyserver keyserver.ubuntu.com \
+            --recv-keys 27034E7FDB850E0BBC2C62FF806BB28AED779869 \
+          || gpg --batch --keyserver hkps://keys.openpgp.org \
+            --recv-keys 27034E7FDB850E0BBC2C62FF806BB28AED779869
+
       - name: Generate reliakit-primitives coverage
         run: |
           cargo llvm-cov \
@@ -270,6 +283,25 @@ jobs:
           files: lcov-reliakit-derive.info
           flags: reliakit-derive
           name: reliakit-derive
+          fail_ci_if_error: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Generate reliakit-decide coverage
+        run: |
+          cargo llvm-cov \
+            -p reliakit-decide \
+            --all-features \
+            --locked \
+            --lcov \
+            --output-path lcov-reliakit-decide.info
+
+      - name: Upload reliakit-decide coverage
+        uses: codecov/codecov-action@v6
+        with:
+          files: lcov-reliakit-decide.info
+          flags: reliakit-decide
+          name: reliakit-decide
           fail_ci_if_error: true
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

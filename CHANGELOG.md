@@ -10,6 +10,13 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 
 ### Added
 
+- New crate `reliakit-decide`: a deterministic, zero-dependency utility-based
+  decision engine. `Score` (fixed-point), `Curve`, `Consideration`, and `Action`
+  (product-veto utility) feed a `Reasoner` that can `decide`, `rank`,
+  `decide_weighted` (roulette, caller-supplied RNG), `decide_above` (abstain), and
+  `explain` a choice. `Action::gate` makes decisions constraint-aware with no
+  dependency, and `Policy` tunes per-key weights from feedback (bounded integer
+  average). `no_std` + `alloc`, `#![forbid(unsafe_code)]`. Not yet published.
 - Added a CI job that fails if any workspace crate gains a third-party
   dependency (of any kind), enforcing the zero-dependency policy, and extended
   the bare-metal `no_std` checks to cover every `no_std` crate. Added
