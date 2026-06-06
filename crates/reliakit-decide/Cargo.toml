@@ -19,5 +19,9 @@ all-features = true
 default = ["std"]
 std = []
 
+[[example]]
+name = "agent_brain"
+path = "examples/agent_brain.rs"
+
 [lints]
 workspace = true

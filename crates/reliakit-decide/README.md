@@ -63,6 +63,35 @@ assert_eq!(brain.decide().unwrap().id, "flee"); // low health -> flee wins
   weights. Key it by `(agent, action)` to give each agent its own learned weights —
   distinct "personas" with no extra types.
 
+A complete runnable example is in [`examples/agent_brain.rs`](./examples/agent_brain.rs):
+
+```sh
+cargo run -p reliakit-decide --example agent_brain
+```
+
+## When to use it
+
+- Routing or selecting among options from weighted signals (intent/agent routing,
+  skill or tool selection, prioritization) where you want a real score and a
+  reason, not a rigid first-match rule.
+- Deciding *when* to spend an expensive resource (an LLM call, a network request)
+  versus answering with a cheap path — `gate` and `decide_above` make that explicit.
+- Embedded or `no_std` control logic that needs graded, testable decisions.
+
+## When not to use it
+
+- You need to generate text or understand language — that is a language model's job;
+  this crate only chooses *what to do*, not *what to say*.
+- You need statistical/ML learning from data — `Policy` is a bounded feedback
+  average, not training.
+- A plain `if` is genuinely enough — don't reach for a scorer.
+
+## Feature flags
+
+| Feature | Default | Effect |
+|---|---|---|
+| `std` | yes | Currently adds nothing beyond `core` + `alloc`; reserved for future `std`-only conveniences. |
+
 ## `no_std`
 
 `no_std`-compatible (`default-features = false`); always requires `alloc`.
@@ -70,6 +99,10 @@ assert_eq!(brain.decide().unwrap().id, "flee"); // low health -> flee wins
 ## Safety
 
 `#![forbid(unsafe_code)]`. All score arithmetic is saturating and panic-free.
+
+## Minimum Supported Rust Version
+
+Rust `1.85` and newer. No nightly features are used.
 
 ## License
 
