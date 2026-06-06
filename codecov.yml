@@ -59,6 +59,11 @@ coverage:
         threshold: 1%
         flags:
           - reliakit-core
+      reliakit-decide:
+        target: 90%
+        threshold: 1%
+        flags:
+          - reliakit-decide
       # reliakit-derive is a proc-macro crate. Its remaining uncovered lines are
       # the `compile_error!` branches for unsupported input (enums, unions,
       # generics), which can only be exercised by a compile-fail harness such as

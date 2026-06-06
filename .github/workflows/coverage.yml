@@ -273,3 +273,22 @@ jobs:
           fail_ci_if_error: true
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Generate reliakit-decide coverage
+        run: |
+          cargo llvm-cov \
+            -p reliakit-decide \
+            --all-features \
+            --locked \
+            --lcov \
+            --output-path lcov-reliakit-decide.info
+
+      - name: Upload reliakit-decide coverage
+        uses: codecov/codecov-action@v6
+        with:
+          files: lcov-reliakit-decide.info
+          flags: reliakit-decide
+          name: reliakit-decide
+          fail_ci_if_error: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
