@@ -45,7 +45,8 @@ assert_eq!(brain.decide().unwrap().id, "flee"); // low health -> flee wins
 - `Consideration` — one signal run through a curve.
 - `Action` — multiplies its considerations (product-veto: any near-zero
   consideration vetoes the action) to form a utility.
-- `Reasoner` — holds the candidate actions; `decide()` / `rank()` by utility.
+- `Reasoner` — holds the candidate actions; `decide()` / `rank()` by utility, and
+  `explain()` for the per-consideration breakdown of why an action won.
 
 ## `no_std`
 

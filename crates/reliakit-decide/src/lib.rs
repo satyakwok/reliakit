@@ -148,6 +148,9 @@ impl Curve {
 /// A single weighted input: a raw signal run through a [`Curve`].
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Consideration {
+    /// A short static label naming this signal; shown by [`Reasoner::explain`].
+    /// Empty by default.
+    pub label: &'static str,
     /// The curve applied to the input.
     pub curve: Curve,
     /// The raw input signal, normalized to a [`Score`].
@@ -155,9 +158,22 @@ pub struct Consideration {
 }
 
 impl Consideration {
-    /// Creates a consideration from a curve and an input signal.
+    /// Creates an unlabeled consideration from a curve and an input signal.
     pub const fn new(curve: Curve, input: Score) -> Consideration {
-        Consideration { curve, input }
+        Consideration {
+            label: "",
+            curve,
+            input,
+        }
+    }
+
+    /// Creates a consideration with a static label (shown in explanations).
+    pub const fn labeled(label: &'static str, curve: Curve, input: Score) -> Consideration {
+        Consideration {
+            label,
+            curve,
+            input,
+        }
     }
 
     /// The consideration's contribution score, `curve.eval(input)`.
@@ -204,6 +220,19 @@ impl<A> Action<A> {
         self
     }
 
+    /// Adds a labeled consideration (builder style); the label appears in
+    /// [`Reasoner::explain`] output.
+    pub fn consider_labeled(
+        mut self,
+        label: &'static str,
+        curve: Curve,
+        input: Score,
+    ) -> Action<A> {
+        self.considerations
+            .push(Consideration::labeled(label, curve, input));
+        self
+    }
+
     /// Computes the action's utility: `base * product(considerations)`.
     pub fn utility(&self) -> Score {
         let mut u = self.base;
@@ -221,6 +250,30 @@ pub struct Decision<A> {
     pub id: A,
     /// The winning utility score.
     pub utility: Score,
+}
+
+/// One line of an explanation: a consideration's label and the score it produced
+/// for the chosen action.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Contribution {
+    /// The consideration's label (empty if it was unlabeled).
+    pub label: &'static str,
+    /// The raw input signal.
+    pub input: Score,
+    /// The score the curve produced for that input.
+    pub output: Score,
+}
+
+/// Why an action was chosen: its id, final utility, and the per-consideration
+/// breakdown (in declaration order) that produced it.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Explanation<A> {
+    /// The chosen action's id.
+    pub id: A,
+    /// The winning utility score.
+    pub utility: Score,
+    /// One entry per consideration, in declaration order.
+    pub contributions: Vec<Contribution>,
 }
 
 /// Holds candidate [`Action`]s and selects among them by utility.
@@ -258,14 +311,10 @@ impl<A> Reasoner<A> {
     pub fn is_empty(&self) -> bool {
         self.actions.is_empty()
     }
-}
 
-impl<A: Clone> Reasoner<A> {
-    /// Chooses the highest-utility action, or `None` if there are none.
-    ///
-    /// Ties resolve deterministically in favor of the earlier-declared action,
-    /// so the same candidates always yield the same decision.
-    pub fn decide(&self) -> Option<Decision<A>> {
+    /// Index of the highest-utility action (earlier-declared wins ties), or
+    /// `None` if there are none. Shared by `decide` and `explain`.
+    fn best_index(&self) -> Option<usize> {
         let mut best: Option<usize> = None;
         let mut best_u = Score::ZERO;
         for (i, a) in self.actions.iter().enumerate() {
@@ -275,9 +324,42 @@ impl<A: Clone> Reasoner<A> {
                 best_u = u;
             }
         }
-        best.map(|i| Decision {
+        best
+    }
+}
+
+impl<A: Clone> Reasoner<A> {
+    /// Chooses the highest-utility action, or `None` if there are none.
+    ///
+    /// Ties resolve deterministically in favor of the earlier-declared action,
+    /// so the same candidates always yield the same decision.
+    pub fn decide(&self) -> Option<Decision<A>> {
+        self.best_index().map(|i| Decision {
             id: self.actions[i].id.clone(),
-            utility: best_u,
+            utility: self.actions[i].utility(),
+        })
+    }
+
+    /// Explains the winning decision: the chosen id, its utility, and the
+    /// per-consideration breakdown that produced it. `None` if there are no
+    /// actions. The winner matches [`decide`](Reasoner::decide).
+    pub fn explain(&self) -> Option<Explanation<A>> {
+        self.best_index().map(|i| {
+            let a = &self.actions[i];
+            let contributions = a
+                .considerations
+                .iter()
+                .map(|c| Contribution {
+                    label: c.label,
+                    input: c.input,
+                    output: c.score(),
+                })
+                .collect();
+            Explanation {
+                id: a.id.clone(),
+                utility: a.utility(),
+                contributions,
+            }
         })
     }
 
@@ -376,5 +458,42 @@ mod tests {
         let ranked = r.rank();
         let ids: Vec<&str> = ranked.iter().map(|d| d.id).collect();
         assert_eq!(ids, ["high", "mid", "low"]);
+    }
+
+    #[test]
+    fn with_base_scales_and_vetoes() {
+        // base 0.5 * consideration 0.8 = 0.4
+        let scaled = Action::new(())
+            .with_base(Score::from_raw(5_000))
+            .consider(Curve::Linear, Score::from_raw(8_000));
+        assert_eq!(scaled.utility().raw(), 4_000);
+
+        // base 0.0 vetoes the whole action regardless of considerations
+        let vetoed = Action::new(())
+            .with_base(Score::ZERO)
+            .consider(Curve::Linear, Score::MAX);
+        assert_eq!(vetoed.utility(), Score::ZERO);
+    }
+
+    #[test]
+    fn explain_breaks_down_the_winner() {
+        let health = Score::from_ratio(20, 100);
+        let mut r = Reasoner::new();
+        r.add(Action::new("flee").consider_labeled("low_health", Curve::Inverse, health));
+        r.add(Action::new("fight").consider_labeled("high_health", Curve::Linear, health));
+
+        let ex = r.explain().unwrap();
+        assert_eq!(ex.id, "flee");
+        assert_eq!(ex.utility.raw(), 8_000); // base 1.0 * Inverse(0.2) = 0.8
+        assert_eq!(ex.contributions.len(), 1);
+        assert_eq!(ex.contributions[0].label, "low_health");
+        assert_eq!(ex.contributions[0].input, health);
+        assert_eq!(ex.contributions[0].output.raw(), 8_000);
+    }
+
+    #[test]
+    fn explain_on_empty_is_none() {
+        let r: Reasoner<&str> = Reasoner::new();
+        assert!(r.explain().is_none());
     }
 }
