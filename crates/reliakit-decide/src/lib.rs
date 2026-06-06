@@ -513,4 +513,25 @@ mod tests {
         assert_eq!(ex.contributions[0].output.raw(), 8_000);
         assert_eq!(ex.contributions[1].output.raw(), 5_000);
     }
+
+    #[test]
+    fn rank_keeps_declaration_order_on_ties() {
+        let mut r = Reasoner::new();
+        r.add(Action::new("first").consider(Curve::Linear, Score::from_raw(5_000)));
+        r.add(Action::new("second").consider(Curve::Linear, Score::from_raw(5_000)));
+        let ids: Vec<&str> = r.rank().iter().map(|d| d.id).collect();
+        assert_eq!(ids, ["first", "second"]); // equal utility -> stable order
+    }
+
+    #[test]
+    fn from_ratio_above_one_clamps() {
+        assert_eq!(Score::from_ratio(3, 2), Score::MAX); // 1.5 -> clamp to 1.0
+        assert_eq!(Score::from_ratio(10, 10), Score::MAX); // exactly 1.0
+    }
+
+    #[test]
+    fn quadratic_extremes() {
+        assert_eq!(Curve::Quadratic.eval(Score::MAX), Score::MAX); // 1.0^2 = 1.0
+        assert_eq!(Curve::Quadratic.eval(Score::ZERO), Score::ZERO); // 0^2 = 0
+    }
 }
