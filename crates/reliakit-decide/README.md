@@ -9,9 +9,10 @@ logic.
 
 `reliakit-decide` answers one question well: *given the current signals, which
 action should I take?* It scores candidate actions with utility-based reasoning
-and picks the best — deterministically, with no floating point, no allocation
-beyond the action list, and no third-party dependencies. The same signals always
-produce the same decision, so choices are reproducible and exactly testable.
+and picks the best — deterministically, with no floating point and no third-party
+dependencies. `decide()` allocates nothing; `rank()` and `explain()` allocate
+only the result they return. The same signals always produce the same decision,
+so choices are reproducible and exactly testable.
 
 It is **not** a language model and does not understand text. It decides *what to
 do*, not *what to say* — the fast, explainable judgment layer that sits next to a

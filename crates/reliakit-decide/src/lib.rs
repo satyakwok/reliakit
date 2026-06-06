@@ -4,9 +4,10 @@
 //! `reliakit-decide` answers one question well: *given the current signals,
 //! which action should I take?* It scores each candidate action with
 //! utility-based reasoning and picks the best — deterministically, with no
-//! floating point, no allocation beyond the action list, and no third-party
-//! dependencies. The same signals always produce the same decision, so the
-//! choice is reproducible and testable.
+//! floating point and no third-party dependencies. [`Reasoner::decide`]
+//! allocates nothing; [`Reasoner::rank`] and [`Reasoner::explain`] allocate only
+//! the result they return. The same signals always produce the same decision, so
+//! the choice is reproducible and testable.
 //!
 //! It is **not** a language model and does not understand text; it decides
 //! *what to do*, not *what to say*. In an agent it is the fast, explainable
@@ -495,5 +496,21 @@ mod tests {
     fn explain_on_empty_is_none() {
         let r: Reasoner<&str> = Reasoner::new();
         assert!(r.explain().is_none());
+    }
+
+    #[test]
+    fn explain_lists_all_considerations_in_order() {
+        let mut r = Reasoner::new();
+        r.add(
+            Action::new("act")
+                .consider_labeled("a", Curve::Linear, Score::from_raw(8_000))
+                .consider_labeled("b", Curve::Linear, Score::from_raw(5_000)),
+        );
+        let ex = r.explain().unwrap();
+        assert_eq!(ex.utility.raw(), 4_000); // 1.0 * 0.8 * 0.5
+        let labels: Vec<&str> = ex.contributions.iter().map(|c| c.label).collect();
+        assert_eq!(labels, ["a", "b"]); // declaration order preserved
+        assert_eq!(ex.contributions[0].output.raw(), 8_000);
+        assert_eq!(ex.contributions[1].output.raw(), 5_000);
     }
 }
