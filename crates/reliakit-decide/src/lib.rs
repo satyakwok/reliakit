@@ -133,7 +133,7 @@ impl Curve {
         match self {
             Curve::Constant(s) => s,
             Curve::Linear => input,
-            Curve::Inverse => Score(Score::SCALE - input.0),
+            Curve::Inverse => Score(Score::SCALE.saturating_sub(input.0)),
             Curve::Quadratic => input.mul(input),
             Curve::Threshold { at, below, above } => {
                 if input.0 >= at.0 {
