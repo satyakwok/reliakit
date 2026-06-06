@@ -64,6 +64,7 @@ dependency appears), `#![forbid(unsafe_code)]`, and usable on its own. You adopt
 | Resilience | `reliakit-backoff`, `reliakit-circuit`, `reliakit-ratelimit`, `reliakit-timeout` | Retry backoff, circuit breaker, token-bucket rate limiter, deadlines — all clock-agnostic |
 | Shared clock | `reliakit-core` | `Clock` trait + `ManualClock` / `MonotonicClock` |
 | Derive helpers | `reliakit-derive` | `#[derive(CanonicalEncode, CanonicalDecode, JsonEncode, JsonDecode)]` |
+| Decision logic | `reliakit-decide` | Deterministic utility-based decisions (`Reasoner` with `decide`/`explain`/`gate`/`Policy`) |
 
 ## Real-world use cases
 
@@ -180,6 +181,7 @@ reliakit-ratelimit   = "0.1"
 reliakit-timeout     = "0.1"
 reliakit-core        = "0.1"
 reliakit-derive      = "0.1"
+reliakit-decide      = "0.1"
 ```
 
 Each crate is independent — most projects use two or three. The minimum
@@ -201,6 +203,7 @@ supported Rust version is **1.85**.
 | [`reliakit-timeout`](https://crates.io/crates/reliakit-timeout) | Deadlines / time budgets | You track whether a budget has run out. | Published (pre-1.0) |
 | [`reliakit-core`](https://crates.io/crates/reliakit-core) | Shared `Clock` trait + clocks | You want a ready-made `u64` time source for the resilience crates. | Published (pre-1.0) |
 | [`reliakit-derive`](https://crates.io/crates/reliakit-derive) | Derive macros for codec + JSON traits | You want `#[derive(...)]` instead of hand-writing encode/decode. | Published (pre-1.0) |
+| [`reliakit-decide`](https://crates.io/crates/reliakit-decide) | Deterministic utility decision engine | You want graded, explainable, testable decisions (routing, selection, when to call an LLM). | Published (pre-1.0) |
 
 The four resilience crates (`backoff`, `circuit`, `ratelimit`, `timeout`) are
 **clock-agnostic** — you pass the time in, so they compose and work in sync,
