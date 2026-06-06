@@ -8,6 +8,7 @@ repository.workspace = true
 homepage.workspace = true
 documentation = "https://docs.rs/reliakit-decide"
 readme = "README.md"
+exclude = ["DESIGN.md"]
 description = "Deterministic, zero-dependency utility-based decision engine for agents and control logic. no_std + alloc."
 keywords = ["decision", "utility-ai", "agent", "deterministic", "no-std"]
 categories = ["algorithms", "no-std"]
