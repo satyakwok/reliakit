@@ -294,6 +294,9 @@ pub struct Contribution {
 pub struct Explanation<A> {
     /// The chosen action's id.
     pub id: A,
+    /// Whether the chosen action was permitted. `false` means every action was
+    /// gated off and this one won only by tie-break — its utility is zero.
+    pub allowed: bool,
     /// The winning utility score.
     pub utility: Score,
     /// One entry per consideration, in declaration order.
@@ -426,6 +429,7 @@ impl<A: Clone> Reasoner<A> {
                 .collect();
             Explanation {
                 id: a.id.clone(),
+                allowed: a.allowed,
                 utility: a.utility(),
                 contributions,
             }
@@ -845,6 +849,20 @@ mod tests {
         );
         r.add(Action::new("defer").consider(Curve::Linear, Score::from_raw(1_000)));
         assert_eq!(r.decide().unwrap().id, "defer");
+    }
+
+    #[test]
+    fn explain_surfaces_gated_winner() {
+        let mut r = Reasoner::new();
+        r.add(
+            Action::new("only")
+                .gate(false)
+                .consider(Curve::Linear, Score::MAX),
+        );
+        let ex = r.explain().unwrap();
+        assert_eq!(ex.id, "only");
+        assert!(!ex.allowed); // surfaced: it was gated off
+        assert_eq!(ex.utility, Score::ZERO);
     }
 
     #[test]
