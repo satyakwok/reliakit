@@ -367,6 +367,28 @@ impl<A: Clone> Reasoner<A> {
         })
     }
 
+    /// Like [`decide`](Reasoner::decide), but **abstains**: returns the best
+    /// action only when its utility is strictly above `threshold`, otherwise
+    /// `None`.
+    ///
+    /// Use it to say "nothing here is good enough" and fall back to a slower or
+    /// more capable path — for example, escalate to an LLM instead of forcing a
+    /// weak choice. A `threshold` of [`Score::ZERO`] abstains exactly when every
+    /// action is vetoed or gated off.
+    pub fn decide_above(&self, threshold: Score) -> Option<Decision<A>> {
+        self.best_index().and_then(|i| {
+            let utility = self.actions[i].utility();
+            if utility > threshold {
+                Some(Decision {
+                    id: self.actions[i].id.clone(),
+                    utility,
+                })
+            } else {
+                None
+            }
+        })
+    }
+
     /// Chooses an action at random with probability proportional to its utility
     /// (roulette selection), so repeated decisions vary instead of always
     /// returning the single best.
@@ -876,6 +898,38 @@ mod tests {
         r.add(Action::new("open").consider(Curve::Linear, Score::from_raw(5_000)));
         // even at the bottom of the random range, a zero-weight action is skipped
         assert_eq!(r.decide_weighted(0).unwrap().id, "open");
+    }
+
+    #[test]
+    fn decide_above_abstains_below_threshold() {
+        let mut r = Reasoner::new();
+        r.add(Action::new("weak").consider(Curve::Linear, Score::from_raw(3_000))); // utility 0.3
+        assert_eq!(r.decide_above(Score::from_raw(2_000)).unwrap().id, "weak"); // 0.3 > 0.2
+        assert!(r.decide_above(Score::from_raw(3_000)).is_none()); // strict: 0.3 > 0.3 is false
+        assert!(r.decide_above(Score::from_raw(5_000)).is_none()); // below threshold
+    }
+
+    #[test]
+    fn decide_above_abstains_when_all_gated() {
+        let mut r = Reasoner::new();
+        r.add(
+            Action::new("a")
+                .gate(false)
+                .consider(Curve::Linear, Score::MAX),
+        );
+        r.add(
+            Action::new("b")
+                .gate(false)
+                .consider(Curve::Linear, Score::MAX),
+        );
+        assert!(r.decide_above(Score::ZERO).is_none()); // everything blocked -> abstain
+        assert_eq!(r.decide().unwrap().id, "a"); // plain decide still tie-breaks to first
+    }
+
+    #[test]
+    fn decide_above_empty_is_none() {
+        let r: Reasoner<&str> = Reasoner::new();
+        assert!(r.decide_above(Score::ZERO).is_none());
     }
 
     #[test]

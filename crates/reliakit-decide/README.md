@@ -52,7 +52,9 @@ assert_eq!(brain.decide().unwrap().id, "flee"); // low health -> flee wins
 - `Reasoner` — holds the candidate actions: `decide()` / `rank()` by utility,
   `explain()` for the per-consideration breakdown of why an action won, and
   `decide_weighted(rand)` for roulette selection (caller-supplied RNG) so an agent
-  varies instead of always repeating the single best.
+  varies instead of always repeating the single best, and `decide_above(threshold)`
+  to **abstain** — return `None` when nothing is good enough so the caller can
+  escalate (e.g. to an LLM) instead of forcing a weak choice.
 - `Policy` — an optional persistent table of learned weights per key. `reward(key,
   outcome)` nudges a weight toward what worked (bounded integer moving average,
   deterministic); fold `weight(&key)` back into an action so choices improve over
