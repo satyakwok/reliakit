@@ -3,6 +3,25 @@
 version = 4
 
 [[package]]
+name = "reliakit"
+version = "0.1.0"
+dependencies = [
+ "reliakit-backoff",
+ "reliakit-circuit",
+ "reliakit-codec",
+ "reliakit-collections",
+ "reliakit-core",
+ "reliakit-decide",
+ "reliakit-derive",
+ "reliakit-json",
+ "reliakit-primitives",
+ "reliakit-ratelimit",
+ "reliakit-secret",
+ "reliakit-timeout",
+ "reliakit-validate",
+]
+
+[[package]]
 name = "reliakit-backoff"
 version = "0.1.3"
 

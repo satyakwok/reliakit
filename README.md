@@ -165,7 +165,26 @@ is one use case among many, not the focus.
 
 ## Quick start / installation
 
-All crates are published to crates.io. Add only the ones you need:
+The quickest way in is the umbrella crate `reliakit`, which re-exports every
+building block behind a feature flag. Add one dependency and enable only the
+pieces you want:
+
+```toml
+[dependencies]
+reliakit = { version = "0.1", features = ["ratelimit", "secret"] }
+```
+
+```rust
+use reliakit::ratelimit::RateLimiter;
+use reliakit::secret::Secret;
+```
+
+Nothing is pulled in beyond the features you enable, so the zero-dependency,
+`no_std`-friendly nature of each block is preserved. Use `features = ["full"]`
+for everything.
+
+Prefer the tightest possible dependency graph? The crates are fully independent —
+depend on just the ones you need:
 
 ```toml
 [dependencies]

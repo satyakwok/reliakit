@@ -80,3 +80,6 @@ jobs:
 
       - name: Verify reliakit-decide package
         run: cargo publish -p reliakit-decide --dry-run --locked
+
+      - name: Verify reliakit package
+        run: cargo publish -p reliakit --dry-run --locked

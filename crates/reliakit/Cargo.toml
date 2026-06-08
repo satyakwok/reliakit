@@ -1,0 +1,104 @@
+[package]
+name = "reliakit"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation = "https://docs.rs/reliakit"
+readme = "README.md"
+description = "Reliability building blocks for Rust: validated primitives, secrets, bounded collections, backoff, circuit breaker, rate limiting, timeouts, and strict JSON. Zero-dependency, no_std-friendly, no unsafe. One name; enable only the building blocks you need via features."
+keywords = ["reliability", "resilience", "no-std", "validation", "toolkit"]
+categories = ["rust-patterns", "no-std", "development-tools"]
+
+[package.metadata.docs.rs]
+features = ["full", "std"]
+
+[lints]
+workspace = true
+
+[dependencies]
+reliakit-core = { path = "../reliakit-core", version = "0.1", optional = true, default-features = false }
+reliakit-primitives = { path = "../reliakit-primitives", version = "0.4", optional = true, default-features = false }
+reliakit-secret = { path = "../reliakit-secret", version = "0.1", optional = true, default-features = false }
+reliakit-validate = { path = "../reliakit-validate", version = "0.3", optional = true, default-features = false }
+reliakit-collections = { path = "../reliakit-collections", version = "0.3", optional = true, default-features = false }
+reliakit-codec = { path = "../reliakit-codec", version = "0.2", optional = true, default-features = false }
+reliakit-backoff = { path = "../reliakit-backoff", version = "0.1", optional = true, default-features = false }
+reliakit-circuit = { path = "../reliakit-circuit", version = "0.2", optional = true, default-features = false }
+reliakit-ratelimit = { path = "../reliakit-ratelimit", version = "0.1", optional = true, default-features = false }
+reliakit-timeout = { path = "../reliakit-timeout", version = "0.1", optional = true, default-features = false }
+reliakit-json = { path = "../reliakit-json", version = "0.2", optional = true, default-features = false }
+reliakit-derive = { path = "../reliakit-derive", version = "0.1", optional = true, default-features = false }
+reliakit-decide = { path = "../reliakit-decide", version = "0.1", optional = true, default-features = false }
+
+[features]
+default = ["std"]
+
+# `std` implies `alloc`. Both forward to whichever sub-crates are enabled, via
+# weak (`dep?/feature`) references so an unused crate is never pulled in.
+std = [
+    "alloc",
+    "reliakit-core?/std",
+    "reliakit-primitives?/std",
+    "reliakit-secret?/std",
+    "reliakit-validate?/std",
+    "reliakit-collections?/std",
+    "reliakit-codec?/std",
+    "reliakit-json?/std",
+    "reliakit-decide?/std",
+]
+alloc = [
+    "reliakit-primitives?/alloc",
+    "reliakit-secret?/alloc",
+    "reliakit-validate?/alloc",
+    "reliakit-collections?/alloc",
+    "reliakit-codec?/alloc",
+]
+
+# One feature per crate; enabling it adds the matching `reliakit::<name>` module.
+primitives = ["dep:reliakit-primitives"]
+secret = ["dep:reliakit-secret"]
+validate = ["dep:reliakit-validate"]
+collections = ["dep:reliakit-collections"]
+codec = ["dep:reliakit-codec"]
+backoff = ["dep:reliakit-backoff"]
+circuit = ["dep:reliakit-circuit"]
+ratelimit = ["dep:reliakit-ratelimit"]
+timeout = ["dep:reliakit-timeout"]
+json = ["dep:reliakit-json"]
+derive = ["dep:reliakit-derive"]
+decide = ["dep:reliakit-decide"]
+
+# `core` adds the `Clock` trait and turns on the clock-aware `*_now` methods of
+# whichever resilience crates are enabled.
+core = [
+    "dep:reliakit-core",
+    "reliakit-circuit?/core",
+    "reliakit-ratelimit?/core",
+    "reliakit-timeout?/core",
+]
+
+# Optional intra-workspace integrations, re-exporting existing sub-crate features.
+json-canonical = ["json", "reliakit-json?/canonical"]
+json-primitives = ["json", "primitives", "reliakit-json?/primitives"]
+json-validate = ["json", "validate", "reliakit-json?/validate"]
+codec-primitives = ["codec", "primitives", "reliakit-codec?/primitives"]
+
+# Everything at once (used by docs.rs and for "give me all of it").
+full = [
+    "core",
+    "primitives",
+    "secret",
+    "validate",
+    "collections",
+    "codec",
+    "backoff",
+    "circuit",
+    "ratelimit",
+    "timeout",
+    "json",
+    "derive",
+    "decide",
+]

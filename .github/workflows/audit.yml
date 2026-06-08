@@ -49,3 +49,35 @@ jobs:
 
       - name: Audit dependencies
         run: cargo audit
+
+  deny:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.3
+
+      - name: Install Rust stable
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+          rustc --version
+          cargo --version
+
+      - name: Cache Cargo
+        uses: actions/cache@v5.0.5
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ github.job }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-${{ github.job }}-
+            ${{ runner.os }}-cargo-
+
+      - name: Install cargo-deny
+        run: cargo install cargo-deny --locked
+
+      - name: Check licenses, advisories, bans, and sources
+        run: cargo deny check
