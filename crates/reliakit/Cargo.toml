@@ -107,3 +107,8 @@ full = [
 name = "resilient_client"
 path = "examples/resilient_client.rs"
 required-features = ["timeout", "ratelimit", "circuit", "backoff"]
+
+[[example]]
+name = "config_check"
+path = "examples/config_check.rs"
+required-features = ["primitives", "validate", "secret"]
