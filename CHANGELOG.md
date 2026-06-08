@@ -15,7 +15,8 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
   (`Healthy`/`Degraded`/`Unhealthy`, ordered by severity), `Criticality`
   (`Optional` failures cap at `Degraded`), an allocation-free `Check` +
   `aggregate`, and an owned `HealthReport` with `overall`/`summary`/`reasons`.
-  `no_std`-friendly, zero-dependency.
+  `no_std`-friendly, zero-dependency. The umbrella crate exposes it behind a
+  `health` feature (`reliakit` 0.1.4).
 - Added a `deny.toml` so `cargo deny check` passes: it allows only the MIT
   license, restricts dependencies to the crates.io registry, and rejects
   duplicate versions and security-advisory or yanked crates.
