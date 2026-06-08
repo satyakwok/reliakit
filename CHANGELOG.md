@@ -10,6 +10,13 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 
 ### Added
 
+- Added the `reliakit` umbrella crate, which re-exports every `reliakit-*`
+  building block behind a per-crate feature flag with `std`/`alloc` forwarding,
+  a `core` feature that enables clock-aware methods, optional cross-crate
+  integration features, and a `full` feature. It contains no logic of its own.
+- Added a `deny.toml` so `cargo deny check` passes: it allows only the MIT
+  license, restricts dependencies to the crates.io registry, and rejects
+  duplicate versions and security-advisory or yanked crates.
 - Added a CI job that fails if any workspace crate gains a third-party
   dependency (of any kind), enforcing the zero-dependency policy, and extended
   the bare-metal `no_std` checks to cover every `no_std` crate. Added

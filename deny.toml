@@ -1,0 +1,28 @@
+# cargo-deny configuration for the reliakit workspace.
+#
+# The workspace ships zero third-party runtime dependencies and every crate is
+# MIT-licensed. This config encodes that posture: only MIT is allowed, only the
+# crates.io registry is trusted, and known-vulnerable or duplicated dependencies
+# are rejected. Run `cargo deny check`.
+
+[licenses]
+allow = ["MIT"]
+confidence-threshold = 0.9
+
+[bans]
+# Zero-dependency policy: no duplicate versions, no wildcard version requirements
+# on published dependencies. Intra-workspace crates are referenced by path with a
+# version, so wildcard paths are allowed.
+multiple-versions = "deny"
+wildcards = "deny"
+allow-wildcard-paths = true
+
+[advisories]
+# Reject crates with known security advisories or that have been yanked.
+# Uses the default RustSec advisory database.
+yanked = "deny"
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
