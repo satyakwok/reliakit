@@ -46,6 +46,7 @@
 //! | `codec` | [`reliakit_codec`] as [`codec`] |
 //! | `backoff` | [`reliakit_backoff`] as [`backoff`] |
 //! | `bulkhead` | [`reliakit_bulkhead`] as [`bulkhead`] |
+//! | `health` | [`reliakit_health`] as [`health`] |
 //! | `circuit` | [`reliakit_circuit`] as [`circuit`] |
 //! | `ratelimit` | [`reliakit_ratelimit`] as [`ratelimit`] |
 //! | `timeout` | [`reliakit_timeout`] as [`timeout`] |
@@ -81,6 +82,9 @@ pub use reliakit_backoff as backoff;
 
 #[cfg(feature = "bulkhead")]
 pub use reliakit_bulkhead as bulkhead;
+
+#[cfg(feature = "health")]
+pub use reliakit_health as health;
 
 #[cfg(feature = "circuit")]
 pub use reliakit_circuit as circuit;
