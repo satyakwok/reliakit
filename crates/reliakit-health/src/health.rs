@@ -195,10 +195,14 @@ mod tests {
     #[test]
     fn predicates() {
         assert!(Health::Healthy.is_healthy());
+        assert!(!Health::Degraded.is_healthy());
+        assert!(Health::Degraded.is_degraded());
+        assert!(!Health::Healthy.is_degraded());
         assert!(Health::Healthy.is_operational());
         assert!(Health::Degraded.is_operational());
         assert!(!Health::Unhealthy.is_operational());
         assert!(Health::Unhealthy.is_unhealthy());
+        assert!(!Health::Healthy.is_unhealthy());
     }
 
     #[test]
@@ -219,6 +223,15 @@ mod tests {
         assert_eq!(Health::Unhealthy.as_str(), "unhealthy");
     }
 
+    #[cfg(feature = "alloc")]
+    #[test]
+    fn display_matches_as_str() {
+        use alloc::format;
+        assert_eq!(format!("{}", Health::Healthy), "healthy");
+        assert_eq!(format!("{}", Health::Degraded), "degraded");
+        assert_eq!(format!("{}", Health::Unhealthy), "unhealthy");
+    }
+
     #[test]
     fn criticality_apply() {
         assert_eq!(Criticality::default(), Criticality::Critical);
@@ -234,5 +247,7 @@ mod tests {
             Criticality::Optional.apply(Health::Healthy),
             Health::Healthy
         );
+        assert!(Criticality::Critical.is_critical());
+        assert!(!Criticality::Optional.is_critical());
     }
 }

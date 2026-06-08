@@ -25,6 +25,7 @@ alloc = []
 [[example]]
 name = "health_basic"
 path = "examples/basic.rs"
+required-features = ["std"]
 
 [lints]
 workspace = true

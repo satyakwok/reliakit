@@ -40,7 +40,7 @@ coverage:
         flags:
           - reliakit-bulkhead
       reliakit-health:
-        target: 90%
+        target: 95%
         threshold: 1%
         flags:
           - reliakit-health
