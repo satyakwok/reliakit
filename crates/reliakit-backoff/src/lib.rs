@@ -12,9 +12,9 @@
 //! retry limit is reached.
 //!
 //! Randomized jitter is provided as explicit, pure functions
-//! ([`full_jitter`], [`equal_jitter`]) that take a caller-supplied random value,
-//! so the crate stays dependency-free and its output stays deterministic in
-//! tests.
+//! ([`full_jitter`], [`equal_jitter`], [`decorrelated_jitter`]) that take a
+//! caller-supplied random value, so the crate stays dependency-free and its
+//! output stays deterministic in tests.
 //!
 //! # Example
 //!
@@ -47,7 +47,7 @@
 
 mod jitter;
 
-pub use jitter::{equal_jitter, full_jitter};
+pub use jitter::{decorrelated_jitter, equal_jitter, full_jitter};
 
 use core::time::Duration;
 

@@ -62,6 +62,43 @@ pub fn equal_jitter(delay: Duration, rand: u32) -> Duration {
     half.saturating_add(scale(half, rand))
 }
 
+/// Decorrelated jitter: returns a delay uniformly in `base ..= prev * 3`, capped
+/// at `cap`.
+///
+/// Unlike [`full_jitter`] and [`equal_jitter`], the next delay is derived from
+/// the *previous* delay rather than from an attempt number, which spreads
+/// retries more widely. Feed each return value back in as `prev` on the next
+/// retry, starting with `prev == base`. The caller holds that one piece of
+/// state; this function stays pure.
+///
+/// `rand` is a caller-supplied random value spanning `0 ..= u32::MAX`. All
+/// arithmetic saturates, so any inputs (including `Duration::MAX`) are safe.
+///
+/// ```
+/// use core::time::Duration;
+/// use reliakit_backoff::decorrelated_jitter;
+///
+/// let base = Duration::from_millis(100);
+/// let cap = Duration::from_secs(10);
+///
+/// // With `prev == base`, the range is `base ..= base * 3`.
+/// assert_eq!(decorrelated_jitter(base, base, cap, 0), base);
+/// assert_eq!(
+///     decorrelated_jitter(base, base, cap, u32::MAX),
+///     Duration::from_millis(300),
+/// );
+///
+/// // The cap always wins, however large `prev` grows.
+/// let big = Duration::from_secs(100);
+/// assert_eq!(decorrelated_jitter(base, big, cap, u32::MAX), cap);
+/// ```
+pub fn decorrelated_jitter(base: Duration, prev: Duration, cap: Duration, rand: u32) -> Duration {
+    let high = base.max(prev.saturating_mul(3));
+    let span = high.saturating_sub(base);
+    let delay = base.saturating_add(scale(span, rand));
+    delay.min(cap)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -89,6 +126,48 @@ mod tests {
     fn zero_delay_stays_zero() {
         assert_eq!(full_jitter(Duration::ZERO, u32::MAX), Duration::ZERO);
         assert_eq!(equal_jitter(Duration::ZERO, u32::MAX), Duration::ZERO);
+    }
+
+    #[test]
+    fn decorrelated_jitter_bounds() {
+        let base = Duration::from_millis(100);
+        let cap = Duration::from_secs(10);
+        // prev == base => range is base ..= base*3.
+        assert_eq!(decorrelated_jitter(base, base, cap, 0), base);
+        assert_eq!(
+            decorrelated_jitter(base, base, cap, u32::MAX),
+            Duration::from_millis(300)
+        );
+        let mid = decorrelated_jitter(base, base, cap, u32::MAX / 2);
+        assert!(mid > base && mid < Duration::from_millis(300));
+    }
+
+    #[test]
+    fn decorrelated_jitter_caps() {
+        let base = Duration::from_millis(100);
+        let cap = Duration::from_secs(1);
+        // prev*3 far exceeds the cap, so the cap wins.
+        let d = decorrelated_jitter(base, Duration::from_secs(100), cap, u32::MAX);
+        assert_eq!(d, cap);
+    }
+
+    #[test]
+    fn decorrelated_jitter_edges() {
+        let base = Duration::from_millis(100);
+        let cap = Duration::from_secs(10);
+        // prev == 0 collapses the range to `base`, then capped.
+        assert_eq!(
+            decorrelated_jitter(base, Duration::ZERO, cap, u32::MAX),
+            base
+        );
+        // A cap below base means the cap still wins.
+        assert_eq!(
+            decorrelated_jitter(base, base, Duration::from_millis(50), u32::MAX),
+            Duration::from_millis(50)
+        );
+        // Huge prev must not overflow or panic.
+        let d = decorrelated_jitter(base, Duration::from_secs(u64::MAX), cap, u32::MAX / 4);
+        assert!(d <= cap);
     }
 
     #[test]

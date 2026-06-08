@@ -29,9 +29,9 @@ The crate has no dependencies, is `#![no_std]`, and forbids unsafe code.
   wait, or `None` once the retry limit is reached. All arithmetic saturates, so
   large attempt numbers never overflow, panic, or hang.
 - `Backoff::delays()` — an iterator over successive delays.
-- `full_jitter` / `equal_jitter` — pure jitter helpers that take a
-  caller-supplied random value, so the crate stays dependency-free and the math
-  stays testable.
+- `full_jitter` / `equal_jitter` / `decorrelated_jitter` — pure jitter helpers
+  that take a caller-supplied random value, so the crate stays dependency-free
+  and the math stays testable.
 
 ## What This Crate Does Not Do
 
@@ -88,6 +88,7 @@ All are clamped to `with_max_delay(..)` and stop at `with_max_retries(..)`.
 |---|---|
 | `full_jitter(delay, rand)` | `0 ..= delay` |
 | `equal_jitter(delay, rand)` | `delay/2 ..= delay` |
+| `decorrelated_jitter(base, prev, cap, rand)` | `base ..= prev*3`, capped at `cap` |
 
 `rand` is interpreted as the fraction `rand / u32::MAX`. Source it from `rand`,
 `getrandom`, or a hardware RNG.

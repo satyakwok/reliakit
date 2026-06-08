@@ -79,6 +79,15 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 - Documentation only: add Feature Flags, `no_std`, and Status sections to the
   README. No API or behavior changes.
 
+## reliakit-backoff 0.1.4 - 2026-06-08
+
+### Added
+
+- `decorrelated_jitter(base, prev, cap, rand)` — a pure jitter helper that
+  returns a delay uniformly in `base ..= prev * 3`, capped at `cap`. The caller
+  feeds each result back in as `prev`, so the delay walks up and down between
+  retries while the function stays dependency-free and saturating.
+
 ## reliakit-backoff 0.1.3 - 2026-06-05
 
 ### Changed
