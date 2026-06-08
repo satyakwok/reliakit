@@ -10,13 +10,6 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 
 ### Added
 
-- Added `reliakit-health`, health status types and a criticality-aware
-  aggregator for service health checks, probes, and status pages. `Health`
-  (`Healthy`/`Degraded`/`Unhealthy`, ordered by severity), `Criticality`
-  (`Optional` failures cap at `Degraded`), an allocation-free `Check` +
-  `aggregate`, and an owned `HealthReport` with `overall`/`summary`/`reasons`.
-  `no_std`-friendly, zero-dependency. The umbrella crate exposes it behind a
-  `health` feature (`reliakit` 0.1.4).
 - Added a `deny.toml` so `cargo deny check` passes: it allows only the MIT
   license, restricts dependencies to the crates.io registry, and rejects
   duplicate versions and security-advisory or yanked crates.
@@ -33,6 +26,24 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
   The tag-triggered and manual publish workflows now mint a short-lived token at
   publish time instead of reading a stored API token, so no long-lived registry
   token is kept in repository secrets.
+
+## reliakit-health 0.1.0 - 2026-06-08
+
+### Added
+
+- Initial release. Health status types and a criticality-aware aggregator for
+  service health checks, probes, and status pages: `Health`
+  (`Healthy`/`Degraded`/`Unhealthy`, ordered by severity), `Criticality`
+  (`Optional` failures cap at `Degraded`), an allocation-free `Check` +
+  `aggregate`, and an owned `HealthReport` with `overall`/`summary`/`reasons`.
+  Reports only, never acts. `no_std`-friendly, zero-dependency.
+
+## reliakit 0.1.4 - 2026-06-08
+
+### Added
+
+- Exposed `reliakit-health` through the umbrella behind a `health` feature (also
+  included in `full`).
 
 ## reliakit-primitives 0.4.3 - 2026-06-08
 
