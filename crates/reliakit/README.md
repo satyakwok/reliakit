@@ -92,6 +92,15 @@ cargo run -p reliakit --example config_check \
 
 See [`examples/config_check.rs`](./examples/config_check.rs).
 
+**Typed JSON** — parse untrusted JSON strictly, then lift the raw fields into
+validated primitive types:
+
+```sh
+cargo run -p reliakit --example typed_json --features "json primitives"
+```
+
+See [`examples/typed_json.rs`](./examples/typed_json.rs).
+
 ## Building Blocks
 
 | Feature | Module | Crate |

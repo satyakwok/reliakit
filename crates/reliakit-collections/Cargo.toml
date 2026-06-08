@@ -22,5 +22,9 @@ alloc = []
 
 [dependencies]
 
+[[example]]
+name = "collections_basic"
+path = "examples/basic.rs"
+
 [lints]
 workspace = true

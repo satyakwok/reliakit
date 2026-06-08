@@ -22,5 +22,9 @@ alloc = []
 
 [dependencies]
 
+[[example]]
+name = "validate_basic"
+path = "examples/basic.rs"
+
 [lints]
 workspace = true
