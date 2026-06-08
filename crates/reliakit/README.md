@@ -67,6 +67,20 @@ Everything at once:
 reliakit = { version = "0.1", features = ["full"] }
 ```
 
+## Example: a resilient client
+
+The reliability blocks are designed to compose. This guards one call to a flaky
+dependency with an overall deadline, rate limiting, a circuit breaker, and
+backoff — all reached through the one `reliakit` name and all driven by a single
+clock:
+
+```sh
+cargo run -p reliakit --example resilient_client \
+  --features "timeout ratelimit circuit backoff"
+```
+
+See [`examples/resilient_client.rs`](./examples/resilient_client.rs).
+
 ## Building Blocks
 
 | Feature | Module | Crate |
