@@ -1,0 +1,22 @@
+[package]
+name = "reliakit-bulkhead"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation = "https://docs.rs/reliakit-bulkhead"
+readme = "README.md"
+description = "Clock-agnostic concurrency limiter (counting-semaphore bulkhead) that caps in-flight operations. no_std and zero-dependency."
+keywords = ["bulkhead", "concurrency", "semaphore", "reliability", "no-std"]
+categories = ["algorithms", "no-std", "rust-patterns"]
+
+[dependencies]
+
+[[example]]
+name = "bulkhead_basic"
+path = "examples/basic.rs"
+
+[lints]
+workspace = true

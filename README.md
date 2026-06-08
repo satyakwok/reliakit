@@ -61,7 +61,7 @@ dependency appears), `#![forbid(unsafe_code)]`, and usable on its own. You adopt
 | Bounded collections | `reliakit-collections` | `BoundedVec<T, MIN, MAX>` with enforced size invariants |
 | Canonical binary codec | `reliakit-codec` | `CanonicalEncode` / `CanonicalDecode`, strict decoding |
 | Strict JSON | `reliakit-json` | Strict parser + limits, deterministic output, typed `JsonEncode` / `JsonDecode` |
-| Resilience | `reliakit-backoff`, `reliakit-circuit`, `reliakit-ratelimit`, `reliakit-timeout` | Retry backoff, circuit breaker, token-bucket rate limiter, deadlines — all clock-agnostic |
+| Resilience | `reliakit-backoff`, `reliakit-bulkhead`, `reliakit-circuit`, `reliakit-ratelimit`, `reliakit-timeout` | Retry backoff, concurrency limiter, circuit breaker, token-bucket rate limiter, deadlines — all clock-agnostic |
 | Shared clock | `reliakit-core` | `Clock` trait + `ManualClock` / `MonotonicClock` |
 | Derive helpers | `reliakit-derive` | `#[derive(CanonicalEncode, CanonicalDecode, JsonEncode, JsonDecode)]` |
 | Decision logic | `reliakit-decide` | Deterministic utility-based decisions (`Reasoner` with `decide`/`explain`/`gate`/`Policy`) |
@@ -195,6 +195,7 @@ reliakit-collections = "0.3"
 reliakit-codec       = "0.2"
 reliakit-json        = "0.2"
 reliakit-backoff     = "0.1"
+reliakit-bulkhead    = "0.1"
 reliakit-circuit     = "0.2"
 reliakit-ratelimit   = "0.1"
 reliakit-timeout     = "0.1"
@@ -217,6 +218,7 @@ supported Rust version is **1.85**.
 | [`reliakit-codec`](https://crates.io/crates/reliakit-codec) | Canonical binary encoding/decoding | You need deterministic bytes (cache keys, fixtures, framing). | Published (pre-1.0) |
 | [`reliakit-json`](https://crates.io/crates/reliakit-json) | Strict, deterministic JSON + typed encode/decode | You parse untrusted JSON or need predictable output. | Published (pre-1.0) |
 | [`reliakit-backoff`](https://crates.io/crates/reliakit-backoff) | Retry backoff delays + jitter | You retry an operation and want explicit spacing. | Published (pre-1.0) |
+| `reliakit-bulkhead` | Concurrency limiter (counting semaphore) | You cap how many operations run at once and shed the rest. | Unreleased (pre-1.0) |
 | [`reliakit-circuit`](https://crates.io/crates/reliakit-circuit) | Circuit breaker state machine | You want to stop calling a failing dependency. | Published (pre-1.0) |
 | [`reliakit-ratelimit`](https://crates.io/crates/reliakit-ratelimit) | Token-bucket rate limiter | You cap how often something may happen. | Published (pre-1.0) |
 | [`reliakit-timeout`](https://crates.io/crates/reliakit-timeout) | Deadlines / time budgets | You track whether a budget has run out. | Published (pre-1.0) |
@@ -224,11 +226,12 @@ supported Rust version is **1.85**.
 | [`reliakit-derive`](https://crates.io/crates/reliakit-derive) | Derive macros for codec + JSON traits | You want `#[derive(...)]` instead of hand-writing encode/decode. | Published (pre-1.0) |
 | [`reliakit-decide`](https://crates.io/crates/reliakit-decide) | Deterministic utility decision engine | You want graded, explainable, testable decisions (routing, selection, when to call an LLM). | Published (pre-1.0) |
 
-The four resilience crates (`backoff`, `circuit`, `ratelimit`, `timeout`) are
-**clock-agnostic** — you pass the time in, so they compose and work in sync,
-async, and embedded code: a rate limiter decides whether to call, a circuit
-breaker stops calling a failing dependency, backoff spaces out retries, and a
-timeout bounds how long you wait.
+The resilience crates (`backoff`, `bulkhead`, `circuit`, `ratelimit`, `timeout`)
+are **clock-agnostic** — you pass the time in (where they need it), so they
+compose and work in sync, async, and embedded code: a rate limiter decides
+whether to call, a bulkhead bounds how many calls run at once, a circuit breaker
+stops calling a failing dependency, backoff spaces out retries, and a timeout
+bounds how long you wait.
 
 ## Design philosophy
 

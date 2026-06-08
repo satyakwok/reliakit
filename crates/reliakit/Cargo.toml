@@ -1,6 +1,6 @@
 [package]
 name = "reliakit"
-version = "0.1.2"
+version = "0.1.3"
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
@@ -8,7 +8,7 @@ repository.workspace = true
 homepage.workspace = true
 documentation = "https://docs.rs/reliakit"
 readme = "README.md"
-description = "Reliability building blocks for Rust: validated primitives, secrets, bounded collections, backoff, circuit breaker, rate limiting, timeouts, and strict JSON. Zero-dependency, no_std-friendly, no unsafe. One name; enable only the building blocks you need via features."
+description = "Reliability building blocks for Rust: validated primitives, secrets, bounded collections, backoff, circuit breaker, rate limiting, concurrency limiting, timeouts, and strict JSON. Zero-dependency, no_std-friendly, no unsafe. One name; enable only the building blocks you need via features."
 keywords = ["reliability", "resilience", "no-std", "validation", "toolkit"]
 categories = ["rust-patterns", "no-std", "development-tools"]
 
@@ -26,6 +26,7 @@ reliakit-validate = { path = "../reliakit-validate", version = "0.3", optional =
 reliakit-collections = { path = "../reliakit-collections", version = "0.3", optional = true, default-features = false }
 reliakit-codec = { path = "../reliakit-codec", version = "0.2", optional = true, default-features = false }
 reliakit-backoff = { path = "../reliakit-backoff", version = "0.1", optional = true, default-features = false }
+reliakit-bulkhead = { path = "../reliakit-bulkhead", version = "0.1", optional = true, default-features = false }
 reliakit-circuit = { path = "../reliakit-circuit", version = "0.2", optional = true, default-features = false }
 reliakit-ratelimit = { path = "../reliakit-ratelimit", version = "0.1", optional = true, default-features = false }
 reliakit-timeout = { path = "../reliakit-timeout", version = "0.1", optional = true, default-features = false }
@@ -64,6 +65,7 @@ validate = ["dep:reliakit-validate"]
 collections = ["dep:reliakit-collections"]
 codec = ["dep:reliakit-codec"]
 backoff = ["dep:reliakit-backoff"]
+bulkhead = ["dep:reliakit-bulkhead"]
 circuit = ["dep:reliakit-circuit"]
 ratelimit = ["dep:reliakit-ratelimit"]
 timeout = ["dep:reliakit-timeout"]
@@ -95,6 +97,7 @@ full = [
     "collections",
     "codec",
     "backoff",
+    "bulkhead",
     "circuit",
     "ratelimit",
     "timeout",

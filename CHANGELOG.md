@@ -10,6 +10,10 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 
 ### Added
 
+- Added `reliakit-bulkhead`, a clock-agnostic concurrency limiter (counting
+  semaphore) that caps in-flight operations and sheds load when full.
+  `try_acquire`/`release` with saturating, panic-free integer math; `no_std` and
+  zero-dependency. The umbrella crate exposes it behind a `bulkhead` feature.
 - Added a `deny.toml` so `cargo deny check` passes: it allows only the MIT
   license, restricts dependencies to the crates.io registry, and rejects
   duplicate versions and security-advisory or yanked crates.

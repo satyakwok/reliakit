@@ -21,6 +21,7 @@ on:
       - "reliakit-collections-v*"
       - "reliakit-codec-v*"
       - "reliakit-backoff-v*"
+      - "reliakit-bulkhead-v*"
       - "reliakit-circuit-v*"
       - "reliakit-ratelimit-v*"
       - "reliakit-json-v*"
@@ -346,6 +347,59 @@ jobs:
           CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
         run: |
           crate=reliakit-backoff
+          version="$(cargo metadata --no-deps --format-version 1 \
+            | jq -r --arg c "$crate" '.packages[] | select(.name == $c) | .version')"
+          index_url="https://index.crates.io/${crate:0:2}/${crate:2:2}/${crate}"
+          if curl -sf "$index_url" | jq -e --arg v "$version" 'select(.vers == $v)' >/dev/null; then
+            echo "$crate $version is already published on crates.io; skipping."
+          else
+            echo "Publishing $crate $version to crates.io..."
+            cargo publish -p "$crate" --locked
+          fi
+
+  publish-bulkhead:
+    if: startsWith(github.ref, 'refs/tags/reliakit-bulkhead-v')
+    runs-on: ubuntu-latest
+    environment: crates-io-publish
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install Rust stable
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+          rustc --version
+          cargo --version
+
+      - name: Cache Cargo
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ github.job }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-${{ github.job }}-
+            ${{ runner.os }}-cargo-
+
+      - name: Run tests
+        run: cargo test -p reliakit-bulkhead --all-features --locked
+
+      - name: Authenticate to crates.io
+        id: auth
+        uses: rust-lang/crates-io-auth-action@v1
+
+      - name: Publish to crates.io
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
+        run: |
+          crate=reliakit-bulkhead
           version="$(cargo metadata --no-deps --format-version 1 \
             | jq -r --arg c "$crate" '.packages[] | select(.name == $c) | .version')"
           index_url="https://index.crates.io/${crate:0:2}/${crate:2:2}/${crate}"

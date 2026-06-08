@@ -45,6 +45,7 @@
 //! | `collections` | [`reliakit_collections`] as [`collections`] |
 //! | `codec` | [`reliakit_codec`] as [`codec`] |
 //! | `backoff` | [`reliakit_backoff`] as [`backoff`] |
+//! | `bulkhead` | [`reliakit_bulkhead`] as [`bulkhead`] |
 //! | `circuit` | [`reliakit_circuit`] as [`circuit`] |
 //! | `ratelimit` | [`reliakit_ratelimit`] as [`ratelimit`] |
 //! | `timeout` | [`reliakit_timeout`] as [`timeout`] |
@@ -77,6 +78,9 @@ pub use reliakit_codec as codec;
 
 #[cfg(feature = "backoff")]
 pub use reliakit_backoff as backoff;
+
+#[cfg(feature = "bulkhead")]
+pub use reliakit_bulkhead as bulkhead;
 
 #[cfg(feature = "circuit")]
 pub use reliakit_circuit as circuit;

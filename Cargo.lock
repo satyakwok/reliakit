@@ -4,9 +4,10 @@ version = 4
 
 [[package]]
 name = "reliakit"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "reliakit-backoff",
+ "reliakit-bulkhead",
  "reliakit-circuit",
  "reliakit-codec",
  "reliakit-collections",
@@ -24,6 +25,10 @@ dependencies = [
 [[package]]
 name = "reliakit-backoff"
 version = "0.1.4"
+
+[[package]]
+name = "reliakit-bulkhead"
+version = "0.1.0"
 
 [[package]]
 name = "reliakit-circuit"
