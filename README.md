@@ -62,6 +62,7 @@ dependency appears), `#![forbid(unsafe_code)]`, and usable on its own. You adopt
 | Canonical binary codec | `reliakit-codec` | `CanonicalEncode` / `CanonicalDecode`, strict decoding |
 | Strict JSON | `reliakit-json` | Strict parser + limits, deterministic output, typed `JsonEncode` / `JsonDecode` |
 | Resilience | `reliakit-backoff`, `reliakit-bulkhead`, `reliakit-circuit`, `reliakit-ratelimit`, `reliakit-timeout` | Retry backoff, concurrency limiter, circuit breaker, token-bucket rate limiter, deadlines — all clock-agnostic |
+| Health reporting | `reliakit-health` | `Health` status + criticality-aware aggregator for `/health`, probes, and status pages |
 | Shared clock | `reliakit-core` | `Clock` trait + `ManualClock` / `MonotonicClock` |
 | Derive helpers | `reliakit-derive` | `#[derive(CanonicalEncode, CanonicalDecode, JsonEncode, JsonDecode)]` |
 | Decision logic | `reliakit-decide` | Deterministic utility-based decisions (`Reasoner` with `decide`/`explain`/`gate`/`Policy`) |
@@ -196,6 +197,7 @@ reliakit-codec       = "0.2"
 reliakit-json        = "0.2"
 reliakit-backoff     = "0.1"
 reliakit-bulkhead    = "0.1"
+reliakit-health      = "0.1"
 reliakit-circuit     = "0.2"
 reliakit-ratelimit   = "0.1"
 reliakit-timeout     = "0.1"
@@ -218,7 +220,8 @@ supported Rust version is **1.85**.
 | [`reliakit-codec`](https://crates.io/crates/reliakit-codec) | Canonical binary encoding/decoding | You need deterministic bytes (cache keys, fixtures, framing). | Published (pre-1.0) |
 | [`reliakit-json`](https://crates.io/crates/reliakit-json) | Strict, deterministic JSON + typed encode/decode | You parse untrusted JSON or need predictable output. | Published (pre-1.0) |
 | [`reliakit-backoff`](https://crates.io/crates/reliakit-backoff) | Retry backoff delays + jitter | You retry an operation and want explicit spacing. | Published (pre-1.0) |
-| `reliakit-bulkhead` | Concurrency limiter (counting semaphore) | You cap how many operations run at once and shed the rest. | Unreleased (pre-1.0) |
+| [`reliakit-bulkhead`](https://crates.io/crates/reliakit-bulkhead) | Concurrency limiter (counting semaphore) | You cap how many operations run at once and shed the rest. | Published (pre-1.0) |
+| `reliakit-health` | Health status + criticality-aware aggregator | You expose a `/health`/`readyz` endpoint or status page. | Unreleased (pre-1.0) |
 | [`reliakit-circuit`](https://crates.io/crates/reliakit-circuit) | Circuit breaker state machine | You want to stop calling a failing dependency. | Published (pre-1.0) |
 | [`reliakit-ratelimit`](https://crates.io/crates/reliakit-ratelimit) | Token-bucket rate limiter | You cap how often something may happen. | Published (pre-1.0) |
 | [`reliakit-timeout`](https://crates.io/crates/reliakit-timeout) | Deadlines / time budgets | You track whether a budget has run out. | Published (pre-1.0) |

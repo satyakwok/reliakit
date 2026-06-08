@@ -63,6 +63,9 @@ jobs:
       - name: Verify reliakit-bulkhead package
         run: cargo publish -p reliakit-bulkhead --dry-run --locked
 
+      - name: Verify reliakit-health package
+        run: cargo publish -p reliakit-health --dry-run --locked
+
       - name: Verify reliakit-circuit package
         run: cargo publish -p reliakit-circuit --dry-run --locked
 

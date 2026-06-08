@@ -8,6 +8,7 @@ members = [
     "crates/reliakit-backoff",
     "crates/reliakit-bulkhead",
     "crates/reliakit-circuit",
+    "crates/reliakit-health",
     "crates/reliakit-ratelimit",
     "crates/reliakit-json",
     "crates/reliakit-timeout",

@@ -67,6 +67,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "reliakit-health"
+version = "0.1.0"
+
+[[package]]
 name = "reliakit-json"
 version = "0.2.5"
 dependencies = [

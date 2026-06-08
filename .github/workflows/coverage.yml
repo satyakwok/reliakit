@@ -192,6 +192,25 @@ jobs:
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
+      - name: Generate reliakit-health coverage
+        run: |
+          cargo llvm-cov \
+            -p reliakit-health \
+            --all-features \
+            --locked \
+            --lcov \
+            --output-path lcov-reliakit-health.info
+
+      - name: Upload reliakit-health coverage
+        uses: codecov/codecov-action@v7
+        with:
+          files: lcov-reliakit-health.info
+          flags: reliakit-health
+          name: reliakit-health
+          fail_ci_if_error: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
       - name: Generate reliakit-circuit coverage
         run: |
           cargo llvm-cov \
