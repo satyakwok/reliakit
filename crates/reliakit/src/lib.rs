@@ -15,9 +15,16 @@
 //! reliakit = { version = "0.1", features = ["ratelimit", "secret"] }
 //! ```
 //!
-//! ```ignore
+//! ```
+//! # // Requires the `ratelimit` and `secret` features (both on under `full`).
 //! use reliakit::ratelimit::RateLimiter;
-//! use reliakit::secret::Secret;
+//! use reliakit::secret::SecretString;
+//!
+//! let mut limiter = RateLimiter::new(5, 1, 1);
+//! assert!(limiter.try_acquire_one(0));
+//!
+//! let api_key = SecretString::from_string("rk_live_value");
+//! assert_eq!(format!("{api_key}"), "[REDACTED]");
 //! ```
 //!
 //! For `no_std`, disable default features and add `alloc` where a module needs
