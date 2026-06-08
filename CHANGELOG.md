@@ -10,25 +10,6 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 
 ### Added
 
-- `reliakit-validate`: documented a real-world pattern — turning collected
-  `Violation`s into an API-style `(field, message)` error list — and how to pair
-  the crate with `reliakit-primitives` for ready-made typed fields. Docs only; no
-  API change.
-- `reliakit-primitives`: added `Cidr`, an allocation-free IPv4/IPv6 network type
-  (`address/prefix`) with prefix-length validation, `contains` membership
-  testing, and a masked `network()`; and `Base32`, a standard (RFC 4648) base32
-  format-validated string. `Cidr` works in `no_std` without `alloc`.
-- `reliakit-collections`: added `BoundedMap<K, V, MIN, MAX>` and
-  `BoundedSet<T, MIN, MAX>` — insertion-ordered, vec-backed types with unique
-  keys/elements and an enforced count range, using linear lookup so they stay
-  deterministic and dependency-free. Added a `CollectionError::Duplicate` variant
-  (the enum is `#[non_exhaustive]`).
-- `reliakit-secret`: added `Secret::ct_eq`, a best-effort constant-time byte
-  comparison (available for byte-viewable secrets such as `String`, `Vec<u8>`,
-  `&[u8]`, `[u8; N]`) so a presented value can be checked against a stored secret
-  without leaking it through timing. Documented redacting a secret field inside a
-  larger `#[derive(Debug)]` struct.
-
 - Added a `deny.toml` so `cargo deny check` passes: it allows only the MIT
   license, restricts dependencies to the crates.io registry, and rejects
   duplicate versions and security-advisory or yanked crates.
@@ -45,6 +26,42 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
   The tag-triggered and manual publish workflows now mint a short-lived token at
   publish time instead of reading a stored API token, so no long-lived registry
   token is kept in repository secrets.
+
+## reliakit-primitives 0.4.3 - 2026-06-08
+
+### Added
+
+- `Cidr`, an allocation-free IPv4/IPv6 network type (`address/prefix`) with
+  prefix-length validation, `contains` membership testing, and a masked
+  `network()`. Works in `no_std` without `alloc`.
+- `Base32`, a standard (RFC 4648) base32 format-validated string.
+
+## reliakit-collections 0.3.2 - 2026-06-08
+
+### Added
+
+- `BoundedMap<K, V, MIN, MAX>` and `BoundedSet<T, MIN, MAX>` — insertion-ordered,
+  vec-backed types with unique keys/elements and an enforced count range, using
+  linear lookup so they stay deterministic and dependency-free.
+- `CollectionError::Duplicate` variant (the enum is `#[non_exhaustive]`).
+
+## reliakit-secret 0.1.3 - 2026-06-08
+
+### Added
+
+- `Secret::ct_eq`, a best-effort constant-time byte comparison (available for
+  byte-viewable secrets such as `String`, `Vec<u8>`, `&[u8]`, `[u8; N]`) so a
+  presented value can be checked against a stored secret without leaking it
+  through timing. Documented redacting a secret field inside a larger
+  `#[derive(Debug)]` struct.
+
+## reliakit-validate 0.3.3 - 2026-06-08
+
+### Added
+
+- Documented a real-world pattern — turning collected `Violation`s into an
+  API-style `(field, message)` error list — and how to pair the crate with
+  `reliakit-primitives` for ready-made typed fields. Docs only; no API change.
 
 ## reliakit-bulkhead 0.1.0 - 2026-06-08
 
