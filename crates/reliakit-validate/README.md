@@ -150,6 +150,15 @@ assert_eq!(result.unwrap_err().len(), 2);
 | `Violation` | A single failed constraint with optional field name |
 | `ValidateResult<T>` | `Result<T, ValidationError>` alias |
 
+## Composing with typed primitives
+
+For ready-made typed fields to validate — `Email`, `Port`, `Percent`,
+`BoundedStr`, and more — pair this crate with
+[`reliakit-primitives`](https://crates.io/crates/reliakit-primitives). The
+`config_check` example in the [`reliakit`](https://crates.io/crates/reliakit)
+umbrella crate shows primitives, validate, and secret validating one config and
+reporting every problem at once.
+
 ## Feature Flags
 
 | Flag | Default | Description |

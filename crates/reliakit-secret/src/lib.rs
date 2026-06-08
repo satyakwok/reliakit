@@ -30,6 +30,49 @@
 //! assert_eq!(password.expose_secret(), "correct horse battery staple");
 //! ```
 //!
+//! # Redacting a field inside a larger struct
+//!
+//! The common case is a secret that lives in a config or request struct. Because
+//! [`Secret<T>`] redacts itself, deriving `Debug` on the parent stays safe — the
+//! secret field renders as `[REDACTED]` while every other field prints normally,
+//! so the whole struct can be logged without leaking:
+//!
+//! ```
+//! use reliakit_secret::SecretString;
+//!
+//! #[derive(Debug)]
+//! struct DbConfig {
+//!     host: String,
+//!     port: u16,
+//!     password: SecretString,
+//! }
+//!
+//! let cfg = DbConfig {
+//!     host: "db.internal".into(),
+//!     port: 5432,
+//!     password: SecretString::from_string("hunter2"),
+//! };
+//!
+//! let rendered = format!("{cfg:?}");
+//! assert!(rendered.contains("db.internal"));
+//! assert!(rendered.contains("[REDACTED]"));
+//! assert!(!rendered.contains("hunter2")); // the secret never appears
+//! ```
+//!
+//! # Comparing secrets
+//!
+//! Checking a presented value against a stored secret with `==` on the exposed
+//! bytes can leak information through timing. Use [`Secret::ct_eq`], which
+//! compares in time that does not depend on how many leading bytes match:
+//!
+//! ```
+//! use reliakit_secret::SecretString;
+//!
+//! let stored = SecretString::from_string("s3cr3t-token");
+//! assert!(stored.ct_eq("s3cr3t-token"));
+//! assert!(!stored.ct_eq("s3cr3t-wrong"));
+//! ```
+//!
 //! # Feature flags
 //!
 //! - `std` is enabled by default.
@@ -100,6 +143,48 @@ impl<T> Secret<T> {
     /// Maps a secret value into another secret value.
     pub fn map<U>(self, f: impl FnOnce(T) -> U) -> Secret<U> {
         Secret::new(f(self.inner))
+    }
+}
+
+impl<T: AsRef<[u8]>> Secret<T> {
+    /// Compares this secret's bytes to `other` in time that does not depend on
+    /// how many leading bytes match.
+    ///
+    /// Comparing a presented value against a stored secret with `==` returns as
+    /// soon as the first differing byte is found, which can leak the secret one
+    /// byte at a time through timing. `ct_eq` always inspects every byte, so the
+    /// duration reveals only the input length, not its contents. Inputs of
+    /// different lengths always compare unequal — the length itself is not
+    /// treated as secret.
+    ///
+    /// This is a best-effort, dependency-free implementation built on
+    /// [`core::hint::black_box`] to discourage the optimizer from
+    /// short-circuiting. If you require audited constant-time guarantees, use a
+    /// dedicated cryptographic comparison crate.
+    ///
+    /// Available for any secret whose value is byte-viewable (`String`,
+    /// `Vec<u8>`, `&str`, `&[u8]`, `[u8; N]`, ...). To compare two secrets, pass
+    /// the other's exposed value: `a.ct_eq(b.expose_secret())`.
+    ///
+    /// ```
+    /// use reliakit_secret::Secret;
+    ///
+    /// let stored = Secret::new(*b"abc123");
+    /// assert!(stored.ct_eq(b"abc123"));
+    /// assert!(!stored.ct_eq(b"abc124"));
+    /// assert!(!stored.ct_eq(b"abc")); // different length
+    /// ```
+    pub fn ct_eq(&self, other: impl AsRef<[u8]>) -> bool {
+        let a = self.inner.as_ref();
+        let b = other.as_ref();
+        if a.len() != b.len() {
+            return false;
+        }
+        let mut diff = 0u8;
+        for (x, y) in a.iter().zip(b.iter()) {
+            diff |= x ^ y;
+        }
+        core::hint::black_box(diff) == 0
     }
 }
 
@@ -222,5 +307,49 @@ mod tests {
         assert_eq!(secret.expose_secret(), "password");
         assert_eq!(secret.expose_str(), "password");
         assert_eq!(secret.to_string(), "[REDACTED]");
+    }
+
+    #[test]
+    fn ct_eq_matches_equal_bytes() {
+        let secret = SecretString::from_string("s3cr3t-token");
+        assert!(secret.ct_eq("s3cr3t-token"));
+        assert!(secret.ct_eq(b"s3cr3t-token"));
+    }
+
+    #[test]
+    fn ct_eq_rejects_different_content_same_length() {
+        let secret = SecretString::from_string("s3cr3t-token");
+        assert!(!secret.ct_eq("s3cr3t-tokeX"));
+        // First and last bytes differ but length matches.
+        assert!(!secret.ct_eq("X3cr3t-tokeX"));
+    }
+
+    #[test]
+    fn ct_eq_rejects_different_length() {
+        let secret = SecretString::from_string("abc");
+        assert!(!secret.ct_eq("ab"));
+        assert!(!secret.ct_eq("abcd"));
+        assert!(!secret.ct_eq(""));
+    }
+
+    #[test]
+    fn ct_eq_works_for_byte_arrays_without_alloc_types() {
+        let secret = Secret::new(*b"key-bytes");
+        assert!(secret.ct_eq(b"key-bytes"));
+        assert!(!secret.ct_eq(b"key-byteX"));
+    }
+
+    #[test]
+    fn ct_eq_empty_secret_matches_empty() {
+        let secret = SecretString::from_string("");
+        assert!(secret.ct_eq(""));
+        assert!(!secret.ct_eq("x"));
+    }
+
+    #[test]
+    fn ct_eq_between_two_secrets_via_expose() {
+        let a = SecretString::from_string("same-value");
+        let b = SecretString::from_string("same-value");
+        assert!(a.ct_eq(b.expose_secret()));
     }
 }

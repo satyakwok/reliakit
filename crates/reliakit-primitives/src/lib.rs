@@ -90,6 +90,8 @@ pub mod duration;
 pub mod error;
 /// MAC address primitive.
 pub mod mac;
+/// IP network (CIDR) primitive.
+pub mod net;
 /// Non-empty string primitive.
 #[cfg(feature = "alloc")]
 pub mod non_empty;
@@ -111,11 +113,12 @@ pub use collections::NonEmptyVec;
 pub use duration::HumanDuration;
 pub use error::{PrimitiveError, PrimitiveErrorKind, PrimitiveResult};
 pub use mac::MacAddress;
+pub use net::Cidr;
 #[cfg(feature = "alloc")]
 pub use non_empty::NonEmptyStr;
 pub use numeric::{ByteSize, Percent, PercentageF64, Port, PositiveFloat, PositiveInt};
 #[cfg(feature = "alloc")]
 pub use semver::SemVer;
 #[cfg(feature = "alloc")]
-pub use text::{Base64, Email, HexString, Hostname, HttpUrl, Identifier, Slug};
+pub use text::{Base32, Base64, Email, HexString, Hostname, HttpUrl, Identifier, Slug};
 pub use uuid::Uuid;

@@ -69,6 +69,56 @@
 //! assert!(result.is_err());
 //! assert_eq!(result.unwrap_err().len(), 2);
 //! ```
+//!
+//! ## One error list for an API response
+//!
+//! Collecting every [`Violation`] lets a request handler report all field
+//! problems at once (e.g. as an HTTP 422 body) instead of making the client fix
+//! one error per round-trip:
+//!
+//! ```
+//! use reliakit_validate::{Validate, ValidationError, Violation};
+//!
+//! struct Signup {
+//!     email: String,
+//!     password: String,
+//! }
+//!
+//! impl Validate for Signup {
+//!     type Error = ValidationError;
+//!
+//!     fn validate(&self) -> Result<(), Self::Error> {
+//!         let mut errors = ValidationError::empty();
+//!         if !self.email.contains('@') {
+//!             errors.push(Violation::with_field("email", "must contain @"));
+//!         }
+//!         if self.password.len() < 8 {
+//!             errors.push(Violation::with_field("password", "must be at least 8 characters"));
+//!         }
+//!         if errors.is_empty() { Ok(()) } else { Err(errors) }
+//!     }
+//! }
+//!
+//! let bad = Signup { email: "nope".into(), password: "x".into() };
+//! let errors = bad.validate().unwrap_err();
+//!
+//! // Render to the (field, message) pairs a JSON error body would carry.
+//! let body: Vec<(&str, &str)> = errors
+//!     .violations()
+//!     .iter()
+//!     .map(|v| (v.field.unwrap_or("(root)"), v.message))
+//!     .collect();
+//! assert_eq!(
+//!     body,
+//!     vec![("email", "must contain @"), ("password", "must be at least 8 characters")]
+//! );
+//! ```
+//!
+//! For ready-made typed fields to validate — email, port, percentages, bounded
+//! strings, and more — pair this crate with
+//! [`reliakit-primitives`](https://docs.rs/reliakit-primitives). The
+//! `config_check` example in the `reliakit` umbrella crate shows primitives,
+//! validate, and secret working together on one config.
 
 //! # Feature flags
 //!

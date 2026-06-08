@@ -102,6 +102,50 @@ let token = secret.into_inner();
 assert_eq!(token, "token");
 ```
 
+### Redacting a field inside a struct
+
+The common case: a secret living in a config or request struct. Because
+`Secret<T>` redacts itself, deriving `Debug` on the parent stays safe — the
+secret field shows `[REDACTED]` and the rest prints normally, so you can log the
+whole struct.
+
+```rust
+use reliakit_secret::SecretString;
+
+#[derive(Debug)]
+struct DbConfig {
+    host: String,
+    port: u16,
+    password: SecretString,
+}
+
+let cfg = DbConfig {
+    host: "db.internal".into(),
+    port: 5432,
+    password: SecretString::from_string("hunter2"),
+};
+
+let rendered = format!("{cfg:?}");
+assert!(rendered.contains("db.internal"));
+assert!(rendered.contains("[REDACTED]"));
+assert!(!rendered.contains("hunter2"));
+```
+
+### Constant-time comparison
+
+Checking a presented value against a stored secret with `==` on the exposed
+bytes can leak the secret through timing. `ct_eq` compares in time that does not
+depend on how many leading bytes match (best-effort, dependency-free; it depends
+only on the input length, not the contents).
+
+```rust
+use reliakit_secret::SecretString;
+
+let stored = SecretString::from_string("s3cr3t-token");
+assert!(stored.ct_eq("s3cr3t-token"));
+assert!(!stored.ct_eq("s3cr3t-wrong"));
+```
+
 ## Available Types
 
 | Type | Description |
@@ -110,6 +154,9 @@ assert_eq!(token, "token");
 | `SecretString` | `String`-backed secret, available with `std` or `alloc` |
 | `ExposeSecret<T>` | Trait for explicit shared access |
 | `ExposeSecretMut<T>` | Trait for explicit mutable access |
+
+`Secret<T>` where the value is byte-viewable (`String`, `Vec<u8>`, `&[u8]`,
+`[u8; N]`, ...) also has `ct_eq` for constant-time comparison.
 
 ## Feature Flags
 

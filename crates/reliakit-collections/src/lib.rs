@@ -9,8 +9,17 @@
 //!
 //! - [`BoundedVec<T, MIN, MAX>`] — an owned `Vec<T>` constrained to hold
 //!   between `MIN` and `MAX` elements inclusive.
+//! - [`BoundedMap<K, V, MIN, MAX>`] — an insertion-ordered key-value map with
+//!   unique keys and an enforced entry-count range.
+//! - [`BoundedSet<T, MIN, MAX>`] — an insertion-ordered set of unique elements
+//!   with an enforced count range.
 //! - [`RingBuffer<T>`] — a fixed-capacity circular buffer that overwrites the
 //!   oldest element when full (a rolling window that never fails to push).
+//!
+//! [`BoundedMap`] and [`BoundedSet`] are backed by a `Vec` and use linear scans
+//! for lookup, so they stay deterministic and dependency-free (no hashing or
+//! ordering machinery) and are meant for the small, bounded sizes their bounds
+//! describe.
 //!
 //! # Examples
 //!
@@ -55,11 +64,19 @@
 extern crate alloc;
 
 #[cfg(feature = "alloc")]
+mod bounded_map;
+#[cfg(feature = "alloc")]
+mod bounded_set;
+#[cfg(feature = "alloc")]
 mod bounded_vec;
 mod error;
 #[cfg(feature = "alloc")]
 mod ring_buffer;
 
+#[cfg(feature = "alloc")]
+pub use bounded_map::BoundedMap;
+#[cfg(feature = "alloc")]
+pub use bounded_set::BoundedSet;
 #[cfg(feature = "alloc")]
 pub use bounded_vec::BoundedVec;
 pub use error::{CollectionError, CollectionResult};
