@@ -10,10 +10,6 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 
 ### Added
 
-- Added the `reliakit` umbrella crate, which re-exports every `reliakit-*`
-  building block behind a per-crate feature flag with `std`/`alloc` forwarding,
-  a `core` feature that enables clock-aware methods, optional cross-crate
-  integration features, and a `full` feature. It contains no logic of its own.
 - Added a `deny.toml` so `cargo deny check` passes: it allows only the MIT
   license, restricts dependencies to the crates.io registry, and rejects
   duplicate versions and security-advisory or yanked crates.
@@ -30,6 +26,16 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
   The tag-triggered and manual publish workflows now mint a short-lived token at
   publish time instead of reading a stored API token, so no long-lived registry
   token is kept in repository secrets.
+
+## reliakit 0.1.0 - 2026-06-08
+
+### Added
+
+- Initial release of the `reliakit` umbrella crate, which re-exports every
+  `reliakit-*` building block behind a per-crate feature flag with `std`/`alloc`
+  forwarding, a `core` feature that enables clock-aware methods, optional
+  cross-crate integration features, and a `full` feature. It contains no logic of
+  its own.
 
 ## reliakit-decide 0.1.0 - 2026-06-07
 
