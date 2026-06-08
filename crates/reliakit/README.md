@@ -67,12 +67,13 @@ Everything at once:
 reliakit = { version = "0.1", features = ["full"] }
 ```
 
-## Example: a resilient client
+## Examples
 
-The reliability blocks are designed to compose. This guards one call to a flaky
-dependency with an overall deadline, rate limiting, a circuit breaker, and
-backoff — all reached through the one `reliakit` name and all driven by a single
-clock:
+The building blocks are designed to compose, all reached through the one
+`reliakit` name.
+
+**A resilient client** — guard one call to a flaky dependency with an overall
+deadline, rate limiting, a circuit breaker, and backoff, driven by a single clock:
 
 ```sh
 cargo run -p reliakit --example resilient_client \
@@ -80,6 +81,16 @@ cargo run -p reliakit --example resilient_client \
 ```
 
 See [`examples/resilient_client.rs`](./examples/resilient_client.rs).
+
+**A config check** — validate a service config from raw, untrusted strings,
+reporting every problem at once with the credential kept out of logs:
+
+```sh
+cargo run -p reliakit --example config_check \
+  --features "primitives validate secret"
+```
+
+See [`examples/config_check.rs`](./examples/config_check.rs).
 
 ## Building Blocks
 
