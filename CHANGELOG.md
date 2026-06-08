@@ -10,6 +10,25 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 
 ### Added
 
+- `reliakit-validate`: documented a real-world pattern — turning collected
+  `Violation`s into an API-style `(field, message)` error list — and how to pair
+  the crate with `reliakit-primitives` for ready-made typed fields. Docs only; no
+  API change.
+- `reliakit-primitives`: added `Cidr`, an allocation-free IPv4/IPv6 network type
+  (`address/prefix`) with prefix-length validation, `contains` membership
+  testing, and a masked `network()`; and `Base32`, a standard (RFC 4648) base32
+  format-validated string. `Cidr` works in `no_std` without `alloc`.
+- `reliakit-collections`: added `BoundedMap<K, V, MIN, MAX>` and
+  `BoundedSet<T, MIN, MAX>` — insertion-ordered, vec-backed types with unique
+  keys/elements and an enforced count range, using linear lookup so they stay
+  deterministic and dependency-free. Added a `CollectionError::Duplicate` variant
+  (the enum is `#[non_exhaustive]`).
+- `reliakit-secret`: added `Secret::ct_eq`, a best-effort constant-time byte
+  comparison (available for byte-viewable secrets such as `String`, `Vec<u8>`,
+  `&[u8]`, `[u8; N]`) so a presented value can be checked against a stored secret
+  without leaking it through timing. Documented redacting a secret field inside a
+  larger `#[derive(Debug)]` struct.
+
 - Added a `deny.toml` so `cargo deny check` passes: it allows only the MIT
   license, restricts dependencies to the crates.io registry, and rejects
   duplicate versions and security-advisory or yanked crates.

@@ -678,6 +678,155 @@ impl From<Base64> for String {
     }
 }
 
+// ── Base32 ────────────────────────────────────────────────────────────────────
+
+/// Standard (RFC 4648) base32 string with required, correct padding.
+///
+/// Rules: non-empty, length is a multiple of `8`, every non-padding character is
+/// in the standard alphabet (`A-Z`, `2-7`), and `=` padding appears only at the
+/// end in a valid amount (`1`, `3`, `4`, or `6` characters). This is a *format*
+/// check; it does not decode the data. Lowercase letters and the extended-hex
+/// alphabet are not accepted.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct Base32(String);
+
+impl Base32 {
+    /// Creates a new `Base32`. Returns an error if the value is empty or is not
+    /// well-formed standard base32 (see the type docs for the exact rules).
+    pub fn new(value: impl Into<String>) -> PrimitiveResult<Self> {
+        let value = value.into();
+        if value.is_empty() {
+            return Err(PrimitiveError::Empty);
+        }
+        let bytes = value.as_bytes();
+        if bytes.len() % 8 != 0 {
+            return Err(PrimitiveError::Invalid {
+                message: "base32 length must be a multiple of 8",
+            });
+        }
+        let pad = bytes.iter().rev().take_while(|&&b| b == b'=').count();
+        // Valid trailing-pad counts for base32 are 0, 1, 3, 4, or 6.
+        if !matches!(pad, 0 | 1 | 3 | 4 | 6) {
+            return Err(PrimitiveError::Invalid {
+                message: "base32 has an invalid amount of padding",
+            });
+        }
+        // Every character before the padding must be in the standard alphabet;
+        // because `=` is not in the alphabet, this also rejects interior padding.
+        if !bytes[..bytes.len() - pad]
+            .iter()
+            .all(|&b| b.is_ascii_uppercase() || (b'2'..=b'7').contains(&b))
+        {
+            return Err(PrimitiveError::Invalid {
+                message: "base32 contains a character outside the standard alphabet",
+            });
+        }
+        Ok(Self(value))
+    }
+
+    /// Returns the underlying base32 string slice.
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+
+    /// Consumes the wrapper and returns the inner string.
+    pub fn into_inner(self) -> String {
+        self.0
+    }
+
+    /// Returns `true` if the value carries `=` padding.
+    pub fn is_padded(&self) -> bool {
+        self.0.ends_with('=')
+    }
+
+    /// Returns the number of bytes this base32 string decodes to.
+    pub fn decoded_len(&self) -> usize {
+        let pad = self.0.bytes().rev().take_while(|&b| b == b'=').count();
+        let missing = match pad {
+            6 => 4,
+            4 => 3,
+            3 => 2,
+            1 => 1,
+            _ => 0,
+        };
+        self.0.len() / 8 * 5 - missing
+    }
+}
+
+impl fmt::Display for Base32 {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(&self.0)
+    }
+}
+
+impl AsRef<str> for Base32 {
+    fn as_ref(&self) -> &str {
+        self.as_str()
+    }
+}
+
+impl Deref for Base32 {
+    type Target = str;
+
+    fn deref(&self) -> &Self::Target {
+        self.as_str()
+    }
+}
+
+impl TryFrom<&str> for Base32 {
+    type Error = PrimitiveError;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        Self::new(value)
+    }
+}
+
+impl TryFrom<String> for Base32 {
+    type Error = PrimitiveError;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        Self::new(value)
+    }
+}
+
+impl FromStr for Base32 {
+    type Err = PrimitiveError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Self::new(s)
+    }
+}
+
+impl PartialEq<str> for Base32 {
+    fn eq(&self, other: &str) -> bool {
+        self.as_str() == other
+    }
+}
+
+impl PartialEq<&str> for Base32 {
+    fn eq(&self, other: &&str) -> bool {
+        self.as_str() == *other
+    }
+}
+
+impl PartialEq<String> for Base32 {
+    fn eq(&self, other: &String) -> bool {
+        self.as_str() == other.as_str()
+    }
+}
+
+impl PartialEq<&String> for Base32 {
+    fn eq(&self, other: &&String) -> bool {
+        self.as_str() == other.as_str()
+    }
+}
+
+impl From<Base32> for String {
+    fn from(value: Base32) -> Self {
+        value.into_inner()
+    }
+}
+
 // ── Identifier ────────────────────────────────────────────────────────────────
 
 /// A conservative ASCII identifier: a letter or `_`, then letters, digits, or
@@ -944,7 +1093,7 @@ impl From<Hostname> for String {
 
 #[cfg(test)]
 mod tests {
-    use super::{Base64, Email, HexString, Hostname, HttpUrl, Identifier, Slug};
+    use super::{Base32, Base64, Email, HexString, Hostname, HttpUrl, Identifier, Slug};
     use crate::{PrimitiveError, PrimitiveErrorKind};
 
     // Slug
@@ -1271,6 +1420,47 @@ mod tests {
         let b = Base64::new("YWJjZGZn").unwrap(); // 6 bytes, no pad
         assert!(!b.is_padded());
         assert_eq!(b.decoded_len(), 6);
+    }
+
+    // Base32 (RFC 4648 test vectors: f/fo/foo/foob/fooba/foobar)
+    #[test]
+    fn base32_accepts_valid() {
+        assert_eq!(Base32::new("MZXW6YTB").unwrap().as_str(), "MZXW6YTB"); // "fooba"
+        assert!(Base32::new("MY======").is_ok()); // "f"
+        assert!(Base32::new("MZXQ====").is_ok()); // "fo"
+        assert!(Base32::new("MZXW6===").is_ok()); // "foo"
+        assert!(Base32::new("MZXW6YQ=").is_ok()); // "foob"
+        assert!(Base32::new("MZXW6YTBOI======").is_ok()); // "foobar"
+    }
+
+    #[test]
+    fn base32_rejects_bad() {
+        assert_eq!(
+            Base32::new("").unwrap_err().kind(),
+            PrimitiveErrorKind::Empty
+        );
+        assert_eq!(
+            Base32::new("MZXW6YT").unwrap_err().kind(), // not a multiple of 8
+            PrimitiveErrorKind::InvalidFormat
+        );
+        assert!(Base32::new("mzxw6ytb").is_err()); // lowercase not accepted
+        assert!(Base32::new("MZXW6YT1").is_err()); // '1' outside the 2-7 digits
+        assert!(Base32::new("MZXW6Y==").is_err()); // invalid padding amount (2)
+        assert!(Base32::new("M=XW6YTB").is_err()); // interior padding
+    }
+
+    #[test]
+    fn base32_padding_and_decoded_len() {
+        let b = Base32::new("MY======").unwrap(); // "f" -> 1 byte
+        assert!(b.is_padded());
+        assert_eq!(b.decoded_len(), 1);
+        assert_eq!(Base32::new("MZXQ====").unwrap().decoded_len(), 2); // "fo"
+        assert_eq!(Base32::new("MZXW6===").unwrap().decoded_len(), 3); // "foo"
+        assert_eq!(Base32::new("MZXW6YQ=").unwrap().decoded_len(), 4); // "foob"
+        let full = Base32::new("MZXW6YTB").unwrap(); // "fooba" -> 5 bytes
+        assert!(!full.is_padded());
+        assert_eq!(full.decoded_len(), 5);
+        assert_eq!(Base32::new("MZXW6YTBOI======").unwrap().decoded_len(), 6); // "foobar"
     }
 
     #[test]

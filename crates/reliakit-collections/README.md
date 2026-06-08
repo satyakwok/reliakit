@@ -104,11 +104,41 @@ assert_eq!(last3.push(4), Some(1));
 assert_eq!(last3.iter().copied().collect::<Vec<_>>(), [2, 3, 4]);
 ```
 
+### Bounded map with unique keys
+
+```rust
+use reliakit_collections::BoundedMap;
+
+// At most 8 feature flags, keys unique, insertion order preserved.
+let mut flags = BoundedMap::<String, bool, 0, 8>::new(vec![]).unwrap();
+
+assert_eq!(flags.insert("dark_mode".into(), true).unwrap(), None);
+assert_eq!(flags.insert("dark_mode".into(), false).unwrap(), Some(true)); // replaces, count unchanged
+assert_eq!(flags.get(&"dark_mode".to_string()), Some(&false));
+assert_eq!(flags.len(), 1);
+```
+
+### Bounded set of unique elements
+
+```rust
+use reliakit_collections::BoundedSet;
+
+// Track up to 3 active sessions; duplicates are ignored, overflow is rejected.
+let mut sessions = BoundedSet::<u32, 0, 3>::new(vec![1, 2]).unwrap();
+
+assert!(sessions.insert(3).unwrap());      // added
+assert!(!sessions.insert(2).unwrap());     // already present, no-op
+assert!(sessions.insert(4).is_err());      // at capacity
+assert!(sessions.contains(&3));
+```
+
 ## Available Types
 
 | Type | Description |
 |---|---|
 | `BoundedVec<T, MIN, MAX>` | `Vec<T>` constrained to hold between `MIN` and `MAX` elements |
+| `BoundedMap<K, V, MIN, MAX>` | Insertion-ordered map with unique keys and an enforced entry-count range (vec-backed, linear lookup) |
+| `BoundedSet<T, MIN, MAX>` | Insertion-ordered set of unique elements with an enforced count range (vec-backed, linear lookup) |
 | `RingBuffer<T>` | Fixed-capacity circular buffer that overwrites the oldest element when full |
 
 ## Feature Flags
@@ -116,13 +146,14 @@ assert_eq!(last3.iter().copied().collect::<Vec<_>>(), [2, 3, 4]);
 | Flag | Default | Description |
 |---|---|---|
 | `std` | yes | Enables `std::error::Error` for `CollectionError`; implies `alloc` |
-| `alloc` | no | Enables `BoundedVec` and `RingBuffer` (backed by `alloc`) |
+| `alloc` | no | Enables `BoundedVec`, `BoundedMap`, `BoundedSet`, and `RingBuffer` (backed by `alloc`) |
 
 ## `no_std`
 
-The crate supports `no_std`. `BoundedVec` requires the `alloc` feature (enabled
-by default via `std`). The error types (`CollectionError`, `CollectionResult`)
-are available without `alloc`.
+The crate supports `no_std`. `BoundedVec`, `BoundedMap`, `BoundedSet`, and
+`RingBuffer` require the `alloc` feature (enabled by default via `std`). The
+error types (`CollectionError`, `CollectionResult`) are available without
+`alloc`.
 
 ## Safety
 

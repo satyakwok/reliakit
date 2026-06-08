@@ -12,6 +12,8 @@ pub enum CollectionError {
     InvalidBounds { min: usize, max: usize },
     /// A capacity of zero was requested where a positive capacity is required.
     ZeroCapacity,
+    /// A duplicate key or element was supplied where uniqueness is required.
+    Duplicate,
 }
 
 /// Result alias for bounded collection operations.
@@ -36,6 +38,7 @@ impl fmt::Display for CollectionError {
                 write!(f, "invalid bounds: MIN ({min}) must not exceed MAX ({max})")
             }
             Self::ZeroCapacity => write!(f, "capacity must be greater than zero"),
+            Self::Duplicate => write!(f, "collection contains a duplicate key or element"),
         }
     }
 }
@@ -77,6 +80,14 @@ mod tests {
         assert_eq!(
             CollectionError::ZeroCapacity.to_string(),
             "capacity must be greater than zero"
+        );
+    }
+
+    #[test]
+    fn display_duplicate() {
+        assert_eq!(
+            CollectionError::Duplicate.to_string(),
+            "collection contains a duplicate key or element"
         );
     }
 }
