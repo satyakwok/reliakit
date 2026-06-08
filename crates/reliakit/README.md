@@ -101,10 +101,12 @@ reliakit = { version = "0.1", features = ["full"] }
 
 ## `no_std`
 
-`no_std`-compatible (`default-features = false`). Add `alloc` for modules that
-need owned storage (for example `primitives`, `collections`, `json`). The pure
-`core` building blocks (`backoff`, `circuit`, `ratelimit`, `timeout`) need
-neither.
+`no_std`-compatible (`default-features = false`). Enable the umbrella's `alloc`
+feature for the modules whose owned storage is gated behind it — `primitives`,
+`secret`, `validate`, `collections`, and `codec`. `json` and `decide` always
+include `alloc` on their own, so they need no extra feature. The pure-`core`
+blocks (`backoff`, `circuit`, `ratelimit`, `timeout`) need neither `std` nor
+`alloc`.
 
 ## Safety
 
@@ -114,6 +116,12 @@ building block forbids unsafe code in its own right.
 ## Minimum Supported Rust Version
 
 Rust `1.85` and newer. No nightly features are used.
+
+## Status
+
+Pre-1.0. A thin re-export layer over the `reliakit-*` building blocks; its public
+surface is the set of feature flags, which may gain backward-compatible additions
+before a 1.0 release.
 
 ## License
 
