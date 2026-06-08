@@ -1,0 +1,30 @@
+[package]
+name = "reliakit-health"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation = "https://docs.rs/reliakit-health"
+readme = "README.md"
+description = "Health status types and a criticality-aware aggregator for service health checks, probes, and status pages. no_std-friendly and zero-dependency."
+keywords = ["health", "healthcheck", "readiness", "reliability", "no-std"]
+categories = ["data-structures", "rust-patterns", "no-std"]
+
+[package.metadata.docs.rs]
+all-features = true
+
+[features]
+default = ["std"]
+std = ["alloc"]
+alloc = []
+
+[dependencies]
+
+[[example]]
+name = "health_basic"
+path = "examples/basic.rs"
+
+[lints]
+workspace = true
