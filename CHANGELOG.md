@@ -27,6 +27,13 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
   publish time instead of reading a stored API token, so no long-lived registry
   token is kept in repository secrets.
 
+## reliakit 0.1.1 - 2026-06-08
+
+### Added
+
+- Examples reachable through the `reliakit` umbrella: `resilient_client`,
+  `config_check`, and `typed_json`.
+
 ## reliakit 0.1.0 - 2026-06-08
 
 ### Added
