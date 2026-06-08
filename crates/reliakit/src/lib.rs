@@ -42,7 +42,7 @@
 //! | `ratelimit` | [`reliakit_ratelimit`] as [`ratelimit`] |
 //! | `timeout` | [`reliakit_timeout`] as [`timeout`] |
 //! | `json` | [`reliakit_json`] as [`json`] |
-//! | `derive` | [`reliakit_derive`] as [`derive`] |
+//! | `derive` | [`reliakit_derive`] as [`mod@derive`] |
 //! | `decide` | [`reliakit_decide`] as [`decide`] |
 //! | `full` | all of the above |
 //!
