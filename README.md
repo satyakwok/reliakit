@@ -303,8 +303,12 @@ crate — check each crate's README for the exact flags.
 
 ## Contributing
 
-Contributions are welcome. Please open an issue before submitting a pull request
-for non-trivial changes so the direction can be discussed first.
+Contributions are welcome. New here? The pinned
+[good first issues](https://github.com/satyakwok/reliakit/labels/good%20first%20issue)
+are a friendly place to start, and
+[help wanted](https://github.com/satyakwok/reliakit/labels/help%20wanted) issues
+need a bit more design judgment. Please open an issue before submitting a pull
+request for non-trivial changes so the direction can be discussed first.
 
 - Keep each crate minimal and focused.
 - Add tests for any new public API surface.
