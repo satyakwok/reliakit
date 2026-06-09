@@ -49,6 +49,16 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
   `RetryError::Exhausted` carries the attempt count and last error with no
   allocation and no `Error` bound. Pure `core`, `no_std`, zero-dependency.
 
+## reliakit-csv 0.1.1 - Unreleased
+
+### Added
+
+- A `#[doc(hidden)]` `__private` module that re-exports `alloc`'s `Vec` and
+  `String`. It exists only so the upcoming `CsvEncode`/`CsvDecode` derives in
+  `reliakit-derive` can name those types in generated code on `no_std`. It is
+  not part of the public API and may change at any time. No existing API
+  changes.
+
 ## reliakit-csv 0.1.0 - 2026-06-09
 
 ### Added
