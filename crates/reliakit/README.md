@@ -114,6 +114,8 @@ See [`examples/typed_json.rs`](./examples/typed_json.rs).
 | `csv` | `reliakit::csv` | [`reliakit-csv`](https://crates.io/crates/reliakit-csv) — strict, bounded CSV |
 | `backoff` | `reliakit::backoff` | [`reliakit-backoff`](https://crates.io/crates/reliakit-backoff) — retry backoff policies |
 | `retry` | `reliakit::retry` | [`reliakit-retry`](https://crates.io/crates/reliakit-retry) — runtime-agnostic retry helpers |
+| `bulkhead` | `reliakit::bulkhead` | [`reliakit-bulkhead`](https://crates.io/crates/reliakit-bulkhead) — concurrency limiter |
+| `health` | `reliakit::health` | [`reliakit-health`](https://crates.io/crates/reliakit-health) — criticality-aware health aggregator |
 | `circuit` | `reliakit::circuit` | [`reliakit-circuit`](https://crates.io/crates/reliakit-circuit) — circuit breaker |
 | `ratelimit` | `reliakit::ratelimit` | [`reliakit-ratelimit`](https://crates.io/crates/reliakit-ratelimit) — token-bucket rate limiter |
 | `timeout` | `reliakit::timeout` | [`reliakit-timeout`](https://crates.io/crates/reliakit-timeout) — deadlines and timeouts |
@@ -139,10 +141,10 @@ See [`examples/typed_json.rs`](./examples/typed_json.rs).
 
 `no_std`-compatible (`default-features = false`). Enable the umbrella's `alloc`
 feature for the modules whose owned storage is gated behind it — `primitives`,
-`secret`, `validate`, `collections`, and `codec`. `json` and `decide` always
-include `alloc` on their own, so they need no extra feature. The pure-`core`
-blocks (`backoff`, `circuit`, `ratelimit`, `timeout`) need neither `std` nor
-`alloc`.
+`secret`, `validate`, `collections`, `codec`, `csv`, and `health`. `json` and
+`decide` always include `alloc` on their own, so they need no extra feature. The
+pure-`core` blocks (`backoff`, `retry`, `bulkhead`, `circuit`, `ratelimit`,
+`timeout`) need neither `std` nor `alloc`.
 
 ## Safety
 
