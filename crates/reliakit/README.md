@@ -111,7 +111,9 @@ See [`examples/typed_json.rs`](./examples/typed_json.rs).
 | `validate` | `reliakit::validate` | [`reliakit-validate`](https://crates.io/crates/reliakit-validate) — validation traits + error aggregation |
 | `collections` | `reliakit::collections` | [`reliakit-collections`](https://crates.io/crates/reliakit-collections) — bounded collections |
 | `codec` | `reliakit::codec` | [`reliakit-codec`](https://crates.io/crates/reliakit-codec) — canonical binary encoding |
+| `csv` | `reliakit::csv` | [`reliakit-csv`](https://crates.io/crates/reliakit-csv) — strict, bounded CSV |
 | `backoff` | `reliakit::backoff` | [`reliakit-backoff`](https://crates.io/crates/reliakit-backoff) — retry backoff policies |
+| `retry` | `reliakit::retry` | [`reliakit-retry`](https://crates.io/crates/reliakit-retry) — runtime-agnostic retry helpers |
 | `circuit` | `reliakit::circuit` | [`reliakit-circuit`](https://crates.io/crates/reliakit-circuit) — circuit breaker |
 | `ratelimit` | `reliakit::ratelimit` | [`reliakit-ratelimit`](https://crates.io/crates/reliakit-ratelimit) — token-bucket rate limiter |
 | `timeout` | `reliakit::timeout` | [`reliakit-timeout`](https://crates.io/crates/reliakit-timeout) — deadlines and timeouts |

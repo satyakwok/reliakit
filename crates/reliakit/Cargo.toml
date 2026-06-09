@@ -1,6 +1,6 @@
 [package]
 name = "reliakit"
-version = "0.1.4"
+version = "0.1.5"
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
@@ -8,7 +8,7 @@ repository.workspace = true
 homepage.workspace = true
 documentation = "https://docs.rs/reliakit"
 readme = "README.md"
-description = "Reliability building blocks for Rust: validated primitives, secrets, bounded collections, backoff, circuit breaker, rate limiting, concurrency limiting, timeouts, health reporting, and strict JSON. Zero-dependency, no_std-friendly, no unsafe. One name; enable only the building blocks you need via features."
+description = "Reliability building blocks for Rust: validated primitives, secrets, bounded collections, backoff, retry helpers, circuit breaker, rate limiting, concurrency limiting, timeouts, health reporting, and strict JSON/CSV. Zero-dependency, no_std-friendly, no unsafe. One name; enable only the building blocks you need via features."
 keywords = ["reliability", "resilience", "no-std", "validation", "toolkit"]
 categories = ["rust-patterns", "no-std", "development-tools"]
 
@@ -25,7 +25,9 @@ reliakit-secret = { path = "../reliakit-secret", version = "0.1", optional = tru
 reliakit-validate = { path = "../reliakit-validate", version = "0.3", optional = true, default-features = false }
 reliakit-collections = { path = "../reliakit-collections", version = "0.3", optional = true, default-features = false }
 reliakit-codec = { path = "../reliakit-codec", version = "0.2", optional = true, default-features = false }
+reliakit-csv = { path = "../reliakit-csv", version = "0.1", optional = true, default-features = false }
 reliakit-backoff = { path = "../reliakit-backoff", version = "0.1", optional = true, default-features = false }
+reliakit-retry = { path = "../reliakit-retry", version = "0.1", optional = true, default-features = false }
 reliakit-bulkhead = { path = "../reliakit-bulkhead", version = "0.1", optional = true, default-features = false }
 reliakit-health = { path = "../reliakit-health", version = "0.1", optional = true, default-features = false }
 reliakit-circuit = { path = "../reliakit-circuit", version = "0.2", optional = true, default-features = false }
@@ -48,6 +50,8 @@ std = [
     "reliakit-validate?/std",
     "reliakit-collections?/std",
     "reliakit-codec?/std",
+    "reliakit-csv?/std",
+    "reliakit-retry?/std",
     "reliakit-json?/std",
     "reliakit-decide?/std",
     "reliakit-health?/std",
@@ -58,6 +62,7 @@ alloc = [
     "reliakit-validate?/alloc",
     "reliakit-collections?/alloc",
     "reliakit-codec?/alloc",
+    "reliakit-csv?/alloc",
     "reliakit-health?/alloc",
 ]
 
@@ -67,7 +72,9 @@ secret = ["dep:reliakit-secret"]
 validate = ["dep:reliakit-validate"]
 collections = ["dep:reliakit-collections"]
 codec = ["dep:reliakit-codec"]
+csv = ["dep:reliakit-csv"]
 backoff = ["dep:reliakit-backoff"]
+retry = ["dep:reliakit-retry"]
 bulkhead = ["dep:reliakit-bulkhead"]
 health = ["dep:reliakit-health"]
 circuit = ["dep:reliakit-circuit"]
@@ -100,7 +107,9 @@ full = [
     "validate",
     "collections",
     "codec",
+    "csv",
     "backoff",
+    "retry",
     "bulkhead",
     "health",
     "circuit",

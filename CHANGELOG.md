@@ -27,6 +27,14 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
   publish time instead of reading a stored API token, so no long-lived registry
   token is kept in repository secrets.
 
+## reliakit 0.1.5 - Unreleased
+
+### Added
+
+- Exposed `reliakit-csv` and `reliakit-retry` through the umbrella behind `csv`
+  and `retry` features (both also included in `full`), with `std`/`alloc`
+  forwarding (`retry` is pure `core`, so it has no `alloc` wiring).
+
 ## reliakit-retry 0.1.0 - 2026-06-09
 
 ### Added
