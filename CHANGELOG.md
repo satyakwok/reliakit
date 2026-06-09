@@ -27,7 +27,7 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
   publish time instead of reading a stored API token, so no long-lived registry
   token is kept in repository secrets.
 
-## reliakit-retry 0.1.0 - Unreleased
+## reliakit-retry 0.1.0 - 2026-06-09
 
 ### Added
 
@@ -41,7 +41,7 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
   `RetryError::Exhausted` carries the attempt count and last error with no
   allocation and no `Error` bound. Pure `core`, `no_std`, zero-dependency.
 
-## reliakit-csv 0.1.0 - Unreleased
+## reliakit-csv 0.1.0 - 2026-06-09
 
 ### Added
 
