@@ -41,6 +41,19 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
   `RetryError::Exhausted` carries the attempt count and last error with no
   allocation and no `Error` bound. Pure `core`, `no_std`, zero-dependency.
 
+## reliakit-csv 0.1.0 - Unreleased
+
+### Added
+
+- Initial release. Strict, bounded, and deterministic CSV (a subset of
+  RFC 4180): `read_str`/`read_str_with_limits` parse text into rectangular
+  records and reject malformed quoting, bare carriage returns, and ragged rows;
+  `CsvWriter` writes deterministically, quoting a field only when required and
+  terminating every record with `\r\n`; `CsvLimits` bounds input size, record
+  and field counts, and field length. A typed layer (`CsvField`, `CsvEncode`,
+  `CsvDecode`, `to_csv_string`/`from_csv_str` with headerless variants) maps
+  records to and from your own types. `no_std` with `alloc`, zero-dependency.
+
 ## reliakit-health 0.1.0 - 2026-06-08
 
 ### Added

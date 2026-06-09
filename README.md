@@ -61,6 +61,7 @@ dependency appears), `#![forbid(unsafe_code)]`, and usable on its own. You adopt
 | Bounded collections | `reliakit-collections` | `BoundedVec<T, MIN, MAX>` with enforced size invariants |
 | Canonical binary codec | `reliakit-codec` | `CanonicalEncode` / `CanonicalDecode`, strict decoding |
 | Strict JSON | `reliakit-json` | Strict parser + limits, deterministic output, typed `JsonEncode` / `JsonDecode` |
+| Strict CSV | `reliakit-csv` | Strict, bounded reader + deterministic writer, typed `CsvEncode` / `CsvDecode` |
 | Resilience | `reliakit-backoff`, `reliakit-bulkhead`, `reliakit-circuit`, `reliakit-ratelimit`, `reliakit-timeout` | Retry backoff, concurrency limiter, circuit breaker, token-bucket rate limiter, deadlines — all clock-agnostic |
 | Retry helper | `reliakit-retry` | `RetryPolicy` + `retry` / `retry_with_sleep` / `retry_async`; runtime-agnostic, never sleeps internally |
 | Health reporting | `reliakit-health` | `Health` status + criticality-aware aggregator for `/health`, probes, and status pages |
@@ -220,6 +221,7 @@ supported Rust version is **1.85**.
 | [`reliakit-collections`](https://crates.io/crates/reliakit-collections) | Bounded collection types | A collection must stay within a fixed size range. | Published (pre-1.0) |
 | [`reliakit-codec`](https://crates.io/crates/reliakit-codec) | Canonical binary encoding/decoding | You need deterministic bytes (cache keys, fixtures, framing). | Published (pre-1.0) |
 | [`reliakit-json`](https://crates.io/crates/reliakit-json) | Strict, deterministic JSON + typed encode/decode | You parse untrusted JSON or need predictable output. | Published (pre-1.0) |
+| `reliakit-csv` | Strict, deterministic CSV + typed encode/decode | You parse untrusted CSV or need reproducible output. | Unreleased (pre-1.0) |
 | [`reliakit-backoff`](https://crates.io/crates/reliakit-backoff) | Retry backoff delays + jitter | You retry an operation and want explicit spacing. | Published (pre-1.0) |
 | `reliakit-retry` | Runtime-agnostic retry helper (sync + async) | You retry fallible operations and want attempt limits, backoff, and an error classifier without forcing a runtime. | Unreleased (pre-1.0) |
 | [`reliakit-bulkhead`](https://crates.io/crates/reliakit-bulkhead) | Concurrency limiter (counting semaphore) | You cap how many operations run at once and shed the rest. | Published (pre-1.0) |
@@ -283,7 +285,8 @@ crate — check each crate's README for the exact flags.
   `--no-default-features` gives the `no_std` subset.
 - **Allocation-backed APIs need `alloc`.** Owned types (`String`/`Vec`-backed,
   e.g. `Email`, `BoundedStr`, `SecretString`, `BoundedVec`, all of
-  `reliakit-json`) require the `alloc` feature; the allocation-free primitives
+  `reliakit-json` and `reliakit-csv`) require the `alloc` feature; the
+  allocation-free primitives
   (`Port`, `Percent`, `Uuid`, `MacAddress`, `HumanDuration`, numeric types) work
   with neither.
 - **The resilience crates are pure `core`.** `reliakit-backoff`,
