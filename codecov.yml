@@ -29,6 +29,11 @@ coverage:
         threshold: 1%
         flags:
           - reliakit-codec
+      reliakit-csv:
+        target: 90%
+        threshold: 1%
+        flags:
+          - reliakit-csv
       reliakit-backoff:
         target: 90%
         threshold: 1%

@@ -154,6 +154,25 @@ jobs:
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
+      - name: Generate reliakit-csv coverage
+        run: |
+          cargo llvm-cov \
+            -p reliakit-csv \
+            --all-features \
+            --locked \
+            --lcov \
+            --output-path lcov-reliakit-csv.info
+
+      - name: Upload reliakit-csv coverage
+        uses: codecov/codecov-action@v7
+        with:
+          files: lcov-reliakit-csv.info
+          flags: reliakit-csv
+          name: reliakit-csv
+          fail_ci_if_error: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
       - name: Generate reliakit-backoff coverage
         run: |
           cargo llvm-cov \

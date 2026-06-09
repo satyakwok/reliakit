@@ -57,6 +57,9 @@ jobs:
       - name: Verify reliakit-codec package
         run: cargo publish -p reliakit-codec --dry-run --locked
 
+      - name: Verify reliakit-csv package
+        run: cargo publish -p reliakit-csv --dry-run --locked
+
       - name: Verify reliakit-backoff package
         run: cargo publish -p reliakit-backoff --dry-run --locked
 

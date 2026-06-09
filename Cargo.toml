@@ -5,6 +5,7 @@ members = [
     "crates/reliakit-validate",
     "crates/reliakit-collections",
     "crates/reliakit-codec",
+    "crates/reliakit-csv",
     "crates/reliakit-backoff",
     "crates/reliakit-retry",
     "crates/reliakit-bulkhead",

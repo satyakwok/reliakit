@@ -56,6 +56,10 @@ name = "reliakit-core"
 version = "0.1.2"
 
 [[package]]
+name = "reliakit-csv"
+version = "0.1.0"
+
+[[package]]
 name = "reliakit-decide"
 version = "0.1.0"
 

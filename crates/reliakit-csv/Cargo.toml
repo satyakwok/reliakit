@@ -1,0 +1,30 @@
+[package]
+name = "reliakit-csv"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation = "https://docs.rs/reliakit-csv"
+readme = "README.md"
+description = "Strict, bounded, and deterministic CSV for reliability-sensitive Rust. no_std + alloc, zero-dependency."
+keywords = ["csv", "strict", "no-std", "deterministic", "reliability"]
+categories = ["parser-implementations", "encoding", "no-std"]
+
+[package.metadata.docs.rs]
+all-features = true
+
+[features]
+default = ["std"]
+std = ["alloc"]
+alloc = []
+
+[dependencies]
+
+[[example]]
+name = "csv_basic"
+path = "examples/basic.rs"
+
+[lints]
+workspace = true
