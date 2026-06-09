@@ -4,7 +4,7 @@ version = 4
 
 [[package]]
 name = "reliakit"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "reliakit-backoff",
  "reliakit-bulkhead",
@@ -12,12 +12,14 @@ dependencies = [
  "reliakit-codec",
  "reliakit-collections",
  "reliakit-core",
+ "reliakit-csv",
  "reliakit-decide",
  "reliakit-derive",
  "reliakit-health",
  "reliakit-json",
  "reliakit-primitives",
  "reliakit-ratelimit",
+ "reliakit-retry",
  "reliakit-secret",
  "reliakit-timeout",
  "reliakit-validate",

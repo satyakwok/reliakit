@@ -44,7 +44,9 @@
 //! | `validate` | [`reliakit_validate`] as [`validate`] |
 //! | `collections` | [`reliakit_collections`] as [`collections`] |
 //! | `codec` | [`reliakit_codec`] as [`codec`] |
+//! | `csv` | [`reliakit_csv`] as [`csv`] |
 //! | `backoff` | [`reliakit_backoff`] as [`backoff`] |
+//! | `retry` | [`reliakit_retry`] as [`retry`] |
 //! | `bulkhead` | [`reliakit_bulkhead`] as [`bulkhead`] |
 //! | `health` | [`reliakit_health`] as [`health`] |
 //! | `circuit` | [`reliakit_circuit`] as [`circuit`] |
@@ -77,8 +79,14 @@ pub use reliakit_collections as collections;
 #[cfg(feature = "codec")]
 pub use reliakit_codec as codec;
 
+#[cfg(feature = "csv")]
+pub use reliakit_csv as csv;
+
 #[cfg(feature = "backoff")]
 pub use reliakit_backoff as backoff;
+
+#[cfg(feature = "retry")]
+pub use reliakit_retry as retry;
 
 #[cfg(feature = "bulkhead")]
 pub use reliakit_bulkhead as bulkhead;
