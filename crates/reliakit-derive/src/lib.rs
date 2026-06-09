@@ -16,7 +16,8 @@
 //!
 //! Unions, generic types, generic enums, enums with explicit discriminants or a
 //! `#[repr(...)]`, and empty enums are rejected with a compile error. The JSON
-//! derives currently cover structs only; enums are rejected for now.
+//! derives currently cover structs only; enums are rejected for now. The CSV
+//! derives cover only structs with named fields, since CSV columns need names.
 //!
 //! # `reliakit-codec`
 //!
@@ -82,6 +83,31 @@
 //! assert_eq!(json, r#"{"x":10,"y":20}"#);
 //! assert_eq!(from_json_str::<Point>(&json).unwrap(), Point { x: 10, y: 20 });
 //! ```
+//!
+//! # `reliakit-csv`
+//!
+//! [`CsvEncode`] and [`CsvDecode`] generate implementations of the same-named
+//! `reliakit-csv` traits. A struct with named fields becomes a CSV row, one
+//! column per field in declaration order, with the field names as the header.
+//! Because CSV columns need names, only structs with named fields are supported
+//! — tuple structs, unit structs, and enums are rejected. Decoding is strict:
+//! the row must have one field per struct field, and each must parse.
+//!
+//! ```
+//! use reliakit_csv::{from_csv_str, to_csv_string};
+//! use reliakit_derive::{CsvDecode, CsvEncode};
+//!
+//! #[derive(Debug, PartialEq, CsvEncode, CsvDecode)]
+//! struct Row {
+//!     id: u32,
+//!     name: String,
+//! }
+//!
+//! let rows = vec![Row { id: 1, name: "ada".into() }];
+//! let csv = to_csv_string(&rows);
+//! assert_eq!(csv, "id,name\r\n1,ada\r\n");
+//! assert_eq!(from_csv_str::<Row>(&csv).unwrap(), rows);
+//! ```
 
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
@@ -133,6 +159,34 @@ pub fn derive_json_encode(input: TokenStream) -> TokenStream {
 #[proc_macro_derive(JsonDecode)]
 pub fn derive_json_decode(input: TokenStream) -> TokenStream {
     match Parsed::from_input(input).and_then(|parsed| parsed.json_decode_impl()) {
+        Ok(tokens) => tokens,
+        Err(message) => compile_error(&message),
+    }
+}
+
+/// Derives `reliakit_csv::CsvEncode`: a struct with named fields becomes a row,
+/// one column per field in declaration order, with the field names as the
+/// header.
+///
+/// Only structs with named fields are supported — CSV columns need names, so
+/// tuple structs, unit structs, and enums are rejected. See the [crate]
+/// documentation.
+#[proc_macro_derive(CsvEncode)]
+pub fn derive_csv_encode(input: TokenStream) -> TokenStream {
+    match Parsed::from_input(input).and_then(|parsed| parsed.csv_encode_impl()) {
+        Ok(tokens) => tokens,
+        Err(message) => compile_error(&message),
+    }
+}
+
+/// Derives `reliakit_csv::CsvDecode`, the inverse of [`macro@CsvEncode`].
+/// Decoding is strict: the row must have exactly one field per struct field,
+/// and each field must parse into its target type.
+///
+/// Only structs with named fields are supported. See the [crate] documentation.
+#[proc_macro_derive(CsvDecode)]
+pub fn derive_csv_decode(input: TokenStream) -> TokenStream {
+    match Parsed::from_input(input).and_then(|parsed| parsed.csv_decode_impl()) {
         Ok(tokens) => tokens,
         Err(message) => compile_error(&message),
     }
@@ -286,6 +340,28 @@ impl Parsed {
         .parse()
         .expect("reliakit-derive generated invalid JsonDecode tokens"))
     }
+
+    fn csv_encode_impl(&self) -> Result<TokenStream, String> {
+        let fields = csv_named_fields(&self.body, "CsvEncode")?;
+        let methods = csv_encode_methods(fields);
+        Ok(format!(
+            "impl ::reliakit_csv::CsvEncode for {name} {{\n{methods}\n}}",
+            name = self.name,
+        )
+        .parse()
+        .expect("reliakit-derive generated invalid CsvEncode tokens"))
+    }
+
+    fn csv_decode_impl(&self) -> Result<TokenStream, String> {
+        let fields = csv_named_fields(&self.body, "CsvDecode")?;
+        let method = csv_decode_method(fields);
+        Ok(format!(
+            "impl ::reliakit_csv::CsvDecode for {name} {{\n{method}\n}}",
+            name = self.name,
+        )
+        .parse()
+        .expect("reliakit-derive generated invalid CsvDecode tokens"))
+    }
 }
 
 /// The JSON object key for a field: a raw identifier's `r#` prefix is dropped.
@@ -368,6 +444,71 @@ fn json_decode_body(shape: &Shape) -> String {
              ::core::result::Result::Ok(Self)"
             .to_string(),
     }
+}
+
+/// The CSV column name for a field: a raw identifier's `r#` prefix is dropped.
+fn csv_column(field: &str) -> &str {
+    field.strip_prefix("r#").unwrap_or(field)
+}
+
+/// Returns the named fields of a struct, or a reject message. CSV needs column
+/// names, so tuple structs, unit structs, and enums are rejected. Pure, so the
+/// reject decisions are unit-testable.
+fn csv_named_fields<'a>(body: &'a Body, trait_name: &str) -> Result<&'a [String], String> {
+    match body {
+        Body::Struct(Shape::Named(fields)) => Ok(fields),
+        Body::Struct(_) => Err(format!(
+            "reliakit-derive: {trait_name} requires a struct with named fields \
+             (CSV columns need names)"
+        )),
+        Body::Enum(_) => Err(format!(
+            "reliakit-derive: {trait_name} does not support enums"
+        )),
+    }
+}
+
+/// The `header` and `encode_fields` method bodies for a named struct.
+fn csv_encode_methods(fields: &[String]) -> String {
+    let mut header = String::new();
+    let mut pushes = String::new();
+    for field in fields {
+        let column = csv_column(field);
+        header.push_str(&format!("__header.push({column:?});"));
+        pushes.push_str(&format!(
+            "__out.push(::reliakit_csv::CsvField::encode_field(&self.{field}));"
+        ));
+    }
+    format!(
+        "fn header() -> ::reliakit_csv::__private::Vec<&'static str> {{\n\
+         let mut __header = ::reliakit_csv::__private::Vec::new();\n\
+         {header}\n\
+         __header\n\
+         }}\n\
+         fn encode_fields(&self, __out: &mut ::reliakit_csv::__private::Vec<\
+         ::reliakit_csv::__private::String>) {{\n\
+         {pushes}\n\
+         }}"
+    )
+}
+
+/// The `decode_fields` method body for a named struct.
+fn csv_decode_method(fields: &[String]) -> String {
+    let count = fields.len();
+    let mut inner = String::new();
+    for (index, field) in fields.iter().enumerate() {
+        inner.push_str(&format!(
+            "{field}: ::reliakit_csv::CsvField::decode_field(__fields[{index}])\
+             .map_err(|__e| __e.at_field({index}))?,"
+        ));
+    }
+    format!(
+        "fn decode_fields(__fields: &[&str]) \
+         -> ::core::result::Result<Self, ::reliakit_csv::CsvDecodeError> {{\n\
+         if __fields.len() != {count} {{ return ::core::result::Result::Err(\
+         ::reliakit_csv::CsvDecodeError::field_count()); }}\n\
+         ::core::result::Result::Ok(Self {{ {inner} }})\n\
+         }}"
+    )
 }
 
 /// Validates a [`Raw`] item, rejecting unsupported forms with a descriptive
@@ -904,5 +1045,40 @@ mod tests {
             }
             Body::Struct(_) => panic!("expected an enum body"),
         }
+    }
+
+    #[test]
+    fn csv_rejects_non_named_structs_and_enums() {
+        assert!(
+            csv_named_fields(&Body::Struct(Shape::Tuple(2)), "CsvEncode")
+                .unwrap_err()
+                .contains("requires a struct with named fields")
+        );
+        assert!(csv_named_fields(&Body::Struct(Shape::Unit), "CsvDecode")
+            .unwrap_err()
+            .contains("named fields"));
+        let enum_body = Body::Enum(vec![Variant {
+            name: "A".to_string(),
+            shape: Shape::Unit,
+        }]);
+        assert!(csv_named_fields(&enum_body, "CsvEncode")
+            .unwrap_err()
+            .contains("does not support enums"));
+    }
+
+    #[test]
+    fn csv_named_struct_builds_methods() {
+        let body = Body::Struct(Shape::Named(vec!["id".to_string(), "r#type".to_string()]));
+        let fields = csv_named_fields(&body, "CsvEncode").expect("named struct accepted");
+        let enc = csv_encode_methods(fields);
+        assert!(enc.contains("__header.push(\"id\")"));
+        // The `r#` prefix is dropped for the column name but kept for field access.
+        assert!(enc.contains("__header.push(\"type\")"));
+        assert!(enc.contains("encode_field(&self.id)"));
+        assert!(enc.contains("encode_field(&self.r#type)"));
+        let dec = csv_decode_method(fields);
+        assert!(dec.contains("__fields.len() != 2"));
+        assert!(dec.contains("__fields[0]"));
+        assert!(dec.contains("at_field(1)"));
     }
 }

@@ -49,12 +49,23 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
   `RetryError::Exhausted` carries the attempt count and last error with no
   allocation and no `Error` bound. Pure `core`, `no_std`, zero-dependency.
 
-## reliakit-csv 0.1.1 - Unreleased
+## reliakit-derive 0.1.3 - Unreleased
+
+### Added
+
+- `#[derive(CsvEncode, CsvDecode)]` for the `reliakit-csv` traits. A struct with
+  named fields becomes a CSV row — one column per field in declaration order,
+  with the field names as the header. Only structs with named fields are
+  supported (CSV columns need names); tuple structs, unit structs, and enums are
+  rejected. Decoding is strict. Requires `reliakit-csv` 0.1.1 for the generated
+  code's hidden re-exports. Existing codec and JSON derives are unchanged.
+
+## reliakit-csv 0.1.1 - 2026-06-10
 
 ### Added
 
 - A `#[doc(hidden)]` `__private` module that re-exports `alloc`'s `Vec` and
-  `String`. It exists only so the upcoming `CsvEncode`/`CsvDecode` derives in
+  `String`. It exists only so the `CsvEncode`/`CsvDecode` derives in
   `reliakit-derive` can name those types in generated code on `no_std`. It is
   not part of the public API and may change at any time. No existing API
   changes.
