@@ -49,7 +49,7 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
   `RetryError::Exhausted` carries the attempt count and last error with no
   allocation and no `Error` bound. Pure `core`, `no_std`, zero-dependency.
 
-## reliakit-derive 0.1.3 - Unreleased
+## reliakit-derive 0.1.3 - 2026-06-10
 
 ### Added
 
