@@ -95,6 +95,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "reliakit-retry"
+version = "0.1.0"
+dependencies = [
+ "reliakit-backoff",
+]
+
+[[package]]
 name = "reliakit-secret"
 version = "0.1.3"
 

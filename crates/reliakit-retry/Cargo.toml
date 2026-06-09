@@ -1,0 +1,36 @@
+[package]
+name = "reliakit-retry"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation = "https://docs.rs/reliakit-retry"
+readme = "README.md"
+description = "Small, runtime-agnostic retry helpers for fallible operations. Sync and async, never sleeps internally, no_std-friendly, zero-dependency."
+keywords = ["retry", "backoff", "resilience", "no-std", "reliability"]
+categories = ["rust-patterns", "no-std", "asynchronous"]
+
+[package.metadata.docs.rs]
+all-features = true
+
+[features]
+default = ["std"]
+# `std` only adds `impl std::error::Error for RetryError`. The crate is
+# otherwise pure `core`: no allocation, no clock, no runtime.
+std = []
+
+[dependencies]
+reliakit-backoff = { path = "../reliakit-backoff", version = "0.1", default-features = false }
+
+[[example]]
+name = "basic_retry"
+path = "examples/basic_retry.rs"
+
+[[example]]
+name = "async_retry"
+path = "examples/async_retry.rs"
+
+[lints]
+workspace = true

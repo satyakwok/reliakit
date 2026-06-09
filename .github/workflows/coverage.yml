@@ -173,6 +173,25 @@ jobs:
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
+      - name: Generate reliakit-retry coverage
+        run: |
+          cargo llvm-cov \
+            -p reliakit-retry \
+            --all-features \
+            --locked \
+            --lcov \
+            --output-path lcov-reliakit-retry.info
+
+      - name: Upload reliakit-retry coverage
+        uses: codecov/codecov-action@v7
+        with:
+          files: lcov-reliakit-retry.info
+          flags: reliakit-retry
+          name: reliakit-retry
+          fail_ci_if_error: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
       - name: Generate reliakit-bulkhead coverage
         run: |
           cargo llvm-cov \

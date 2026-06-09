@@ -6,6 +6,7 @@ members = [
     "crates/reliakit-collections",
     "crates/reliakit-codec",
     "crates/reliakit-backoff",
+    "crates/reliakit-retry",
     "crates/reliakit-bulkhead",
     "crates/reliakit-circuit",
     "crates/reliakit-health",
