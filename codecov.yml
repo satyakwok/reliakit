@@ -34,6 +34,11 @@ coverage:
         threshold: 1%
         flags:
           - reliakit-backoff
+      reliakit-retry:
+        target: 90%
+        threshold: 1%
+        flags:
+          - reliakit-retry
       reliakit-bulkhead:
         target: 90%
         threshold: 1%

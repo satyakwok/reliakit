@@ -27,6 +27,20 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
   publish time instead of reading a stored API token, so no long-lived registry
   token is kept in repository secrets.
 
+## reliakit-retry 0.1.0 - Unreleased
+
+### Added
+
+- Initial release. Small, runtime-agnostic retry helpers built on
+  `reliakit-backoff`: `RetryPolicy` (total-attempt limit plus a backoff
+  schedule), and `retry` / `retry_with_sleep` / `retry_async` drivers with a
+  `should_retry` error classifier. The crate never sleeps or spawns internally —
+  `retry` runs attempts back-to-back, `retry_with_sleep` calls a caller-provided
+  sleeper, and `retry_async` awaits a caller-provided sleep future using only
+  `core::future::Future` (no Tokio/async-std/`futures`, no forced runtime).
+  `RetryError::Exhausted` carries the attempt count and last error with no
+  allocation and no `Error` bound. Pure `core`, `no_std`, zero-dependency.
+
 ## reliakit-health 0.1.0 - 2026-06-08
 
 ### Added

@@ -132,6 +132,7 @@ jobs:
           # These default to `std`, so the default feature must be disabled.
           cargo check -p reliakit-core --no-default-features --target thumbv7em-none-eabi --locked
           cargo check -p reliakit-json --no-default-features --features canonical --target thumbv7em-none-eabi --locked
+          cargo check -p reliakit-retry --no-default-features --target thumbv7em-none-eabi --locked
 
   no-third-party-deps:
     name: Zero dependencies

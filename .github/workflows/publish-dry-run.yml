@@ -60,6 +60,9 @@ jobs:
       - name: Verify reliakit-backoff package
         run: cargo publish -p reliakit-backoff --dry-run --locked
 
+      - name: Verify reliakit-retry package
+        run: cargo publish -p reliakit-retry --dry-run --locked
+
       - name: Verify reliakit-bulkhead package
         run: cargo publish -p reliakit-bulkhead --dry-run --locked
 
