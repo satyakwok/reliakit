@@ -141,3 +141,13 @@ pub use record::{
     from_csv_str_with_limits, to_csv_string, to_csv_string_headerless, CsvDecode, CsvEncode,
 };
 pub use writer::CsvWriter;
+
+/// Implementation details used by the `CsvEncode`/`CsvDecode` derives in
+/// `reliakit-derive`. Not part of the public API — do not use it directly; it
+/// may change at any time. It only re-exports `alloc` types so generated code
+/// can name them without assuming they are in scope on `no_std`.
+#[doc(hidden)]
+pub mod __private {
+    pub use alloc::string::String;
+    pub use alloc::vec::Vec;
+}
