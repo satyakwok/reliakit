@@ -9,7 +9,7 @@ homepage.workspace = true
 documentation = "https://docs.rs/reliakit-derive"
 readme = "README.md"
 description = "Derive macros for reliakit traits, implemented with only the standard library proc-macro API and no third-party dependencies."
-keywords = ["derive", "codec", "macros", "canonical", "reliability"]
+keywords = ["derive", "macros", "serialization", "codec", "csv"]
 categories = ["development-tools::procedural-macro-helpers", "encoding", "rust-patterns"]
 
 [lib]
