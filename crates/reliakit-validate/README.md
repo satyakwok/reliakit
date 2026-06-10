@@ -10,7 +10,7 @@ Composable validation traits and error types for Rust structs and values.
 [![Crates.io Downloads](https://img.shields.io/crates/d/reliakit-validate.svg)](https://crates.io/crates/reliakit-validate)
 [![Docs.rs](https://docs.rs/reliakit-validate/badge.svg)](https://docs.rs/reliakit-validate)
 [![CI](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml/badge.svg)](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/satyakwok/reliakit/branch/main/graph/badge.svg)](https://codecov.io/gh/satyakwok/reliakit)
+[![codecov](https://codecov.io/gh/satyakwok/reliakit/branch/main/graph/badge.svg?flag=reliakit-validate)](https://codecov.io/gh/satyakwok/reliakit/tree/main/crates/reliakit-validate)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/satyakwok/reliakit/blob/main/LICENSE)
 
 `reliakit-validate` provides a small set of types for expressing validation rules as part of a type's contract, collecting multiple failures at once, and carrying proof of validation in the type system.
