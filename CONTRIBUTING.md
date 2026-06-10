@@ -90,6 +90,10 @@ impact in your pull request.
 
 ## Commit and pull request style
 
+- **Sign your commits.** Every commit in a pull request must be cryptographically
+  signed and show as *Verified* on GitHub — CI rejects unsigned commits. Set up
+  GPG or SSH commit signing once and enable it (`git config commit.gpgsign true`);
+  see [GitHub's guide](https://docs.github.com/authentication/managing-commit-signature-verification).
 - Write plain, human commit messages in the imperative mood: `Add TryFrom<u32>
   for Port`, not `Added` or `Adding`.
 - Keep each pull request focused on one logical change; avoid unrelated
