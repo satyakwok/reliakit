@@ -177,3 +177,18 @@ jobs:
               sys.exit(1)
           print("OK: no third-party dependencies (any kind) across the workspace.")
           '
+
+      # Ground truth: the fully resolved dependency graph (Cargo.lock) must
+      # contain only reliakit crates. This catches any third-party package —
+      # including a transitive one — that the per-crate manifest scan above
+      # cannot see. The umbrella crate is named `reliakit` (no suffix), so the
+      # pattern accepts both `reliakit` and `reliakit-*`.
+      - name: Assert the lockfile has no third-party packages
+        run: |
+          bad="$(grep '^name = ' Cargo.lock | grep -vE '^name = "reliakit(-[^"]*)?"$' || true)"
+          if [ -n "$bad" ]; then
+            echo "Third-party packages found in Cargo.lock (reliakit must have none):"
+            echo "$bad"
+            exit 1
+          fi
+          echo "OK: Cargo.lock contains only reliakit / reliakit-* packages."
