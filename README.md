@@ -50,6 +50,11 @@ dependency appears), `#![forbid(unsafe_code)]`, and usable on its own. You adopt
   hidden threads, no global state.
 - **Keep adoption cost low.** Small independent crates compile fast and pull in
   nothing extra.
+- **One cohesive family — take one or all.** Use a single crate for one job, or
+  the `reliakit` umbrella for several; every block follows the same conventions
+  and the same zero-dependency, `no_std`, no-`unsafe` rules. Reliability patterns
+  usually mean stitching together unrelated crates with different designs and
+  dependency trees — here they are built to fit.
 
 ## Core features
 
