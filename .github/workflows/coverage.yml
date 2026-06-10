@@ -74,7 +74,7 @@ jobs:
           files: lcov-reliakit-primitives.info
           flags: reliakit-primitives
           name: reliakit-primitives
-          fail_ci_if_error: true
+          fail_ci_if_error: false
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
@@ -93,7 +93,7 @@ jobs:
           files: lcov-reliakit-secret.info
           flags: reliakit-secret
           name: reliakit-secret
-          fail_ci_if_error: true
+          fail_ci_if_error: false
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
@@ -112,7 +112,7 @@ jobs:
           files: lcov-reliakit-validate.info
           flags: reliakit-validate
           name: reliakit-validate
-          fail_ci_if_error: true
+          fail_ci_if_error: false
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
@@ -131,7 +131,7 @@ jobs:
           files: lcov-reliakit-collections.info
           flags: reliakit-collections
           name: reliakit-collections
-          fail_ci_if_error: true
+          fail_ci_if_error: false
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
@@ -150,7 +150,7 @@ jobs:
           files: lcov-reliakit-codec.info
           flags: reliakit-codec
           name: reliakit-codec
-          fail_ci_if_error: true
+          fail_ci_if_error: false
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
@@ -169,7 +169,7 @@ jobs:
           files: lcov-reliakit-csv.info
           flags: reliakit-csv
           name: reliakit-csv
-          fail_ci_if_error: true
+          fail_ci_if_error: false
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
@@ -188,7 +188,7 @@ jobs:
           files: lcov-reliakit-backoff.info
           flags: reliakit-backoff
           name: reliakit-backoff
-          fail_ci_if_error: true
+          fail_ci_if_error: false
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
@@ -207,7 +207,7 @@ jobs:
           files: lcov-reliakit-retry.info
           flags: reliakit-retry
           name: reliakit-retry
-          fail_ci_if_error: true
+          fail_ci_if_error: false
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
@@ -226,7 +226,7 @@ jobs:
           files: lcov-reliakit-bulkhead.info
           flags: reliakit-bulkhead
           name: reliakit-bulkhead
-          fail_ci_if_error: true
+          fail_ci_if_error: false
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
@@ -245,7 +245,7 @@ jobs:
           files: lcov-reliakit-health.info
           flags: reliakit-health
           name: reliakit-health
-          fail_ci_if_error: true
+          fail_ci_if_error: false
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
@@ -264,7 +264,7 @@ jobs:
           files: lcov-reliakit-circuit.info
           flags: reliakit-circuit
           name: reliakit-circuit
-          fail_ci_if_error: true
+          fail_ci_if_error: false
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
@@ -283,7 +283,7 @@ jobs:
           files: lcov-reliakit-ratelimit.info
           flags: reliakit-ratelimit
           name: reliakit-ratelimit
-          fail_ci_if_error: true
+          fail_ci_if_error: false
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
@@ -302,7 +302,7 @@ jobs:
           files: lcov-reliakit-json.info
           flags: reliakit-json
           name: reliakit-json
-          fail_ci_if_error: true
+          fail_ci_if_error: false
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
@@ -321,7 +321,7 @@ jobs:
           files: lcov-reliakit-timeout.info
           flags: reliakit-timeout
           name: reliakit-timeout
-          fail_ci_if_error: true
+          fail_ci_if_error: false
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
@@ -340,7 +340,7 @@ jobs:
           files: lcov-reliakit-core.info
           flags: reliakit-core
           name: reliakit-core
-          fail_ci_if_error: true
+          fail_ci_if_error: false
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
@@ -359,7 +359,7 @@ jobs:
           files: lcov-reliakit-derive.info
           flags: reliakit-derive
           name: reliakit-derive
-          fail_ci_if_error: true
+          fail_ci_if_error: false
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
@@ -378,6 +378,6 @@ jobs:
           files: lcov-reliakit-decide.info
           flags: reliakit-decide
           name: reliakit-decide
-          fail_ci_if_error: true
+          fail_ci_if_error: false
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
