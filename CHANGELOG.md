@@ -26,6 +26,9 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
   The tag-triggered and manual publish workflows now mint a short-lived token at
   publish time instead of reading a stored API token, so no long-lived registry
   token is kept in repository secrets.
+- Pointed the workspace `homepage` at `https://satyakwok.dev/projects/reliakit`,
+  separate from `repository`, which stays on GitHub. Each crate picks this up on
+  its next publish.
 
 ## reliakit 0.1.5 - 2026-06-09
 
