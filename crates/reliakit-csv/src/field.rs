@@ -9,7 +9,7 @@ use crate::error::CsvDecodeError;
 /// Encoding never fails — every supported value has a text form. Decoding is
 /// strict: the field text must parse exactly into the target type.
 ///
-/// Implemented for the integer types, `bool` (`"true"`/`"false"`), `String`,
+/// Implemented for the integer types, `bool` (`"true"`/`"false"`), `char`, `String`,
 /// and `Option<T>` (an empty field decodes to `None`).
 pub trait CsvField: Sized {
     /// Encodes `self` into a field value.
@@ -44,6 +44,20 @@ impl CsvField for bool {
             "true" => Ok(true),
             "false" => Ok(false),
             _ => Err(CsvDecodeError::field("field is not `true` or `false`")),
+        }
+    }
+}
+
+impl CsvField for char {
+    fn encode_field(&self) -> String {
+        self.to_string()
+    }
+    fn decode_field(s: &str) -> Result<Self, CsvDecodeError> {
+        let mut chars = s.chars();
+        match (chars.next(), chars.next()) {
+            (Some(c), None) => Ok(c),
+            (None, _) => Err(CsvDecodeError::field("field is empty")),
+            (Some(_), Some(_)) => Err(CsvDecodeError::field("field is not a single char")),
         }
     }
 }
@@ -94,6 +108,15 @@ mod tests {
         assert!(!bool::decode_field("false").unwrap());
         assert!(bool::decode_field("True").is_err());
         assert!(bool::decode_field("1").is_err());
+    }
+    #[test]
+    fn char_is_strict() {
+        assert_eq!('a'.encode_field(), "a");
+        assert_eq!(char::decode_field("a").unwrap(), 'a');
+        let crab = '🦀';
+        assert_eq!(char::decode_field(&crab.encode_field()).unwrap(), crab);
+        assert!(char::decode_field("").is_err());
+        assert!(char::decode_field("abc").is_err());
     }
 
     #[test]
