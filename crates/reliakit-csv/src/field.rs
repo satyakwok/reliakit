@@ -44,7 +44,7 @@ macro_rules! impl_net_addr {
 
             fn decode_field(input: &str) -> Result<Self, CsvDecodeError> {
                 input.parse::<$t>().map_err(|_| {
-                    CsvDecodeError::field("field is not an network address that fits the target type")
+                    CsvDecodeError::field("field is not a network address that fits the target type")
                 })
             }
         }
