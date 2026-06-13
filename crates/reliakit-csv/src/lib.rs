@@ -95,7 +95,7 @@
 //! ```
 //!
 //! The per-field `encode_field`/`decode_field` calls above come from
-//! [`CsvField`], which is implemented for the integer types, `bool`, `String`,
+//! [`CsvField`], which is implemented for the integer types, `bool`, `char`, `String`,
 //! and `Option<T>`.
 //!
 //! # Limits
