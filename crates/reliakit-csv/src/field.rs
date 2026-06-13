@@ -52,8 +52,8 @@ impl CsvField for char {
     fn encode_field(&self) -> String {
         self.to_string()
     }
-    fn decode_field(s: &str) -> Result<Self, CsvDecodeError> {
-        let mut chars = s.chars();
+    fn decode_field(input: &str) -> Result<Self, CsvDecodeError> {
+        let mut chars = input.chars();
         match (chars.next(), chars.next()) {
             (Some(c), None) => Ok(c),
             (None, _) => Err(CsvDecodeError::field("field is empty")),
@@ -109,6 +109,7 @@ mod tests {
         assert!(bool::decode_field("True").is_err());
         assert!(bool::decode_field("1").is_err());
     }
+
     #[test]
     fn char_is_strict() {
         assert_eq!('a'.encode_field(), "a");

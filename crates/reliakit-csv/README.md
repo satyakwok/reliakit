@@ -29,7 +29,7 @@ unsafe code.
 - `CsvWriter` — build CSV text one record at a time; a field is quoted only when
   it must be, and every record ends with `\r\n`.
 - `CsvField` — encode/decode a single field for the integer types, `bool`,
-  `char`,`String`, and `Option<T>` (an empty field is `None`).
+  `char`, `String`, and `Option<T>` (an empty field is `None`).
 - `CsvEncode` / `CsvDecode` — map your record type to and from a row, with a
   header. `to_csv_string` / `from_csv_str` write and read a header row;
   `*_headerless` variants skip it.

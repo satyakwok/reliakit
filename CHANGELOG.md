@@ -10,6 +10,8 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 
 ### Added
 
+- `CsvField` impl for `char` in `reliakit-csv`, so a single character can be
+  used directly as a CSV row field alongside the existing primitive impls.
 - Added a `deny.toml` so `cargo deny check` passes: it allows only the MIT
   license, restricts dependencies to the crates.io registry, and rejects
   duplicate versions and security-advisory or yanked crates.
