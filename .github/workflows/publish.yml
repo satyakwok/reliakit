@@ -78,7 +78,7 @@ jobs:
 
       - name: Authenticate to crates.io
         id: auth
-        uses: rust-lang/crates-io-auth-action@b7e9a28eded4986ec6b1fa40eeee8f8f165559ec # v1
+        uses: rust-lang/crates-io-auth-action@bbd81622f20ce9e2dd9622e3218b975523e45bbe # v1
 
       - name: Publish to crates.io
         env:
@@ -131,7 +131,7 @@ jobs:
 
       - name: Authenticate to crates.io
         id: auth
-        uses: rust-lang/crates-io-auth-action@b7e9a28eded4986ec6b1fa40eeee8f8f165559ec # v1
+        uses: rust-lang/crates-io-auth-action@bbd81622f20ce9e2dd9622e3218b975523e45bbe # v1
 
       - name: Publish to crates.io
         env:
@@ -184,7 +184,7 @@ jobs:
 
       - name: Authenticate to crates.io
         id: auth
-        uses: rust-lang/crates-io-auth-action@b7e9a28eded4986ec6b1fa40eeee8f8f165559ec # v1
+        uses: rust-lang/crates-io-auth-action@bbd81622f20ce9e2dd9622e3218b975523e45bbe # v1
 
       - name: Publish to crates.io
         env:
@@ -237,7 +237,7 @@ jobs:
 
       - name: Authenticate to crates.io
         id: auth
-        uses: rust-lang/crates-io-auth-action@b7e9a28eded4986ec6b1fa40eeee8f8f165559ec # v1
+        uses: rust-lang/crates-io-auth-action@bbd81622f20ce9e2dd9622e3218b975523e45bbe # v1
 
       - name: Publish to crates.io
         env:
@@ -290,7 +290,7 @@ jobs:
 
       - name: Authenticate to crates.io
         id: auth
-        uses: rust-lang/crates-io-auth-action@b7e9a28eded4986ec6b1fa40eeee8f8f165559ec # v1
+        uses: rust-lang/crates-io-auth-action@bbd81622f20ce9e2dd9622e3218b975523e45bbe # v1
 
       - name: Publish to crates.io
         env:
@@ -343,7 +343,7 @@ jobs:
 
       - name: Authenticate to crates.io
         id: auth
-        uses: rust-lang/crates-io-auth-action@b7e9a28eded4986ec6b1fa40eeee8f8f165559ec # v1
+        uses: rust-lang/crates-io-auth-action@bbd81622f20ce9e2dd9622e3218b975523e45bbe # v1
 
       - name: Publish to crates.io
         env:
@@ -396,7 +396,7 @@ jobs:
 
       - name: Authenticate to crates.io
         id: auth
-        uses: rust-lang/crates-io-auth-action@b7e9a28eded4986ec6b1fa40eeee8f8f165559ec # v1
+        uses: rust-lang/crates-io-auth-action@bbd81622f20ce9e2dd9622e3218b975523e45bbe # v1
 
       - name: Publish to crates.io
         env:
@@ -449,7 +449,7 @@ jobs:
 
       - name: Authenticate to crates.io
         id: auth
-        uses: rust-lang/crates-io-auth-action@b7e9a28eded4986ec6b1fa40eeee8f8f165559ec # v1
+        uses: rust-lang/crates-io-auth-action@bbd81622f20ce9e2dd9622e3218b975523e45bbe # v1
 
       - name: Publish to crates.io
         env:
@@ -502,7 +502,7 @@ jobs:
 
       - name: Authenticate to crates.io
         id: auth
-        uses: rust-lang/crates-io-auth-action@b7e9a28eded4986ec6b1fa40eeee8f8f165559ec # v1
+        uses: rust-lang/crates-io-auth-action@bbd81622f20ce9e2dd9622e3218b975523e45bbe # v1
 
       - name: Publish to crates.io
         env:
@@ -555,7 +555,7 @@ jobs:
 
       - name: Authenticate to crates.io
         id: auth
-        uses: rust-lang/crates-io-auth-action@b7e9a28eded4986ec6b1fa40eeee8f8f165559ec # v1
+        uses: rust-lang/crates-io-auth-action@bbd81622f20ce9e2dd9622e3218b975523e45bbe # v1
 
       - name: Publish to crates.io
         env:
@@ -608,7 +608,7 @@ jobs:
 
       - name: Authenticate to crates.io
         id: auth
-        uses: rust-lang/crates-io-auth-action@b7e9a28eded4986ec6b1fa40eeee8f8f165559ec # v1
+        uses: rust-lang/crates-io-auth-action@bbd81622f20ce9e2dd9622e3218b975523e45bbe # v1
 
       - name: Publish to crates.io
         env:
@@ -661,7 +661,7 @@ jobs:
 
       - name: Authenticate to crates.io
         id: auth
-        uses: rust-lang/crates-io-auth-action@b7e9a28eded4986ec6b1fa40eeee8f8f165559ec # v1
+        uses: rust-lang/crates-io-auth-action@bbd81622f20ce9e2dd9622e3218b975523e45bbe # v1
 
       - name: Publish to crates.io
         env:
@@ -714,7 +714,7 @@ jobs:
 
       - name: Authenticate to crates.io
         id: auth
-        uses: rust-lang/crates-io-auth-action@b7e9a28eded4986ec6b1fa40eeee8f8f165559ec # v1
+        uses: rust-lang/crates-io-auth-action@bbd81622f20ce9e2dd9622e3218b975523e45bbe # v1
 
       - name: Publish to crates.io
         env:
@@ -767,7 +767,7 @@ jobs:
 
       - name: Authenticate to crates.io
         id: auth
-        uses: rust-lang/crates-io-auth-action@b7e9a28eded4986ec6b1fa40eeee8f8f165559ec # v1
+        uses: rust-lang/crates-io-auth-action@bbd81622f20ce9e2dd9622e3218b975523e45bbe # v1
 
       - name: Publish to crates.io
         env:
@@ -820,7 +820,7 @@ jobs:
 
       - name: Authenticate to crates.io
         id: auth
-        uses: rust-lang/crates-io-auth-action@b7e9a28eded4986ec6b1fa40eeee8f8f165559ec # v1
+        uses: rust-lang/crates-io-auth-action@bbd81622f20ce9e2dd9622e3218b975523e45bbe # v1
 
       - name: Publish to crates.io
         env:
@@ -873,7 +873,7 @@ jobs:
 
       - name: Authenticate to crates.io
         id: auth
-        uses: rust-lang/crates-io-auth-action@b7e9a28eded4986ec6b1fa40eeee8f8f165559ec # v1
+        uses: rust-lang/crates-io-auth-action@bbd81622f20ce9e2dd9622e3218b975523e45bbe # v1
 
       - name: Publish to crates.io
         env:
@@ -926,7 +926,7 @@ jobs:
 
       - name: Authenticate to crates.io
         id: auth
-        uses: rust-lang/crates-io-auth-action@b7e9a28eded4986ec6b1fa40eeee8f8f165559ec # v1
+        uses: rust-lang/crates-io-auth-action@bbd81622f20ce9e2dd9622e3218b975523e45bbe # v1
 
       - name: Publish to crates.io
         env:
@@ -981,7 +981,7 @@ jobs:
 
       - name: Authenticate to crates.io
         id: auth
-        uses: rust-lang/crates-io-auth-action@b7e9a28eded4986ec6b1fa40eeee8f8f165559ec # v1
+        uses: rust-lang/crates-io-auth-action@bbd81622f20ce9e2dd9622e3218b975523e45bbe # v1
 
       - name: Publish to crates.io
         env:
