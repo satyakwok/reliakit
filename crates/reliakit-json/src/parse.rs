@@ -22,7 +22,7 @@ pub fn parse_str(input: &str) -> Result<JsonValue, JsonError> {
 
 /// Parses a JSON value from UTF-8 bytes with explicit [`JsonLimits`].
 pub fn parse_with_limits(input: &[u8], limits: JsonLimits) -> Result<JsonValue, JsonError> {
-    if input.len() > limits.max_input_bytes {
+    if input.len() > limits.max_input_bytes() {
         return Err(JsonError::new(
             JsonErrorKind::LimitExceeded(JsonLimitKind::InputBytes),
             0,
@@ -139,27 +139,27 @@ impl<'a> Parser<'a> {
 
     fn parse_value(&mut self, depth: usize) -> Result<JsonValue, JsonError> {
         self.nodes += 1;
-        if self.nodes > self.limits.max_total_nodes {
+        if self.nodes > self.limits.max_total_nodes() {
             return Err(self.limit(JsonLimitKind::TotalNodes));
         }
         match self.peek() {
             Some(b'{') => {
                 let d = depth + 1;
-                if d > self.limits.max_depth {
+                if d > self.limits.max_depth() {
                     return Err(self.limit(JsonLimitKind::Depth));
                 }
                 self.parse_object(d)
             }
             Some(b'[') => {
                 let d = depth + 1;
-                if d > self.limits.max_depth {
+                if d > self.limits.max_depth() {
                     return Err(self.limit(JsonLimitKind::Depth));
                 }
                 self.parse_array(d)
             }
             Some(b'"') => {
                 let s =
-                    self.parse_string(self.limits.max_string_bytes, JsonLimitKind::StringBytes)?;
+                    self.parse_string(self.limits.max_string_bytes(), JsonLimitKind::StringBytes)?;
                 Ok(JsonValue::String(s))
             }
             Some(b't') => self.parse_literal(b"true", JsonValue::Bool(true)),
@@ -208,7 +208,7 @@ impl<'a> Parser<'a> {
             let key_pos = self.pos;
             let key_line = self.line;
             let key_column = self.column;
-            let key = self.parse_string(self.limits.max_key_bytes, JsonLimitKind::KeyBytes)?;
+            let key = self.parse_string(self.limits.max_key_bytes(), JsonLimitKind::KeyBytes)?;
 
             if !seen.insert(key.clone()) {
                 return Err(self.error_at(
@@ -218,7 +218,7 @@ impl<'a> Parser<'a> {
                     key_column,
                 ));
             }
-            if seen.len() > self.limits.max_object_members {
+            if seen.len() > self.limits.max_object_members() {
                 return Err(self.limit(JsonLimitKind::ObjectMembers));
             }
 
@@ -264,7 +264,7 @@ impl<'a> Parser<'a> {
 
         loop {
             self.skip_ws();
-            if items.len() >= self.limits.max_array_items {
+            if items.len() >= self.limits.max_array_items() {
                 return Err(self.limit(JsonLimitKind::ArrayItems));
             }
 
@@ -302,7 +302,7 @@ impl<'a> Parser<'a> {
                 Some(b'"') => {
                     self.bump();
                     self.decoded_string_bytes = self.decoded_string_bytes.saturating_add(out.len());
-                    if self.decoded_string_bytes > self.limits.max_total_decoded_string_bytes {
+                    if self.decoded_string_bytes > self.limits.max_total_decoded_string_bytes() {
                         return Err(self.limit(JsonLimitKind::TotalDecodedStringBytes));
                     }
                     return Ok(out);
@@ -434,7 +434,7 @@ impl<'a> Parser<'a> {
             }
         }
         let token = &self.input[start..self.pos];
-        if token.len() > self.limits.max_number_bytes {
+        if token.len() > self.limits.max_number_bytes() {
             return Err(self.error_at(
                 JsonErrorKind::LimitExceeded(JsonLimitKind::NumberBytes),
                 start,

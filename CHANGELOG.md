@@ -25,6 +25,10 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 
 ### Changed
 
+- **Breaking:** `reliakit-json`'s `JsonLimits` fields are now private, with a
+  getter and a `with_*` builder method for every limit (matching `CsvLimits`).
+  This lets new limits be added without breaking callers; construct a profile
+  with `new`/`conservative`/`permissive` and adjust it with the `with_*` methods.
 - Switched crates.io publishing to Trusted Publishing over GitHub Actions OIDC.
   The tag-triggered and manual publish workflows now mint a short-lived token at
   publish time instead of reading a stored API token, so no long-lived registry
