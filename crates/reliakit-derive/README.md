@@ -97,7 +97,7 @@ together:
 
 ```toml
 [dependencies]
-reliakit-codec = "0.2"
+reliakit-codec = "0.3"
 reliakit-derive = "0.1"
 ```
 

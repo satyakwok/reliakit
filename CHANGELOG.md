@@ -25,18 +25,6 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 
 ### Changed
 
-- **Breaking:** marked several public data structs `#[non_exhaustive]` so fields
-  can be added later without breaking callers — `reliakit-health`'s `Component`
-  and `Summary`, and `reliakit-decide`'s `Consideration`, `Action`, `Decision`,
-  `Contribution`, and `Explanation`. Build them via their constructors
-  (`Action::new`, `Consideration::new`/`labeled`, …) rather than struct literals.
-- **Breaking:** `reliakit-json`'s `JsonLimits` fields are now private, with a
-  getter and a `with_*` builder method for every limit (matching `CsvLimits`).
-  This lets new limits be added without breaking callers; construct a profile
-  with `new`/`conservative`/`permissive` and adjust it with the `with_*` methods.
-- **Breaking:** renamed `reliakit-primitives`' `PercentageF64` to `PercentFloat`,
-  for consistency with `Percent` (same root word) and `PositiveFloat` (same
-  `Float` suffix for the floating-point variant).
 - Switched crates.io publishing to Trusted Publishing over GitHub Actions OIDC.
   The tag-triggered and manual publish workflows now mint a short-lived token at
   publish time instead of reading a stored API token, so no long-lived registry
@@ -44,6 +32,55 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 - Pointed the workspace `homepage` at `https://satyakwok.dev/projects/reliakit`,
   separate from `repository`, which stays on GitHub. Each crate picks this up on
   its next publish.
+
+## reliakit-primitives 0.5.0 - 2026-06-14
+
+### Changed
+
+- **Breaking:** renamed `PercentageF64` to `PercentFloat`, for consistency with
+  `Percent` (same root word) and `PositiveFloat` (same `Float` suffix for the
+  floating-point variant).
+
+## reliakit-json 0.3.0 - 2026-06-14
+
+### Changed
+
+- **Breaking:** `JsonLimits` fields are now private, with a getter and a `with_*`
+  builder method for every limit (matching `CsvLimits`). This lets new limits be
+  added without breaking callers; construct a profile with
+  `new`/`conservative`/`permissive` and adjust it with the `with_*` methods.
+
+## reliakit-codec 0.3.0 - 2026-06-14
+
+### Changed
+
+- The optional `primitives` integration now targets `reliakit-primitives` 0.5, so
+  its `CanonicalEncode`/`CanonicalDecode` impls apply to the 0.5 primitive types.
+
+## reliakit-health 0.2.0 - 2026-06-14
+
+### Changed
+
+- **Breaking:** marked `Component` and `Summary` `#[non_exhaustive]` so fields can
+  be added later without breaking callers. Build them via their constructors.
+
+## reliakit-decide 0.2.0 - 2026-06-14
+
+### Changed
+
+- **Breaking:** marked `Consideration`, `Action`, `Decision`, `Contribution`, and
+  `Explanation` `#[non_exhaustive]` so fields can be added later without breaking
+  callers. Build them via their constructors (`Action::new`,
+  `Consideration::new`/`labeled`, …) rather than struct literals.
+
+## reliakit 0.2.0 - 2026-06-14
+
+### Changed
+
+- Updated the re-exported sub-crates to their frozen 1.0-track releases:
+  `reliakit-primitives` 0.5, `reliakit-json` 0.3, `reliakit-codec` 0.3,
+  `reliakit-health` 0.2, and `reliakit-decide` 0.2. The breaking changes in those
+  crates surface through the umbrella's re-exports.
 
 ## reliakit 0.1.5 - 2026-06-09
 

@@ -12,7 +12,7 @@
 //! Add it and pick the pieces you want:
 //!
 //! ```toml
-//! reliakit = { version = "0.1", features = ["ratelimit", "secret"] }
+//! reliakit = { version = "0.2", features = ["ratelimit", "secret"] }
 //! ```
 //!
 //! ```
@@ -31,7 +31,7 @@
 //! owned storage:
 //!
 //! ```toml
-//! reliakit = { version = "0.1", default-features = false, features = ["alloc", "primitives"] }
+//! reliakit = { version = "0.2", default-features = false, features = ["alloc", "primitives"] }
 //! ```
 //!
 //! # Features

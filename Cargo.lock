@@ -4,7 +4,7 @@ version = 4
 
 [[package]]
 name = "reliakit"
-version = "0.1.5"
+version = "0.2.0"
 dependencies = [
  "reliakit-backoff",
  "reliakit-bulkhead",
@@ -44,7 +44,7 @@ dependencies = [
 
 [[package]]
 name = "reliakit-codec"
-version = "0.2.2"
+version = "0.3.0"
 dependencies = [
  "reliakit-primitives",
 ]
@@ -63,7 +63,7 @@ version = "0.1.1"
 
 [[package]]
 name = "reliakit-decide"
-version = "0.1.0"
+version = "0.2.0"
 
 [[package]]
 name = "reliakit-derive"
@@ -76,11 +76,11 @@ dependencies = [
 
 [[package]]
 name = "reliakit-health"
-version = "0.1.0"
+version = "0.2.0"
 
 [[package]]
 name = "reliakit-json"
-version = "0.2.5"
+version = "0.3.0"
 dependencies = [
  "reliakit-primitives",
  "reliakit-validate",
@@ -88,7 +88,7 @@ dependencies = [
 
 [[package]]
 name = "reliakit-primitives"
-version = "0.4.3"
+version = "0.5.0"
 dependencies = [
  "reliakit-secret",
  "reliakit-validate",

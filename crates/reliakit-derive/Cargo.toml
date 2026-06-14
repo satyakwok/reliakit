@@ -16,8 +16,8 @@ categories = ["development-tools::procedural-macro-helpers", "encoding", "rust-p
 proc-macro = true
 
 [dev-dependencies]
-reliakit-codec = { path = "../reliakit-codec", version = "0.2", default-features = false, features = ["alloc"] }
-reliakit-json = { path = "../reliakit-json", version = "0.2" }
+reliakit-codec = { path = "../reliakit-codec", version = "0.3", default-features = false, features = ["alloc"] }
+reliakit-json = { path = "../reliakit-json", version = "0.3" }
 reliakit-csv = { path = "../reliakit-csv", version = "0.1.1" }
 
 [[example]]
