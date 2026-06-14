@@ -254,7 +254,7 @@ supported Rust version is **1.85**.
 | [`reliakit-backoff`](https://crates.io/crates/reliakit-backoff) | Retry backoff delays + jitter | You retry an operation and want explicit spacing. | Published (pre-1.0) |
 | [`reliakit-retry`](https://crates.io/crates/reliakit-retry) | Runtime-agnostic retry helper (sync + async) | You retry fallible operations and want attempt limits, backoff, and an error classifier without forcing a runtime. | Published (pre-1.0) |
 | [`reliakit-bulkhead`](https://crates.io/crates/reliakit-bulkhead) | Concurrency limiter (counting semaphore) | You cap how many operations run at once and shed the rest. | Published (pre-1.0) |
-| `reliakit-health` | Health status + criticality-aware aggregator | You expose a `/health`/`readyz` endpoint or status page. | Unreleased (pre-1.0) |
+| [`reliakit-health`](https://crates.io/crates/reliakit-health) | Health status + criticality-aware aggregator | You expose a `/health`/`readyz` endpoint or status page. | Published (pre-1.0) |
 | [`reliakit-circuit`](https://crates.io/crates/reliakit-circuit) | Circuit breaker state machine | You want to stop calling a failing dependency. | Published (pre-1.0) |
 | [`reliakit-ratelimit`](https://crates.io/crates/reliakit-ratelimit) | Token-bucket rate limiter | You cap how often something may happen. | Published (pre-1.0) |
 | [`reliakit-timeout`](https://crates.io/crates/reliakit-timeout) | Deadlines / time budgets | You track whether a budget has run out. | Published (pre-1.0) |
