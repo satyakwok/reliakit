@@ -278,12 +278,10 @@ mod tests {
     #[test]
     fn enforces_count_limits() {
         let limits = JsonLimits::new();
-        let limits = JsonLimits {
-            max_array_items: 2,
-            max_object_members: 2,
-            max_total_nodes: 100,
-            ..limits
-        };
+        let limits = limits
+            .with_max_array_items(2)
+            .with_max_object_members(2)
+            .with_max_total_nodes(100);
         assert_eq!(
             parse_with_limits(b"[1,2,3]", limits)
                 .unwrap_err()
@@ -319,10 +317,7 @@ mod tests {
 
     #[test]
     fn enforces_string_and_number_byte_limits() {
-        let s = JsonLimits {
-            max_string_bytes: 3,
-            ..JsonLimits::new()
-        };
+        let s = JsonLimits::new().with_max_string_bytes(3);
         assert_eq!(
             parse_with_limits(br#""abcd""#, s)
                 .unwrap_err()
@@ -330,10 +325,7 @@ mod tests {
                 .clone(),
             JsonErrorKind::LimitExceeded(JsonLimitKind::StringBytes)
         );
-        let n = JsonLimits {
-            max_number_bytes: 2,
-            ..JsonLimits::new()
-        };
+        let n = JsonLimits::new().with_max_number_bytes(2);
         assert_eq!(
             parse_with_limits(b"12345", n).unwrap_err().kind().clone(),
             JsonErrorKind::LimitExceeded(JsonLimitKind::NumberBytes)
@@ -676,18 +668,28 @@ mod tests {
     #[test]
     fn limits_profiles_and_builders() {
         assert_eq!(JsonLimits::default(), JsonLimits::new());
-        assert!(JsonLimits::conservative().max_input_bytes < JsonLimits::new().max_input_bytes);
-        assert!(JsonLimits::permissive().max_input_bytes > JsonLimits::new().max_input_bytes);
+        assert!(JsonLimits::conservative().max_input_bytes() < JsonLimits::new().max_input_bytes());
+        assert!(JsonLimits::permissive().max_input_bytes() > JsonLimits::new().max_input_bytes());
 
         let tuned = JsonLimits::new()
             .with_max_depth(8)
             .with_max_input_bytes(1024)
             .with_max_string_bytes(16)
-            .with_max_total_nodes(32);
-        assert_eq!(tuned.max_depth, 8);
-        assert_eq!(tuned.max_input_bytes, 1024);
-        assert_eq!(tuned.max_string_bytes, 16);
-        assert_eq!(tuned.max_total_nodes, 32);
+            .with_max_key_bytes(12)
+            .with_max_number_bytes(6)
+            .with_max_array_items(20)
+            .with_max_object_members(24)
+            .with_max_total_nodes(32)
+            .with_max_total_decoded_string_bytes(2048);
+        assert_eq!(tuned.max_depth(), 8);
+        assert_eq!(tuned.max_input_bytes(), 1024);
+        assert_eq!(tuned.max_string_bytes(), 16);
+        assert_eq!(tuned.max_key_bytes(), 12);
+        assert_eq!(tuned.max_number_bytes(), 6);
+        assert_eq!(tuned.max_array_items(), 20);
+        assert_eq!(tuned.max_object_members(), 24);
+        assert_eq!(tuned.max_total_nodes(), 32);
+        assert_eq!(tuned.max_total_decoded_string_bytes(), 2048);
     }
 
     #[test]

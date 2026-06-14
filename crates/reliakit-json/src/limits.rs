@@ -6,26 +6,22 @@
 /// allocator memory — real heap use also depends on `String`/`Vec` capacity and
 /// the platform. Parsing untrusted input should always go through limits;
 /// [`crate::parse`] applies [`JsonLimits::new`] by default.
+///
+/// Pick a profile with [`new`](Self::new), [`conservative`](Self::conservative),
+/// or [`permissive`](Self::permissive), adjust individual limits with the
+/// `with_*` builder methods, and read current values with the matching
+/// accessors.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct JsonLimits {
-    /// Maximum size of the whole input, in bytes.
-    pub max_input_bytes: usize,
-    /// Maximum nesting depth of arrays and objects.
-    pub max_depth: usize,
-    /// Maximum decoded size of a single string value, in bytes.
-    pub max_string_bytes: usize,
-    /// Maximum decoded size of a single object key, in bytes.
-    pub max_key_bytes: usize,
-    /// Maximum length of a single number token, in bytes.
-    pub max_number_bytes: usize,
-    /// Maximum number of items in a single array.
-    pub max_array_items: usize,
-    /// Maximum number of members in a single object.
-    pub max_object_members: usize,
-    /// Maximum total number of values (nodes) in the document.
-    pub max_total_nodes: usize,
-    /// Maximum total decoded string bytes across the whole document.
-    pub max_total_decoded_string_bytes: usize,
+    max_input_bytes: usize,
+    max_depth: usize,
+    max_string_bytes: usize,
+    max_key_bytes: usize,
+    max_number_bytes: usize,
+    max_array_items: usize,
+    max_object_members: usize,
+    max_total_nodes: usize,
+    max_total_decoded_string_bytes: usize,
 }
 
 impl JsonLimits {
@@ -86,15 +82,60 @@ impl JsonLimits {
         }
     }
 
-    /// Sets [`max_depth`](Self::max_depth).
-    pub const fn with_max_depth(mut self, value: usize) -> Self {
-        self.max_depth = value;
-        self
+    /// Maximum size of the whole input, in bytes.
+    pub const fn max_input_bytes(&self) -> usize {
+        self.max_input_bytes
+    }
+
+    /// Maximum nesting depth of arrays and objects.
+    pub const fn max_depth(&self) -> usize {
+        self.max_depth
+    }
+
+    /// Maximum decoded size of a single string value, in bytes.
+    pub const fn max_string_bytes(&self) -> usize {
+        self.max_string_bytes
+    }
+
+    /// Maximum decoded size of a single object key, in bytes.
+    pub const fn max_key_bytes(&self) -> usize {
+        self.max_key_bytes
+    }
+
+    /// Maximum length of a single number token, in bytes.
+    pub const fn max_number_bytes(&self) -> usize {
+        self.max_number_bytes
+    }
+
+    /// Maximum number of items in a single array.
+    pub const fn max_array_items(&self) -> usize {
+        self.max_array_items
+    }
+
+    /// Maximum number of members in a single object.
+    pub const fn max_object_members(&self) -> usize {
+        self.max_object_members
+    }
+
+    /// Maximum total number of values (nodes) in the document.
+    pub const fn max_total_nodes(&self) -> usize {
+        self.max_total_nodes
+    }
+
+    /// Maximum total decoded string bytes across the whole document.
+    pub const fn max_total_decoded_string_bytes(&self) -> usize {
+        self.max_total_decoded_string_bytes
     }
 
     /// Sets [`max_input_bytes`](Self::max_input_bytes).
     pub const fn with_max_input_bytes(mut self, value: usize) -> Self {
         self.max_input_bytes = value;
+        self
+    }
+
+    /// Sets [`max_depth`](Self::max_depth).
+    pub const fn with_max_depth(mut self, value: usize) -> Self {
+        self.max_depth = value;
         self
     }
 
@@ -104,9 +145,39 @@ impl JsonLimits {
         self
     }
 
+    /// Sets [`max_key_bytes`](Self::max_key_bytes).
+    pub const fn with_max_key_bytes(mut self, value: usize) -> Self {
+        self.max_key_bytes = value;
+        self
+    }
+
+    /// Sets [`max_number_bytes`](Self::max_number_bytes).
+    pub const fn with_max_number_bytes(mut self, value: usize) -> Self {
+        self.max_number_bytes = value;
+        self
+    }
+
+    /// Sets [`max_array_items`](Self::max_array_items).
+    pub const fn with_max_array_items(mut self, value: usize) -> Self {
+        self.max_array_items = value;
+        self
+    }
+
+    /// Sets [`max_object_members`](Self::max_object_members).
+    pub const fn with_max_object_members(mut self, value: usize) -> Self {
+        self.max_object_members = value;
+        self
+    }
+
     /// Sets [`max_total_nodes`](Self::max_total_nodes).
     pub const fn with_max_total_nodes(mut self, value: usize) -> Self {
         self.max_total_nodes = value;
+        self
+    }
+
+    /// Sets [`max_total_decoded_string_bytes`](Self::max_total_decoded_string_bytes).
+    pub const fn with_max_total_decoded_string_bytes(mut self, value: usize) -> Self {
+        self.max_total_decoded_string_bytes = value;
         self
     }
 }
