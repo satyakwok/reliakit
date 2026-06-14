@@ -2,6 +2,89 @@
 
 use crate::State;
 
+/// Fixed-size ring buffer of pass/fail outcomes with a maintained failure count.
+///
+/// Stores the last `N` boolean outcomes inline (`[bool; N]`, no allocation) and
+/// keeps a running tally of how many of them are failures, so reading the
+/// current failure count is O(1) rather than a scan.
+///
+/// Each call to [`record`](Self::record) writes one slot. Once the ring is full,
+/// subsequent writes overwrite the oldest slot; if that evicted slot was a
+/// failure, the count is decremented before the new outcome is written. Reads
+/// via [`failures`](Self::failures) return the count for the current window
+/// contents.
+///
+/// `N == 0` is a legal but inert configuration: [`record`](Self::record) is a
+/// no-op and [`failures`](Self::failures) always returns `0`. This lets callers
+/// build a rolling-window-shaped type that opts out of windowed counting
+/// without a separate code path.
+///
+/// All arithmetic on the failure counter saturates, so the count cannot
+/// underflow or overflow even under pathological sequences.
+///
+/// This type is an internal building block for [`RollingBreaker`]; it does not
+/// model any state machine of its own.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct RollingWindow<const N: usize> {
+    outcomes: [bool; N],
+    head: usize,
+    filled: usize,
+    failures: u32,
+}
+
+impl<const N: usize> RollingWindow<N> {
+    /// Creates an empty window. No slots are filled and the failure count is `0`.
+    const fn new() -> Self {
+        Self {
+            outcomes: [false; N],
+            head: 0,
+            filled: 0,
+            failures: 0,
+        }
+    }
+
+    /// Returns the number of failures currently held in the window.
+    ///
+    /// Always in the range `0..=min(filled, N)`. Returns `0` when `N == 0`.
+    const fn failures(&self) -> u32 {
+        self.failures
+    }
+
+    /// Records one outcome (`true` = failure, `false` = success) into the ring.
+    ///
+    /// If the ring is not yet full, the outcome fills the next slot. Once full,
+    /// the oldest slot is overwritten and its contribution to the failure count
+    /// is dropped before the new outcome is written.
+    ///
+    /// Has no effect when `N == 0`.
+    fn record(&mut self, failure: bool) {
+        if N == 0 {
+            return; // nothing to count
+        }
+        if self.filled == N {
+            // Overwriting the oldest slot: drop its contribution first.
+            if self.outcomes[self.head] {
+                self.failures = self.failures.saturating_sub(1);
+            }
+        } else {
+            self.filled += 1;
+        }
+        self.outcomes[self.head] = failure;
+        if failure {
+            self.failures = self.failures.saturating_add(1);
+        }
+        self.head = (self.head + 1) % N;
+    }
+
+    /// Empties the window: all slots are forgotten and the failure count
+    /// returns to `0`. The next [`record`](Self::record) writes to slot `0`.
+    fn clear(&mut self) {
+        self.head = 0;
+        self.filled = 0;
+        self.failures = 0;
+    }
+}
+
 /// A circuit breaker that trips on the number of failures within the last
 /// `WINDOW` calls, rather than on *consecutive* failures like
 /// [`CircuitBreaker`](crate::CircuitBreaker).
@@ -11,6 +94,14 @@ use crate::State;
 /// trips to [`State::Open`] once the window holds at least `failure_threshold`
 /// failures, then behaves exactly like `CircuitBreaker` for cooldown and
 /// half-open recovery.
+///
+/// Internally, the outcome ring and its failure count are delegated to a
+/// private `RollingWindow` helper. The breaker itself owns only the state
+/// machine: current [`State`], cooldown bookkeeping (`opened_at`), and the
+/// half-open probe streak (`successes`). The streak counter is *not* part of
+/// the rolling window — it tracks consecutive successful probes in
+/// [`State::HalfOpen`] and is reset on every transition into half-open, on
+/// [`trip`](Self::trip), and on [`reset`](Self::reset).
 ///
 /// Time is a plain `u64` in any monotonic unit you choose; the breaker never
 /// reads the clock. All arithmetic saturates, so a backwards-moving clock cannot
@@ -42,14 +133,10 @@ pub struct RollingBreaker<const WINDOW: usize> {
     success_threshold: u32,
     cooldown: u64,
     state: State,
-    outcomes: [bool; WINDOW],
-    head: usize,
-    filled: usize,
-    failures_in_window: u32,
+    window: RollingWindow<WINDOW>,
     successes: u32,
     opened_at: u64,
 }
-
 impl<const WINDOW: usize> RollingBreaker<WINDOW> {
     /// Creates a breaker that trips once `failure_threshold` of the last
     /// `WINDOW` calls have failed, staying open for `cooldown` time units.
@@ -67,10 +154,7 @@ impl<const WINDOW: usize> RollingBreaker<WINDOW> {
             success_threshold: 1,
             cooldown,
             state: State::Closed,
-            outcomes: [false; WINDOW],
-            head: 0,
-            filled: 0,
-            failures_in_window: 0,
+            window: RollingWindow::new(),
             successes: 0,
             opened_at: 0,
         }
@@ -99,7 +183,7 @@ impl<const WINDOW: usize> RollingBreaker<WINDOW> {
 
     /// The number of failures currently recorded in the window.
     pub const fn failures_in_window(&self) -> u32 {
-        self.failures_in_window
+        self.window.failures()
     }
 
     /// The configured failure threshold.
@@ -136,7 +220,7 @@ impl<const WINDOW: usize> RollingBreaker<WINDOW> {
     /// `success_threshold`. Has no effect while [`State::Open`].
     pub fn on_success(&mut self) {
         match self.state {
-            State::Closed => self.record(false),
+            State::Closed => self.window.record(false),
             State::HalfOpen => {
                 self.successes = self.successes.saturating_add(1);
                 if self.successes >= self.success_threshold {
@@ -155,8 +239,8 @@ impl<const WINDOW: usize> RollingBreaker<WINDOW> {
     pub fn on_failure(&mut self, now: u64) {
         match self.state {
             State::Closed => {
-                self.record(true);
-                if self.failures_in_window >= self.failure_threshold {
+                self.window.record(true);
+                if self.window.failures() >= self.failure_threshold {
                     self.trip(now);
                 }
             }
@@ -169,42 +253,16 @@ impl<const WINDOW: usize> RollingBreaker<WINDOW> {
     pub fn trip(&mut self, now: u64) {
         self.state = State::Open;
         self.opened_at = now;
-        self.clear_window();
+        self.window.clear();
         self.successes = 0;
     }
 
     /// Forces the breaker back to [`State::Closed`] and clears all counters.
     pub fn reset(&mut self) {
         self.state = State::Closed;
-        self.clear_window();
+        self.window.clear();
         self.successes = 0;
         self.opened_at = 0;
-    }
-
-    /// Pushes one outcome into the ring, maintaining `failures_in_window`.
-    fn record(&mut self, failure: bool) {
-        if WINDOW == 0 {
-            return; // nothing to count; the rate can never trip
-        }
-        if self.filled == WINDOW {
-            // Overwriting the oldest slot: drop its contribution first.
-            if self.outcomes[self.head] {
-                self.failures_in_window = self.failures_in_window.saturating_sub(1);
-            }
-        } else {
-            self.filled += 1;
-        }
-        self.outcomes[self.head] = failure;
-        if failure {
-            self.failures_in_window = self.failures_in_window.saturating_add(1);
-        }
-        self.head = (self.head + 1) % WINDOW;
-    }
-
-    fn clear_window(&mut self) {
-        self.head = 0;
-        self.filled = 0;
-        self.failures_in_window = 0;
     }
 }
 
@@ -332,6 +390,100 @@ mod tests {
         b.reset();
         assert_eq!(b.state(), State::Closed);
         assert_eq!(b.failures_in_window(), 0);
+    }
+
+    mod rolling_window {
+        use super::super::RollingWindow;
+
+        #[test]
+        fn empty_window_has_no_failures() {
+            let w = RollingWindow::<4>::new();
+            assert_eq!(w.failures(), 0);
+        }
+
+        #[test]
+        fn partial_fill_counts_failures() {
+            let mut w = RollingWindow::<5>::new();
+            w.record(true); // window: [F]            failures=1
+            w.record(false); // window: [F,S]          failures=1
+            w.record(true); // window: [F,S,F]        failures=2
+            assert_eq!(w.failures(), 2);
+        }
+
+        #[test]
+        fn exact_full_counts_failures() {
+            let mut w = RollingWindow::<3>::new();
+            w.record(true); // window: [F]            failures=1
+            w.record(false); // window: [F,S]          failures=1
+            w.record(true); // window: [F,S,F]        failures=2
+            assert_eq!(w.failures(), 2);
+        }
+
+        #[test]
+        fn eviction_of_failure_decrements_count() {
+            let mut w = RollingWindow::<3>::new();
+            w.record(true); // window: [F]            failures=1
+            w.record(true); // window: [F,F]          failures=2
+            w.record(true); // window: [F,F,F]        failures=3
+            assert_eq!(w.failures(), 3);
+            w.record(false); // window: [S,F,F] (F out) failures=2
+            assert_eq!(w.failures(), 2);
+        }
+
+        #[test]
+        fn eviction_of_success_does_not_change_count() {
+            let mut w = RollingWindow::<3>::new();
+            w.record(false); // window: [S]            failures=0
+            w.record(true); // window: [S,F]          failures=1
+            w.record(false); // window: [S,F,S]        failures=1
+            assert_eq!(w.failures(), 1);
+            w.record(false); // window: [S,F,S] (S out) failures=1
+            assert_eq!(w.failures(), 1);
+            w.record(false); // window: [S,S,S] (F out) failures=0
+            assert_eq!(w.failures(), 0);
+        }
+
+        #[test]
+        fn full_wraparound_remains_correct() {
+            // Write 3 * N alternating outcomes; last N decide the count.
+            let mut w = RollingWindow::<4>::new();
+            for i in 0..12 {
+                w.record(i % 2 == 0); // F,S,F,S,F,S,F,S,F,S,F,S
+            }
+            // Last 4 outcomes were F,S,F,S -> 2 failures.
+            assert_eq!(w.failures(), 2);
+        }
+
+        #[test]
+        fn clear_resets_window() {
+            let mut w = RollingWindow::<3>::new();
+            w.record(true); // window: [F]             failures=1
+            w.record(true); // window: [F,F]           failures=2
+            w.record(true); // window: [F,F,F]         failures=3
+            assert_eq!(w.failures(), 3);
+            w.clear(); // window: []              failures=0
+            assert_eq!(w.failures(), 0);
+            w.record(true); // window: [F]             failures=1
+            assert_eq!(w.failures(), 1);
+        }
+
+        #[test]
+        fn zero_sized_window_is_inert() {
+            let mut w = RollingWindow::<0>::new();
+            for _ in 0..1_000 {
+                w.record(true);
+            }
+            assert_eq!(w.failures(), 0);
+        }
+
+        #[test]
+        fn failures_never_exceed_window_size() {
+            let mut w = RollingWindow::<4>::new();
+            for _ in 0..1_000 {
+                w.record(true);
+            }
+            assert_eq!(w.failures(), 4); // capped at N
+        }
     }
 }
 
