@@ -328,6 +328,17 @@ crate — check each crate's README for the exact flags.
   host, so the usual `no_std`/`alloc` discussion does not apply to it; the code
   it generates inherits the `no_std` support of the trait crate.
 
+## Minimum supported Rust version
+
+The MSRV is **Rust 1.85**, declared as `rust-version` on every crate and checked
+in CI on each change (the build is compiled with 1.85, not just the latest
+stable). No nightly or unstable features are used.
+
+Raising the MSRV is treated as a **breaking change**: it ships with a version
+bump (a minor bump while a crate is pre-1.0, a major bump once it is 1.0) and is
+noted in the changelog — it is never raised silently in a patch release. So
+pinning a crate version keeps it building on the Rust it shipped with.
+
 ## Contributing
 
 Contributions are welcome. New here? The pinned
