@@ -5,11 +5,26 @@ use core::fmt;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum CollectionError {
     /// The collection has fewer elements than the required minimum.
-    TooFew { min: usize, actual: usize },
+    TooFew {
+        /// The required minimum number of elements.
+        min: usize,
+        /// The actual number of elements.
+        actual: usize,
+    },
     /// The collection has more elements than the allowed maximum.
-    TooMany { max: usize, actual: usize },
+    TooMany {
+        /// The allowed maximum number of elements.
+        max: usize,
+        /// The actual number of elements.
+        actual: usize,
+    },
     /// The const generic bounds are invalid (`MIN > MAX`).
-    InvalidBounds { min: usize, max: usize },
+    InvalidBounds {
+        /// The configured minimum bound.
+        min: usize,
+        /// The configured maximum bound.
+        max: usize,
+    },
     /// A capacity of zero was requested where a positive capacity is required.
     ZeroCapacity,
     /// A duplicate key or element was supplied where uniqueness is required.
