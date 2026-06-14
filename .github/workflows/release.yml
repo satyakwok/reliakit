@@ -8,10 +8,10 @@ on:
       - "reliakit-validate-v*"
       - "reliakit-collections-v*"
 
-# GitHub release creation requires write access to repository contents.
-# This workflow does not publish to crates.io.
+# Least privilege at the top level; the release job opts into the write access
+# it needs. This workflow does not publish to crates.io.
 permissions:
-  contents: write
+  contents: read
 
 env:
   CARGO_TERM_COLOR: always
@@ -20,6 +20,9 @@ env:
 jobs:
   release:
     runs-on: ubuntu-latest
+    # GitHub release creation requires write access to repository contents.
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout
