@@ -29,6 +29,9 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
   getter and a `with_*` builder method for every limit (matching `CsvLimits`).
   This lets new limits be added without breaking callers; construct a profile
   with `new`/`conservative`/`permissive` and adjust it with the `with_*` methods.
+- **Breaking:** renamed `reliakit-primitives`' `PercentageF64` to `PercentFloat`,
+  for consistency with `Percent` (same root word) and `PositiveFloat` (same
+  `Float` suffix for the floating-point variant).
 - Switched crates.io publishing to Trusted Publishing over GitHub Actions OIDC.
   The tag-triggered and manual publish workflows now mint a short-lived token at
   publish time instead of reading a stored API token, so no long-lived registry

@@ -58,7 +58,7 @@
 //! The crate supports `no_std`. Building with `--no-default-features` (no `std`,
 //! no `alloc`) provides the allocation-free primitives:
 //!
-//! - numeric: [`Percent`], [`PercentageF64`], [`Port`], [`PositiveInt`],
+//! - numeric: [`Percent`], [`PercentFloat`], [`Port`], [`PositiveInt`],
 //!   [`PositiveFloat`], [`ByteSize`],
 //! - [`Uuid`], [`MacAddress`], and [`HumanDuration`] (parsing and `Display` do
 //!   not allocate),
@@ -116,7 +116,7 @@ pub use mac::MacAddress;
 pub use net::Cidr;
 #[cfg(feature = "alloc")]
 pub use non_empty::NonEmptyStr;
-pub use numeric::{ByteSize, Percent, PercentageF64, Port, PositiveFloat, PositiveInt};
+pub use numeric::{ByteSize, Percent, PercentFloat, Port, PositiveFloat, PositiveInt};
 #[cfg(feature = "alloc")]
 pub use semver::SemVer;
 #[cfg(feature = "alloc")]

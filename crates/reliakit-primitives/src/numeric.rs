@@ -253,22 +253,22 @@ impl TryFrom<f64> for PositiveFloat {
     }
 }
 
-// ── PercentageF64 ─────────────────────────────────────────────────────────────
+// ── PercentFloat ─────────────────────────────────────────────────────────────
 
 /// Percentage value as `f64` in the range `0.0..=100.0`.
 ///
 /// Use this when decimal precision is required. For integer percentages, use
 /// [`Percent`].
 #[derive(Debug, Copy, Clone, PartialEq, PartialOrd)]
-pub struct PercentageF64(f64);
+pub struct PercentFloat(f64);
 
-impl PercentageF64 {
+impl PercentFloat {
     /// Minimum allowed floating-point percentage.
     pub const MIN: f64 = 0.0;
     /// Maximum allowed floating-point percentage.
     pub const MAX: f64 = 100.0;
 
-    /// Creates a `PercentageF64`. Returns `Invalid` if `value` is not finite
+    /// Creates a `PercentFloat`. Returns `Invalid` if `value` is not finite
     /// or is outside `0.0..=100.0`.
     pub fn new(value: f64) -> PrimitiveResult<Self> {
         if !value.is_finite() || !(Self::MIN..=Self::MAX).contains(&value) {
@@ -290,13 +290,13 @@ impl PercentageF64 {
     }
 }
 
-impl fmt::Display for PercentageF64 {
+impl fmt::Display for PercentFloat {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}%", self.0)
     }
 }
 
-impl TryFrom<f64> for PercentageF64 {
+impl TryFrom<f64> for PercentFloat {
     type Error = PrimitiveError;
 
     fn try_from(value: f64) -> Result<Self, Self::Error> {
@@ -306,7 +306,7 @@ impl TryFrom<f64> for PercentageF64 {
 
 #[cfg(test)]
 mod tests {
-    use super::{ByteSize, Percent, PercentageF64, Port, PositiveFloat, PositiveInt};
+    use super::{ByteSize, Percent, PercentFloat, Port, PositiveFloat, PositiveInt};
     use crate::PrimitiveError;
     use alloc::string::ToString;
 
@@ -482,35 +482,35 @@ mod tests {
 
     #[test]
     fn percentage_f64_accepts_boundaries() {
-        assert_eq!(PercentageF64::new(0.0).unwrap().get(), 0.0);
-        assert_eq!(PercentageF64::new(50.5).unwrap().get(), 50.5);
-        assert_eq!(PercentageF64::new(100.0).unwrap().get(), 100.0);
+        assert_eq!(PercentFloat::new(0.0).unwrap().get(), 0.0);
+        assert_eq!(PercentFloat::new(50.5).unwrap().get(), 50.5);
+        assert_eq!(PercentFloat::new(100.0).unwrap().get(), 100.0);
     }
 
     #[test]
     fn percentage_f64_rejects_out_of_range() {
-        assert!(PercentageF64::new(-0.1).is_err());
-        assert!(PercentageF64::new(100.1).is_err());
+        assert!(PercentFloat::new(-0.1).is_err());
+        assert!(PercentFloat::new(100.1).is_err());
     }
 
     #[test]
     fn percentage_f64_rejects_nan() {
-        assert!(PercentageF64::new(f64::NAN).is_err());
+        assert!(PercentFloat::new(f64::NAN).is_err());
     }
 
     #[test]
     fn percentage_f64_as_fraction() {
-        assert_eq!(PercentageF64::new(25.0).unwrap().as_fraction(), 0.25);
+        assert_eq!(PercentFloat::new(25.0).unwrap().as_fraction(), 0.25);
     }
 
     #[test]
     fn percentage_f64_display() {
-        assert_eq!(PercentageF64::new(42.5).unwrap().to_string(), "42.5%");
+        assert_eq!(PercentFloat::new(42.5).unwrap().to_string(), "42.5%");
     }
 
     #[test]
     fn percentage_f64_try_from() {
-        assert!(PercentageF64::try_from(50.0f64).is_ok());
-        assert!(PercentageF64::try_from(101.0f64).is_err());
+        assert!(PercentFloat::try_from(50.0f64).is_ok());
+        assert!(PercentFloat::try_from(101.0f64).is_err());
     }
 }
