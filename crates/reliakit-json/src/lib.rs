@@ -675,11 +675,21 @@ mod tests {
             .with_max_depth(8)
             .with_max_input_bytes(1024)
             .with_max_string_bytes(16)
-            .with_max_total_nodes(32);
+            .with_max_key_bytes(12)
+            .with_max_number_bytes(6)
+            .with_max_array_items(20)
+            .with_max_object_members(24)
+            .with_max_total_nodes(32)
+            .with_max_total_decoded_string_bytes(2048);
         assert_eq!(tuned.max_depth(), 8);
         assert_eq!(tuned.max_input_bytes(), 1024);
         assert_eq!(tuned.max_string_bytes(), 16);
+        assert_eq!(tuned.max_key_bytes(), 12);
+        assert_eq!(tuned.max_number_bytes(), 6);
+        assert_eq!(tuned.max_array_items(), 20);
+        assert_eq!(tuned.max_object_members(), 24);
         assert_eq!(tuned.max_total_nodes(), 32);
+        assert_eq!(tuned.max_total_decoded_string_bytes(), 2048);
     }
 
     #[test]
