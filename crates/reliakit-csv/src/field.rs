@@ -36,12 +36,11 @@ macro_rules! impl_int {
 impl_int!(u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, i128, isize);
 
 macro_rules! impl_net_addr {
-    ($($t: ty),* $(,)?) => {$(
+    ($($t:ty),* $(,)?) => {$(
         impl CsvField for $t {
             fn encode_field(&self) -> String {
                 self.to_string()
             }
-
             fn decode_field(input: &str) -> Result<Self, CsvDecodeError> {
                 input.parse::<$t>().map_err(|_| {
                     CsvDecodeError::field("field is not a network address that fits the target type")
