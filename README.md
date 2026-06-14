@@ -96,6 +96,31 @@ dependency mostly aren't here:
 | Derive helpers | `reliakit-derive` | `#[derive(CanonicalEncode, CanonicalDecode, JsonEncode, JsonDecode)]` |
 | Decision logic | `reliakit-decide` | Deterministic utility-based decisions (`Reasoner` with `decide`/`explain`/`gate`/`Policy`) |
 
+## Which resilience block do I use?
+
+The resilience crates each solve one problem, and each is a plain value you drive
+with the current time — no runtime, no hidden threads, no global state. Pick by the
+question you are asking:
+
+| Question | Block | Crate |
+|---|---|---|
+| How long should I wait between retries? | backoff delays + jitter | [`reliakit-backoff`](https://crates.io/crates/reliakit-backoff) |
+| Retry a fallible call with an attempt limit? | retry driver (sync + async) | [`reliakit-retry`](https://crates.io/crates/reliakit-retry) |
+| Stop calling a dependency that keeps failing? | circuit breaker | [`reliakit-circuit`](https://crates.io/crates/reliakit-circuit) |
+| Cap how *often* something may happen? | token-bucket rate limiter | [`reliakit-ratelimit`](https://crates.io/crates/reliakit-ratelimit) |
+| Cap how *many* run at once, and shed the rest? | concurrency limiter (bulkhead) | [`reliakit-bulkhead`](https://crates.io/crates/reliakit-bulkhead) |
+| Has the time budget for this operation run out? | deadline / timeout | [`reliakit-timeout`](https://crates.io/crates/reliakit-timeout) |
+
+They compose rather than overlap: `retry` drives `backoff` between attempts;
+`circuit` stops calling a dependency once it has failed enough; `ratelimit` and
+`bulkhead` shed load before you start (too often / too many at once); and `timeout`
+bounds the whole operation. None of them sleep or spawn for you — you pass the
+clock (or a sleeper) in, so they stay runtime-agnostic and trivial to test.
+
+The [`resilient_client`](crates/reliakit/examples/resilient_client.rs) example shows
+a timeout, a rate limiter, a circuit breaker, and retry-with-backoff cooperating in
+a single call.
+
 ## Real-world use cases
 
 ### 1. Backend / API input validation
@@ -345,6 +370,17 @@ crate — check each crate's README for the exact flags.
 - **`reliakit-derive` is a proc-macro crate.** It runs at compile time on the
   host, so the usual `no_std`/`alloc` discussion does not apply to it; the code
   it generates inherits the `no_std` support of the trait crate.
+
+## Minimum supported Rust version
+
+The MSRV is **Rust 1.85**, declared as `rust-version` on every crate and checked
+in CI on each change (the build is compiled with 1.85, not just the latest
+stable). No nightly or unstable features are used.
+
+Raising the MSRV is treated as a **breaking change**: it ships with a version
+bump (a minor bump while a crate is pre-1.0, a major bump once it is 1.0) and is
+noted in the changelog — it is never raised silently in a patch release. So
+pinning a crate version keeps it building on the Rust it shipped with.
 
 ## Contributing
 
