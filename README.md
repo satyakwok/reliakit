@@ -4,8 +4,9 @@
 
 # Reliakit
 
-Small Rust reliability crates for explicit invariants, redacted secrets, bounded
-inputs, deterministic data, and runtime-agnostic resilience.
+Small, zero-dependency Rust reliability crates: explicit invariants, redacted
+secrets, bounded inputs, deterministic data, and runtime-agnostic resilience —
+`no_std`-friendly, no `unsafe`, adopt one crate at a time.
 
 [![CI](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml/badge.svg)](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/satyakwok/reliakit/branch/main/graph/badge.svg)](https://codecov.io/gh/satyakwok/reliakit)
@@ -55,6 +56,26 @@ dependency appears), `#![forbid(unsafe_code)]`, and usable on its own. You adopt
   and the same zero-dependency, `no_std`, no-`unsafe` rules. Reliability patterns
   usually mean stitching together unrelated crates with different designs and
   dependency trees — here they are built to fit.
+
+## Footprint
+
+Adding Reliakit is close to free — the costs you usually weigh before taking on a
+dependency mostly aren't here:
+
+- **Zero third-party dependencies.** With every feature enabled, the entire
+  dependency tree is `reliakit-*` crates and the standard library — nothing else
+  to vet, audit, or track for security advisories. A CI check fails the build if
+  a third-party crate ever appears, and `cargo tree -p reliakit --all-features`
+  proves it.
+- **No `unsafe`.** Every crate declares `#![forbid(unsafe_code)]`.
+- **`no_std`-friendly.** The core crates build for bare metal (for example
+  `thumbv7em-none-eabi`); `alloc` and `std` are opt-in features.
+- **Fast cold builds.** There is no third-party graph to compile — you build
+  Reliakit and nothing else.
+- **Small, readable surface.** Each crate does one thing and is small enough to
+  read end to end before you depend on it.
+- **Pay only for what you use.** Take a single crate, or pull several through the
+  `reliakit` umbrella behind per-crate feature flags.
 
 ## Core features
 
