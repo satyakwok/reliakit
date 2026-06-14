@@ -10,8 +10,9 @@
 [![CI](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml/badge.svg)](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/satyakwok/reliakit/blob/main/LICENSE)
 
-The umbrella crate for the **Reliakit** reliability toolkit: one name that
-re-exports the individual `reliakit-*` building blocks behind feature flags.
+One name for the whole **Reliakit** reliability toolkit — a zero-dependency,
+`no_std`-friendly family of building blocks, each re-exported behind a feature
+flag.
 
 This crate contains no logic of its own. It exists so you can depend on a single
 name and turn on only the pieces you need. Nothing is pulled in by default beyond
@@ -25,6 +26,19 @@ zero-dependency, `no_std`-friendly nature of each building block is preserved.
   `reliakit::secret`, `reliakit::circuit`, and so on.
 - Forwards `std`/`alloc` to whichever sub-crates you enable, so `no_std` works
   through the umbrella exactly as it does for the individual crates.
+
+## Footprint
+
+The umbrella adds nothing of its own, and neither do the building blocks:
+
+- **Zero third-party dependencies** — even with `features = ["full"]`, the entire
+  dependency tree is `reliakit-*` crates and the standard library. Nothing to
+  vet, audit, or track for security advisories
+  (`cargo tree -p reliakit --all-features` proves it).
+- **No `unsafe`** — every crate declares `#![forbid(unsafe_code)]`.
+- **`no_std`-friendly** — `alloc`/`std` are opt-in and forwarded per feature.
+- **Pay only for what you enable** — each module compiles in only when its
+  feature is turned on, so unused blocks cost nothing.
 
 ## When To Use It
 
