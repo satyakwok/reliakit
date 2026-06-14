@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v6.0.3
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
       - name: Install Rust stable
         run: |
@@ -32,7 +32,7 @@ jobs:
           cargo --version
 
       - name: Cache Cargo
-        uses: actions/cache@v5.0.5
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: |
             ~/.cargo/registry
@@ -69,7 +69,7 @@ jobs:
             --output-path lcov-reliakit-primitives.info
 
       - name: Upload reliakit-primitives coverage
-        uses: codecov/codecov-action@v7
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
         with:
           files: lcov-reliakit-primitives.info
           flags: reliakit-primitives
@@ -88,7 +88,7 @@ jobs:
             --output-path lcov-reliakit-secret.info
 
       - name: Upload reliakit-secret coverage
-        uses: codecov/codecov-action@v7
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
         with:
           files: lcov-reliakit-secret.info
           flags: reliakit-secret
@@ -107,7 +107,7 @@ jobs:
             --output-path lcov-reliakit-validate.info
 
       - name: Upload reliakit-validate coverage
-        uses: codecov/codecov-action@v7
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
         with:
           files: lcov-reliakit-validate.info
           flags: reliakit-validate
@@ -126,7 +126,7 @@ jobs:
             --output-path lcov-reliakit-collections.info
 
       - name: Upload reliakit-collections coverage
-        uses: codecov/codecov-action@v7
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
         with:
           files: lcov-reliakit-collections.info
           flags: reliakit-collections
@@ -145,7 +145,7 @@ jobs:
             --output-path lcov-reliakit-codec.info
 
       - name: Upload reliakit-codec coverage
-        uses: codecov/codecov-action@v7
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
         with:
           files: lcov-reliakit-codec.info
           flags: reliakit-codec
@@ -164,7 +164,7 @@ jobs:
             --output-path lcov-reliakit-csv.info
 
       - name: Upload reliakit-csv coverage
-        uses: codecov/codecov-action@v7
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
         with:
           files: lcov-reliakit-csv.info
           flags: reliakit-csv
@@ -183,7 +183,7 @@ jobs:
             --output-path lcov-reliakit-backoff.info
 
       - name: Upload reliakit-backoff coverage
-        uses: codecov/codecov-action@v7
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
         with:
           files: lcov-reliakit-backoff.info
           flags: reliakit-backoff
@@ -202,7 +202,7 @@ jobs:
             --output-path lcov-reliakit-retry.info
 
       - name: Upload reliakit-retry coverage
-        uses: codecov/codecov-action@v7
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
         with:
           files: lcov-reliakit-retry.info
           flags: reliakit-retry
@@ -221,7 +221,7 @@ jobs:
             --output-path lcov-reliakit-bulkhead.info
 
       - name: Upload reliakit-bulkhead coverage
-        uses: codecov/codecov-action@v7
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
         with:
           files: lcov-reliakit-bulkhead.info
           flags: reliakit-bulkhead
@@ -240,7 +240,7 @@ jobs:
             --output-path lcov-reliakit-health.info
 
       - name: Upload reliakit-health coverage
-        uses: codecov/codecov-action@v7
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
         with:
           files: lcov-reliakit-health.info
           flags: reliakit-health
@@ -259,7 +259,7 @@ jobs:
             --output-path lcov-reliakit-circuit.info
 
       - name: Upload reliakit-circuit coverage
-        uses: codecov/codecov-action@v7
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
         with:
           files: lcov-reliakit-circuit.info
           flags: reliakit-circuit
@@ -278,7 +278,7 @@ jobs:
             --output-path lcov-reliakit-ratelimit.info
 
       - name: Upload reliakit-ratelimit coverage
-        uses: codecov/codecov-action@v7
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
         with:
           files: lcov-reliakit-ratelimit.info
           flags: reliakit-ratelimit
@@ -297,7 +297,7 @@ jobs:
             --output-path lcov-reliakit-json.info
 
       - name: Upload reliakit-json coverage
-        uses: codecov/codecov-action@v7
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
         with:
           files: lcov-reliakit-json.info
           flags: reliakit-json
@@ -316,7 +316,7 @@ jobs:
             --output-path lcov-reliakit-timeout.info
 
       - name: Upload reliakit-timeout coverage
-        uses: codecov/codecov-action@v7
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
         with:
           files: lcov-reliakit-timeout.info
           flags: reliakit-timeout
@@ -335,7 +335,7 @@ jobs:
             --output-path lcov-reliakit-core.info
 
       - name: Upload reliakit-core coverage
-        uses: codecov/codecov-action@v7
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
         with:
           files: lcov-reliakit-core.info
           flags: reliakit-core
@@ -354,7 +354,7 @@ jobs:
             --output-path lcov-reliakit-derive.info
 
       - name: Upload reliakit-derive coverage
-        uses: codecov/codecov-action@v7
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
         with:
           files: lcov-reliakit-derive.info
           flags: reliakit-derive
@@ -373,7 +373,7 @@ jobs:
             --output-path lcov-reliakit-decide.info
 
       - name: Upload reliakit-decide coverage
-        uses: codecov/codecov-action@v7
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
         with:
           files: lcov-reliakit-decide.info
           flags: reliakit-decide
