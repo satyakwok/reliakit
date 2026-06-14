@@ -193,6 +193,24 @@ feature), the same value always produces the same bytes — useful for cache key
 content addressing, and hashing or signing in protocol and blockchain work. This
 is one use case among many, not the focus.
 
+### 8. Health and readiness endpoints / status pages
+
+`reliakit-health` turns per-component status into one answer for a `/health` or
+`/readyz` endpoint or a status page. You build a `HealthReport` from `critical`
+and `optional` checks, and the aggregate is criticality-aware: an `optional`
+dependency (say a cache) being `Unhealthy` degrades the service rather than
+failing it, while a `critical` one (the database) fails it. It only reports — it
+never retries, sleeps, or acts.
+
+### 9. Graded, explainable decisions (routing, selection, agents)
+
+`reliakit-decide` is a small deterministic decision engine for when an `if`/`else`
+is too blunt. A `Reasoner` scores candidate `Action`s from weighted
+`Consideration`s shaped by a `Curve`, with `gate(...)` for hard constraints (an
+option that is down or rate-limited is skipped entirely) and `explain()` for why
+a choice won — useful for request routing, picking a backend, or deciding when an
+agent should call an LLM. Same inputs, same decision, every time.
+
 ## Quick start / installation
 
 The quickest way in is the umbrella crate `reliakit`, which re-exports every
