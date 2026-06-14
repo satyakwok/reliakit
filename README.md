@@ -96,6 +96,31 @@ dependency mostly aren't here:
 | Derive helpers | `reliakit-derive` | `#[derive(CanonicalEncode, CanonicalDecode, JsonEncode, JsonDecode)]` |
 | Decision logic | `reliakit-decide` | Deterministic utility-based decisions (`Reasoner` with `decide`/`explain`/`gate`/`Policy`) |
 
+## Which resilience block do I use?
+
+The resilience crates each solve one problem, and each is a plain value you drive
+with the current time — no runtime, no hidden threads, no global state. Pick by the
+question you are asking:
+
+| Question | Block | Crate |
+|---|---|---|
+| How long should I wait between retries? | backoff delays + jitter | [`reliakit-backoff`](https://crates.io/crates/reliakit-backoff) |
+| Retry a fallible call with an attempt limit? | retry driver (sync + async) | [`reliakit-retry`](https://crates.io/crates/reliakit-retry) |
+| Stop calling a dependency that keeps failing? | circuit breaker | [`reliakit-circuit`](https://crates.io/crates/reliakit-circuit) |
+| Cap how *often* something may happen? | token-bucket rate limiter | [`reliakit-ratelimit`](https://crates.io/crates/reliakit-ratelimit) |
+| Cap how *many* run at once, and shed the rest? | concurrency limiter (bulkhead) | [`reliakit-bulkhead`](https://crates.io/crates/reliakit-bulkhead) |
+| Has the time budget for this operation run out? | deadline / timeout | [`reliakit-timeout`](https://crates.io/crates/reliakit-timeout) |
+
+They compose rather than overlap: `retry` drives `backoff` between attempts;
+`circuit` stops calling a dependency once it has failed enough; `ratelimit` and
+`bulkhead` shed load before you start (too often / too many at once); and `timeout`
+bounds the whole operation. None of them sleep or spawn for you — you pass the
+clock (or a sleeper) in, so they stay runtime-agnostic and trivial to test.
+
+The [`resilient_client`](crates/reliakit/examples/resilient_client.rs) example shows
+a timeout, a rate limiter, a circuit breaker, and retry-with-backoff cooperating in
+a single call.
+
 ## Real-world use cases
 
 ### 1. Backend / API input validation
