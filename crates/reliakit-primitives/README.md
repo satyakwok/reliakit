@@ -182,7 +182,7 @@ depending on display text.
 | Type | Description |
 |---|---|
 | `Percent` | Integer percentage from `0` to `100` inclusive |
-| `PercentageF64` | Float percentage from `0.0` to `100.0` inclusive |
+| `PercentFloat` | Float percentage from `0.0` to `100.0` inclusive |
 | `Port` | TCP/UDP port from `1` to `65535` inclusive |
 | `PositiveInt` | `u64` strictly greater than zero |
 | `PositiveFloat` | Finite `f64` strictly greater than zero |
@@ -221,7 +221,7 @@ depending on display text.
 The crate supports `no_std`. Building with `--no-default-features` (no `std`,
 no `alloc`) provides the allocation-free primitives:
 
-- numeric: `Percent`, `PercentageF64`, `Port`, `PositiveInt`, `PositiveFloat`,
+- numeric: `Percent`, `PercentFloat`, `Port`, `PositiveInt`, `PositiveFloat`,
   `ByteSize`,
 - `Uuid`, `MacAddress`, `Cidr`, and `HumanDuration` (parsing and `Display` do
   not allocate),
