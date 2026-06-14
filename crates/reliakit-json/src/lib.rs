@@ -13,6 +13,15 @@
 //! schema validation, JSON5, comments, trailing commas, lenient parsing, or
 //! SIMD throughput.
 //!
+//! # Output stability
+//!
+//! Serialization is deterministic: a given [`JsonValue`] always produces the
+//! same text, with member order preserved. That value-to-text mapping is stable
+//! and will not change in a backwards-incompatible way without a major version
+//! bump, so the output is safe for cache keys, fixtures, hashing, and signing.
+//! The optional `canonical` feature additionally produces RFC 8785 (JCS)
+//! canonical form.
+//!
 //! # Example
 //!
 //! ```
