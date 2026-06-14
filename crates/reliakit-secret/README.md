@@ -13,6 +13,7 @@ diagnostics.
 [![CI](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml/badge.svg)](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/satyakwok/reliakit/branch/main/graph/badge.svg?flag=reliakit-secret)](https://codecov.io/gh/satyakwok/reliakit/tree/main/crates/reliakit-secret)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/satyakwok/reliakit/blob/main/LICENSE)
+[![zero dependencies](https://img.shields.io/badge/dependencies-0-success)](https://github.com/satyakwok/reliakit#footprint)
 
 `reliakit-secret` provides `Secret<T>`, a small wrapper that redacts its inner
 value in `Debug` and `Display` output. Access to the wrapped value is explicit
