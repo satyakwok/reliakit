@@ -10,6 +10,12 @@
 //! - `Option<T>` and `Result<T, E>` use one-byte tags,
 //! - fixed arrays and tuples encode fields in declaration order.
 //!
+//! # Stability
+//!
+//! This format is stable: the same value always encodes to the same bytes, and
+//! the layouts above will not change in a backwards-incompatible way without a
+//! major version bump. Encoded bytes are safe to persist, hash, and sign.
+//!
 //! Floats, pointer-sized integers, hash maps, unordered maps, schema
 //! negotiation, and non-canonical alternatives are not part of this initial
 //! format. They are omitted because their representation or ordering can be
