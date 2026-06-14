@@ -12,6 +12,7 @@ Bounded and reliability-oriented collection types for Rust.
 [![CI](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml/badge.svg)](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/satyakwok/reliakit/branch/main/graph/badge.svg?flag=reliakit-collections)](https://codecov.io/gh/satyakwok/reliakit/tree/main/crates/reliakit-collections)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/satyakwok/reliakit/blob/main/LICENSE)
+[![zero dependencies](https://img.shields.io/badge/dependencies-0-success)](https://github.com/satyakwok/reliakit#footprint)
 
 `reliakit-collections` provides collection types with enforced size constraints. Bounds are expressed as const generic parameters and checked at construction time. Mutations that would violate the bounds return errors instead of panicking.
 

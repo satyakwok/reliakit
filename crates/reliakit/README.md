@@ -9,6 +9,7 @@
 [![Docs.rs](https://docs.rs/reliakit/badge.svg)](https://docs.rs/reliakit)
 [![CI](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml/badge.svg)](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/satyakwok/reliakit/blob/main/LICENSE)
+[![zero dependencies](https://img.shields.io/badge/dependencies-0-success)](https://github.com/satyakwok/reliakit#footprint)
 
 One name for the whole **Reliakit** reliability toolkit — a zero-dependency,
 `no_std`-friendly family of building blocks, each re-exported behind a feature
