@@ -147,6 +147,7 @@ impl Curve {
 }
 
 /// A single weighted input: a raw signal run through a [`Curve`].
+#[non_exhaustive]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Consideration {
     /// A short static label naming this signal; shown by [`Reasoner::explain`].
@@ -189,6 +190,7 @@ impl Consideration {
 /// Utility is the base weight multiplied by every consideration. Because they
 /// multiply, **any near-zero consideration vetoes the action** — all of them
 /// must be satisfied for a high utility.
+#[non_exhaustive]
 #[derive(Debug, Clone)]
 pub struct Action<A> {
     /// The value returned when this action is chosen.
@@ -268,6 +270,7 @@ impl<A> Action<A> {
 }
 
 /// The outcome of a decision: the chosen id and the utility it won with.
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Decision<A> {
     /// The chosen action's id.
@@ -278,6 +281,7 @@ pub struct Decision<A> {
 
 /// One line of an explanation: a consideration's label and the score it produced
 /// for the chosen action.
+#[non_exhaustive]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Contribution {
     /// The consideration's label (empty if it was unlabeled).
@@ -290,6 +294,7 @@ pub struct Contribution {
 
 /// Why an action was chosen: its id, final utility, and the per-consideration
 /// breakdown (in declaration order) that produced it.
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Explanation<A> {
     /// The chosen action's id.

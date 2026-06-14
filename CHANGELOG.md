@@ -25,6 +25,11 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 
 ### Changed
 
+- **Breaking:** marked several public data structs `#[non_exhaustive]` so fields
+  can be added later without breaking callers — `reliakit-health`'s `Component`
+  and `Summary`, and `reliakit-decide`'s `Consideration`, `Action`, `Decision`,
+  `Contribution`, and `Explanation`. Build them via their constructors
+  (`Action::new`, `Consideration::new`/`labeled`, …) rather than struct literals.
 - **Breaking:** `reliakit-json`'s `JsonLimits` fields are now private, with a
   getter and a `with_*` builder method for every limit (matching `CsvLimits`).
   This lets new limits be added without breaking callers; construct a profile

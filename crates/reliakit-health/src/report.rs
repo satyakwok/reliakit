@@ -3,6 +3,7 @@ use alloc::string::String;
 use alloc::vec::Vec;
 
 /// An owned, named component health record held by a [`HealthReport`].
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Component {
     /// The component name.
@@ -28,6 +29,7 @@ impl Component {
 /// Counts use each component's **raw** reported status (what a status page
 /// shows), not the criticality-adjusted one used by
 /// [`HealthReport::overall`].
+#[non_exhaustive]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Hash)]
 pub struct Summary {
     /// Number of components reported [`Healthy`](Health::Healthy).
