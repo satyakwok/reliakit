@@ -1,0 +1,55 @@
+# OpenSSF Scorecard: supply-chain and repository security posture analysis.
+# Audits branch protection, token permissions, action pinning, signed releases,
+# dangerous workflows, and more, then uploads the results to the Security tab and
+# publishes them for the Scorecard badge.
+name: Scorecard
+
+on:
+  # Re-run when branch protection changes (one of the checks Scorecard scores).
+  branch_protection_rule:
+  schedule:
+    - cron: "0 8 * * 1"
+  push:
+    branches: ["main"]
+
+# Least privilege by default; the analysis job opts into exactly what it needs.
+permissions: read-all
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analysis:
+    name: Scorecard analysis
+    runs-on: ubuntu-latest
+    permissions:
+      # Upload the SARIF results to the Security > Code scanning tab.
+      security-events: write
+      # Publish results to the OpenSSF API for the Scorecard badge (OIDC).
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Run analysis
+        uses: ossf/scorecard-action@v2
+        with:
+          results_file: results.sarif
+          results_format: sarif
+          publish_results: true
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SARIF file
+          path: results.sarif
+          retention-days: 5
+
+      - name: Upload to code-scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results.sarif
