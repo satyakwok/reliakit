@@ -135,14 +135,8 @@ mod tests {
             IpAddr::V6(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1)).encode_field(),
             "::1"
         );
-        assert_eq!(
-            Ipv4Addr::new(127, 0, 0, 1).encode_field(),
-            "127.0.0.1"
-        );
-        assert_eq!(
-            Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1).encode_field(),
-            "::1"
-        );
+        assert_eq!(Ipv4Addr::new(127, 0, 0, 1).encode_field(), "127.0.0.1");
+        assert_eq!(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1).encode_field(), "::1");
 
         // Valid Decode Tests
         assert_eq!(
@@ -225,7 +219,12 @@ mod tests {
         );
         assert_eq!(
             SocketAddr::decode_field("[::1%16384]:443").unwrap(),
-            SocketAddr::V6(SocketAddrV6::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1), 443, 0, 16384))
+            SocketAddr::V6(SocketAddrV6::new(
+                Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1),
+                443,
+                0,
+                16384
+            ))
         );
         assert_eq!(
             SocketAddrV6::decode_field("[::1%16384]:443").unwrap(),
