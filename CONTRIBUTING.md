@@ -108,6 +108,22 @@ Open an issue with:
 - Your Rust version (`rustc --version`).
 - The expected versus actual behavior.
 
+## Governance and becoming a maintainer
+
+reliakit is currently led by a single maintainer, with decisions made in the open
+on issues and pull requests. The maintainer set grows from its contributors:
+sustained, high-quality work — several merged non-trivial PRs, good judgment about
+the project's constraints, and helpful participation in reviews — leads to an
+invitation to become a collaborator with review and merge rights. See
+[GOVERNANCE.md](GOVERNANCE.md) for the full picture, including how and when the
+project will move to a GitHub organization.
+
+## Code of Conduct
+
+Participation is governed by the [Code of Conduct](CODE_OF_CONDUCT.md). Be
+considerate and constructive; report unacceptable behavior privately to the
+maintainer.
+
 ## License
 
 By contributing, you agree that your contributions will be licensed under the
