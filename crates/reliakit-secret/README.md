@@ -49,21 +49,21 @@ primitive.
 
 ```toml
 [dependencies]
-reliakit-secret = "0.1"
+reliakit-secret = "1.0"
 ```
 
 For `no_std` without allocation:
 
 ```toml
 [dependencies]
-reliakit-secret = { version = "0.1", default-features = false }
+reliakit-secret = { version = "1.0", default-features = false }
 ```
 
 For `no_std` with string-backed secrets:
 
 ```toml
 [dependencies]
-reliakit-secret = { version = "0.1", default-features = false, features = ["alloc"] }
+reliakit-secret = { version = "1.0", default-features = false, features = ["alloc"] }
 ```
 
 ## Examples

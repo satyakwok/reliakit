@@ -50,7 +50,7 @@ refill happens, nothing panics).
 
 ```toml
 [dependencies]
-reliakit-ratelimit = "0.1"
+reliakit-ratelimit = "1.0"
 ```
 
 This crate is `#![no_std]` with no required dependencies. It has one optional

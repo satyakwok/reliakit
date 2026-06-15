@@ -244,7 +244,7 @@ pieces you want:
 
 ```toml
 [dependencies]
-reliakit = { version = "0.2", features = ["ratelimit", "secret"] }
+reliakit = { version = "1.0", features = ["ratelimit", "secret"] }
 ```
 
 ```rust
@@ -261,23 +261,23 @@ depend on just the ones you need:
 
 ```toml
 [dependencies]
-reliakit-primitives  = "0.5"
-reliakit-secret      = "0.1"
-reliakit-validate    = "0.3"
-reliakit-collections = "0.3"
-reliakit-codec       = "0.3"
-reliakit-json        = "0.3"
-reliakit-csv         = "0.1"
-reliakit-backoff     = "0.1"
-reliakit-retry       = "0.1"
-reliakit-bulkhead    = "0.1"
-reliakit-health      = "0.2"
-reliakit-circuit     = "0.2"
-reliakit-ratelimit   = "0.1"
-reliakit-timeout     = "0.1"
-reliakit-core        = "0.1"
-reliakit-derive      = "0.1"
-reliakit-decide      = "0.2"
+reliakit-primitives  = "1.0"
+reliakit-secret      = "1.0"
+reliakit-validate    = "1.0"
+reliakit-collections = "1.0"
+reliakit-codec       = "1.0"
+reliakit-json        = "1.0"
+reliakit-csv         = "1.0"
+reliakit-backoff     = "1.0"
+reliakit-retry       = "1.0"
+reliakit-bulkhead    = "1.0"
+reliakit-health      = "1.0"
+reliakit-circuit     = "1.0"
+reliakit-ratelimit   = "1.0"
+reliakit-timeout     = "1.0"
+reliakit-core        = "1.0"
+reliakit-derive      = "1.0"
+reliakit-decide      = "1.0"
 ```
 
 Each crate is independent — most projects use two or three. The minimum

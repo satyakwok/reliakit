@@ -49,7 +49,7 @@ compose.
 
 ```toml
 [dependencies]
-reliakit-bulkhead = "0.1"
+reliakit-bulkhead = "1.0"
 ```
 
 This crate is `no_std` and has no feature flags; it depends only on `core`.

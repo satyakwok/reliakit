@@ -73,14 +73,14 @@ host, but it is not a complete URL parser.
 
 ```toml
 [dependencies]
-reliakit-primitives = "0.5"
+reliakit-primitives = "1.0"
 ```
 
 For `no_std` environments:
 
 ```toml
 [dependencies]
-reliakit-primitives = { version = "0.5", default-features = false, features = ["alloc"] }
+reliakit-primitives = { version = "1.0", default-features = false, features = ["alloc"] }
 ```
 
 ## Examples
@@ -234,7 +234,7 @@ Enabling `alloc` adds the owned, allocation-backed types: `Slug`, `Email`,
 The default `std` build enables `alloc` for normal application use:
 
 ```toml
-reliakit-primitives = { version = "0.5", default-features = false, features = ["alloc"] }
+reliakit-primitives = { version = "1.0", default-features = false, features = ["alloc"] }
 ```
 
 ## Safety

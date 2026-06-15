@@ -57,7 +57,7 @@ model which generates language.
 
 ```toml
 [dependencies]
-reliakit-decide = "0.2"
+reliakit-decide = "1.0"
 ```
 
 ## Examples

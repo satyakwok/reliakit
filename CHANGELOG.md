@@ -6,42 +6,36 @@ This project follows normal Rust crate versioning. Crate releases may use a
 workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 `CRATE-vMAJOR.MINOR.PATCH`.
 
-## Unreleased
+## 1.0.0 - 2026-06-15
+
+All crates are promoted to **1.0.0**: their public APIs are now stable and follow
+standard semver, so a future breaking change will require a 2.0. The freeze
+fixes from the 0.x line — `reliakit-primitives` `PercentFloat`, private
+`reliakit-json` `JsonLimits`, `#[non_exhaustive]` on the `reliakit-health` and
+`reliakit-decide` data types, and the documented-stable codec/JSON/CSV wire
+formats — are part of this frozen surface.
+
+### Changed
+
+- **Breaking:** `reliakit-health`'s `Check` is now `#[non_exhaustive]`. Build it
+  with `Check::new(...)` and the builder methods (`optional`, `with_detail`)
+  instead of a struct literal, so fields can be added later without breaking.
+- Switched crates.io publishing to Trusted Publishing over GitHub Actions OIDC,
+  so no long-lived registry token is kept in repository secrets.
+- Pointed the workspace `homepage` at `https://satyakwok.dev/projects/reliakit`.
 
 ### Added
 
 - `reliakit-retry`: `retry_with_sleep_observed` and `retry_async_observed`, which
   take an `on_retry(attempt, delay, &error)` hook called before each wait for
   logging or metrics. The existing `retry`/`retry_with_sleep`/`retry_async` are
-  unchanged and now delegate to the observed variants with a no-op hook.
-  Allocation-free, `no_std`, zero-dependency.
-- `typed_csv` example in the `reliakit` umbrella: derives `CsvEncode`/`CsvDecode`
-  via `reliakit::derive` and round-trips records through `reliakit::csv`
-  (run with `--features "csv derive"`).
-- Zero-dependency benchmark harness (`benches` crate) timing `json::parse` and
-  codec encode/decode with `std::time`; see `BENCHMARKS.md`.
-- `CsvField` impl for `char` in `reliakit-csv`, so a single character can be
-  used directly as a CSV row field alongside the existing primitive impls.
-- `CsvField` impl for `IpAddr`/`SocketAddr` types (including `V4`/`V6` forms)
-- Added a `deny.toml` so `cargo deny check` passes: it allows only the MIT
-  license, restricts dependencies to the crates.io registry, and rejects
-  duplicate versions and security-advisory or yanked crates.
-- Added a CI job that fails if any workspace crate gains a third-party
-  dependency (of any kind), enforcing the zero-dependency policy, and extended
-  the bare-metal `no_std` checks to cover every `no_std` crate. Added
-  `RELEASING.md` documenting the per-crate OIDC release flow.
-- Added a manual publish workflow for publishing one selected crate to
-  crates.io after tests, version checks, and `cargo publish --dry-run`.
-
-### Changed
-
-- Switched crates.io publishing to Trusted Publishing over GitHub Actions OIDC.
-  The tag-triggered and manual publish workflows now mint a short-lived token at
-  publish time instead of reading a stored API token, so no long-lived registry
-  token is kept in repository secrets.
-- Pointed the workspace `homepage` at `https://satyakwok.dev/projects/reliakit`,
-  separate from `repository`, which stays on GitHub. Each crate picks this up on
-  its next publish.
+  unchanged and delegate to these with a no-op hook. Allocation-free, `no_std`,
+  zero-dependency.
+- `reliakit-csv`: `CsvField` impls for `char` and for `IpAddr`/`SocketAddr`
+  (including the `V4`/`V6` forms).
+- A `typed_csv` example in the `reliakit` umbrella; a zero-dependency benchmark
+  harness (`benches`, see `BENCHMARKS.md`); a `deny.toml` and a zero-dependency
+  CI gate; bare-metal `no_std` checks for every `no_std` crate; and `RELEASING.md`.
 
 ## reliakit-primitives 0.5.0 - 2026-06-14
 

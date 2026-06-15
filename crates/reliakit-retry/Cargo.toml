@@ -1,6 +1,6 @@
 [package]
 name = "reliakit-retry"
-version = "0.1.0"
+version = "1.0.0"
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
@@ -22,7 +22,7 @@ default = ["std"]
 std = []
 
 [dependencies]
-reliakit-backoff = { path = "../reliakit-backoff", version = "0.1", default-features = false }
+reliakit-backoff = { path = "../reliakit-backoff", version = "1", default-features = false }
 
 [[example]]
 name = "basic_retry"

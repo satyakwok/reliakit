@@ -23,7 +23,11 @@ use crate::{Criticality, Health};
 /// // The cache is optional, so its failure only degrades the service.
 /// assert_eq!(aggregate(checks), Health::Degraded);
 /// ```
+/// `#[non_exhaustive]`: build a `Check` with [`Check::new`] and the builder
+/// methods rather than a struct literal, so fields can be added later without
+/// breaking callers.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[non_exhaustive]
 pub struct Check<'a> {
     /// The component name.
     pub name: &'a str,

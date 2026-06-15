@@ -47,21 +47,21 @@ calling it) use a circuit breaker; `reliakit-health` reports, it does not decide
 
 ```toml
 [dependencies]
-reliakit-health = "0.2"
+reliakit-health = "1.0"
 ```
 
 For `no_std` without allocation (core types + `aggregate` only):
 
 ```toml
 [dependencies]
-reliakit-health = { version = "0.2", default-features = false }
+reliakit-health = { version = "1.0", default-features = false }
 ```
 
 For `no_std` with the owned `HealthReport`:
 
 ```toml
 [dependencies]
-reliakit-health = { version = "0.2", default-features = false, features = ["alloc"] }
+reliakit-health = { version = "1.0", default-features = false, features = ["alloc"] }
 ```
 
 ## Example

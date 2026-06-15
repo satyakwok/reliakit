@@ -36,7 +36,7 @@ The crate has no dependencies and forbids unsafe code.
 
 ```toml
 [dependencies]
-reliakit-core = "0.1"
+reliakit-core = "1.0"
 ```
 
 Disable default features for `no_std`; `ManualClock` and the `Clock` trait work

@@ -49,14 +49,14 @@ no opinion about how you wait.
 
 ```toml
 [dependencies]
-reliakit-retry = "0.1"
+reliakit-retry = "1.0"
 ```
 
 For `no_std` (pure `core`, no `std::error::Error` impl):
 
 ```toml
 [dependencies]
-reliakit-retry = { version = "0.1", default-features = false }
+reliakit-retry = { version = "1.0", default-features = false }
 ```
 
 ## Basic sync example

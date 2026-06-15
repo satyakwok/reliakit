@@ -72,7 +72,7 @@ breaker simply stays open rather than panicking.
 
 ```toml
 [dependencies]
-reliakit-circuit = "0.2"
+reliakit-circuit = "1.0"
 ```
 
 This crate is `#![no_std]` with no required dependencies. It has one optional

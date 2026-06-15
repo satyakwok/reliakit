@@ -49,7 +49,7 @@ with your runtime's timer or `select!` to actually abort work.
 
 ```toml
 [dependencies]
-reliakit-timeout = "0.1"
+reliakit-timeout = "1.0"
 ```
 
 This crate is `no_std` with no required dependencies. It has one optional

@@ -54,7 +54,7 @@ leading zeros, malformed numbers, and anything exceeding the configured limits.
 
 ```toml
 [dependencies]
-reliakit-json = "0.3"
+reliakit-json = "1.0"
 ```
 
 This crate is `no_std`-compatible (`default-features = false`); the default
@@ -164,7 +164,7 @@ escaping, and numbers use the shortest ECMAScript `Number.toString` form.
 
 ```toml
 [dependencies]
-reliakit-json = { version = "0.3", features = ["canonical"] }
+reliakit-json = { version = "1.0", features = ["canonical"] }
 ```
 
 ```rust
@@ -200,8 +200,8 @@ through a [`reliakit-primitives`](https://crates.io/crates/reliakit-primitives)
 validating constructor in one step. Failures carry the offending field's path.
 
 ```toml
-reliakit-json = { version = "0.3", features = ["primitives"] }
-reliakit-primitives = "0.5"
+reliakit-json = { version = "1.0", features = ["primitives"] }
+reliakit-primitives = "1.0"
 ```
 
 ```rust
@@ -225,8 +225,8 @@ The `validate` feature adds `JsonForm`, which collects every field failure into
 one `reliakit-validate` error instead of stopping at the first:
 
 ```toml
-reliakit-json = { version = "0.3", features = ["validate"] }
-reliakit-primitives = "0.5"
+reliakit-json = { version = "1.0", features = ["validate"] }
+reliakit-primitives = "1.0"
 ```
 
 ```rust

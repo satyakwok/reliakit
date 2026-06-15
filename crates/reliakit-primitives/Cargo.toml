@@ -1,6 +1,6 @@
 [package]
 name = "reliakit-primitives"
-version = "0.5.0"
+version = "1.0.0"
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
@@ -26,8 +26,8 @@ alloc = []
 # working together. These do not affect the runtime dependencies of the
 # published library, which remain zero.
 [dev-dependencies]
-reliakit-secret = { path = "../reliakit-secret", version = "0.1" }
-reliakit-validate = { path = "../reliakit-validate", version = "0.3" }
+reliakit-secret = { path = "../reliakit-secret" }
+reliakit-validate = { path = "../reliakit-validate" }
 
 [[example]]
 name = "primitives_basic"

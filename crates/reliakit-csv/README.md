@@ -60,14 +60,14 @@ not a best effort.
 
 ```toml
 [dependencies]
-reliakit-csv = "0.1"
+reliakit-csv = "1.0"
 ```
 
 For `no_std` with allocation:
 
 ```toml
 [dependencies]
-reliakit-csv = { version = "0.1", default-features = false, features = ["alloc"] }
+reliakit-csv = { version = "1.0", default-features = false, features = ["alloc"] }
 ```
 
 ## Example

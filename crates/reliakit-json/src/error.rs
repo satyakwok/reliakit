@@ -87,6 +87,9 @@ pub enum JsonErrorKind {
 }
 
 /// One segment of a [`JsonPath`].
+///
+/// A JSON location is always either an object member or an array element, so
+/// this enum is intentionally exhaustive — you can `match` it without a wildcard.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum JsonPathSegment {
     /// An object member name.
