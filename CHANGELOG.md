@@ -10,6 +10,11 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 
 ### Added
 
+- `reliakit-retry`: `retry_with_sleep_observed` and `retry_async_observed`, which
+  take an `on_retry(attempt, delay, &error)` hook called before each wait for
+  logging or metrics. The existing `retry`/`retry_with_sleep`/`retry_async` are
+  unchanged and now delegate to the observed variants with a no-op hook.
+  Allocation-free, `no_std`, zero-dependency.
 - `typed_csv` example in the `reliakit` umbrella: derives `CsvEncode`/`CsvDecode`
   via `reliakit::derive` and round-trips records through `reliakit::csv`
   (run with `--features "csv derive"`).

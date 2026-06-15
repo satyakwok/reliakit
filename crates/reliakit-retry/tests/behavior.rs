@@ -5,7 +5,10 @@ use core::future::Future;
 use core::task::{Context, Poll, Waker};
 use core::time::Duration;
 
-use reliakit_retry::{retry, retry_async, retry_with_sleep, Backoff, RetryError, RetryPolicy};
+use reliakit_retry::{
+    retry, retry_async, retry_async_observed, retry_with_sleep, retry_with_sleep_observed, Backoff,
+    RetryError, RetryPolicy,
+};
 
 /// Minimal executor: polls a future to completion on the current thread. The
 /// futures under test are always immediately ready, so this never spins.
@@ -289,6 +292,101 @@ fn retry_error_display_and_source() {
     assert!(
         err.source().is_some(),
         "the cause is exposed as the error source"
+    );
+}
+
+// on_retry hook records the (attempt, delay, error) sequence for a
+// fails-then-succeeds operation.
+#[test]
+fn observed_hook_records_retry_sequence() {
+    let policy = RetryPolicy::new(5, Backoff::exponential(Duration::from_millis(1), 2)).unwrap();
+    let mut seen: Vec<(u32, Duration, &str)> = Vec::new();
+    let mut calls = 0;
+    let result: Result<u32, RetryError<&str>> = retry_with_sleep_observed(
+        &policy,
+        || {
+            calls += 1;
+            if calls < 3 {
+                Err("temporary")
+            } else {
+                Ok(7)
+            }
+        },
+        |_| true,
+        |_delay| {},
+        |attempt, delay, error| seen.push((attempt, delay, *error)),
+    );
+    assert_eq!(result.unwrap(), 7);
+    assert_eq!(calls, 3);
+    // Fired before retries 2 and 3, with the backoff's delays for indices 0 and 1.
+    assert_eq!(
+        seen,
+        [
+            (1, Duration::from_millis(1), "temporary"),
+            (2, Duration::from_millis(2), "temporary"),
+        ]
+    );
+}
+
+// The hook fires for each retry but NOT for the final failure that exhausts
+// the policy.
+#[test]
+fn observed_hook_skips_exhausting_failure() {
+    let mut seen_attempts: Vec<u32> = Vec::new();
+    let result: Result<(), RetryError<u8>> = retry_with_sleep_observed(
+        &policy(3),
+        || Err(1u8),
+        |_| true,
+        |_| {},
+        |attempt, _delay, _error| seen_attempts.push(attempt),
+    );
+    assert!(matches!(
+        result,
+        Err(RetryError::Exhausted { attempts: 3, .. })
+    ));
+    // Three attempts, but the hook only precedes retries 2 and 3.
+    assert_eq!(seen_attempts, [1, 2]);
+}
+
+// No retry means no observation: a fatal error fails fast without the hook.
+#[test]
+fn observed_hook_not_called_when_not_retried() {
+    let mut count = 0;
+    let result: Result<(), RetryError<&str>> = retry_with_sleep_observed(
+        &policy(5),
+        || Err("fatal"),
+        |_| false,
+        |_| {},
+        |_, _, _| count += 1,
+    );
+    assert!(matches!(
+        result,
+        Err(RetryError::Exhausted { attempts: 1, .. })
+    ));
+    assert_eq!(count, 0, "an un-retried error must not be observed");
+}
+
+// The async observed driver records the same sequence, driven by the fake sleep.
+#[test]
+fn async_observed_hook_records_sequence() {
+    let mut seen: Vec<(u32, Duration)> = Vec::new();
+    let mut calls = 0;
+    let result: Result<u32, RetryError<&str>> = block_on(retry_async_observed(
+        &policy(5),
+        || {
+            calls += 1;
+            let outcome = if calls < 3 { Err("temp") } else { Ok(9) };
+            core::future::ready(outcome)
+        },
+        |_| true,
+        |_delay| core::future::ready(()),
+        |attempt, delay, _error| seen.push((attempt, delay)),
+    ));
+    assert_eq!(result.unwrap(), 9);
+    assert_eq!(calls, 3);
+    assert_eq!(
+        seen,
+        [(1, Duration::from_millis(5)), (2, Duration::from_millis(5)),]
     );
 }
 
