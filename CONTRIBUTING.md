@@ -112,9 +112,10 @@ Open an issue with:
 
 reliakit is currently led by a single maintainer, with decisions made in the open
 on issues and pull requests. The maintainer set grows from its contributors:
-sustained, high-quality work — several merged non-trivial PRs, good judgment about
-the project's constraints, and helpful participation in reviews — leads to an
-invitation to become a collaborator with review and merge rights. See
+sustained, high-quality work — a track record of merged non-trivial PRs (around
+five is a rough guide, not a quota), good judgment about the project's
+constraints, and helpful participation in reviews — leads to an invitation to
+become a collaborator with review and merge rights. See
 [GOVERNANCE.md](GOVERNANCE.md) for the full picture, including how and when the
 project will move to a GitHub organization.
 

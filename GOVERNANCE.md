@@ -23,12 +23,14 @@ a feature.
 The project grows its maintainer set from its contributors. There is no
 application form — it follows from sustained, high-quality work:
 
-- several merged non-trivial pull requests,
+- a track record of merged non-trivial pull requests — **around five** is a rough
+  guide, but it is a signal, not a quota,
 - good judgment about the project's constraints (the principles above), and
 - helpful, respectful participation in reviews and discussions.
 
-A contributor who consistently shows this will be invited to become a
-**collaborator** with review and merge rights. Maintainers are expected to uphold
+The number is deliberately soft: maintainership is about demonstrated trust and
+judgment, not a count to grind. A contributor who consistently shows this will be
+invited to become a **collaborator** with review and merge rights. Maintainers are expected to uphold
 the principles and the [Code of Conduct](CODE_OF_CONDUCT.md), and to merge only
 changes that meet the project's bar.
 
