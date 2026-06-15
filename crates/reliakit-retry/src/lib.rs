@@ -91,6 +91,39 @@
 //! For the async helper, see [`retry_async`] and the `async_retry` example,
 //! which drives it without any runtime.
 //!
+//! # Observing retries
+//!
+//! To log or count retries, use [`retry_with_sleep_observed`] (or
+//! [`retry_async_observed`]). They take the same arguments plus an
+//! `on_retry: FnMut(u32, Duration, &E)` hook called just before each wait, with
+//! the failed attempt's number, the delay about to be waited, and the error that
+//! triggered the retry. It fires only when another attempt will be made — not on
+//! success, and not on the final failure that exhausts the policy — and it
+//! allocates nothing. The crate still does no logging itself; the hook is yours.
+//!
+//! ```
+//! use core::time::Duration;
+//! use reliakit_retry::{retry_with_sleep_observed, Backoff, RetryError, RetryPolicy};
+//!
+//! let policy = RetryPolicy::new(3, Backoff::constant(Duration::from_millis(10))).unwrap();
+//!
+//! let mut seen: Vec<(u32, Duration)> = Vec::new();
+//! let mut calls = 0;
+//! let result: Result<u32, RetryError<&str>> = retry_with_sleep_observed(
+//!     &policy,
+//!     || {
+//!         calls += 1;
+//!         if calls < 2 { Err("temporary") } else { Ok(42) }
+//!     },
+//!     |_error| true,
+//!     |_delay| {},                       // your sleeper
+//!     |attempt, delay, _error| seen.push((attempt, delay)),
+//! );
+//!
+//! assert_eq!(result.unwrap(), 42);
+//! assert_eq!(seen, [(1, Duration::from_millis(10))]); // observed the one retry
+//! ```
+//!
 //! # Feature flags
 //!
 //! - `std` (default) adds `impl std::error::Error for RetryError`. With
@@ -113,7 +146,9 @@ mod retry;
 
 pub use error::RetryError;
 pub use policy::RetryPolicy;
-pub use retry::{retry, retry_async, retry_with_sleep};
+pub use retry::{
+    retry, retry_async, retry_async_observed, retry_with_sleep, retry_with_sleep_observed,
+};
 
 /// Re-exported from `reliakit-backoff` so the backoff schedule is reachable
 /// without a separate dependency line.

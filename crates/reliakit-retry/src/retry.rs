@@ -48,14 +48,46 @@ where
 /// `max_attempts` limit was reached or `should_retry` returned `false`.
 pub fn retry_with_sleep<T, E, Op, ShouldRetry, Sleep>(
     policy: &RetryPolicy,
-    mut op: Op,
-    mut should_retry: ShouldRetry,
-    mut sleep: Sleep,
+    op: Op,
+    should_retry: ShouldRetry,
+    sleep: Sleep,
 ) -> Result<T, RetryError<E>>
 where
     Op: FnMut() -> Result<T, E>,
     ShouldRetry: FnMut(&E) -> bool,
     Sleep: FnMut(Duration),
+{
+    retry_with_sleep_observed(policy, op, should_retry, sleep, |_, _, _| {})
+}
+
+/// Like [`retry_with_sleep`], but also calls `on_retry` just before each wait.
+///
+/// `on_retry` receives the number of the attempt that just failed, the
+/// [`Duration`] that is about to be waited, and a reference to the error that
+/// triggered the retry. It runs only when another attempt will actually be made:
+/// not on success, and not on the final failure that exhausts the policy. Use it
+/// for logging or metrics — the crate itself still logs nothing and allocates
+/// nothing.
+///
+/// To observe the no-sleep driver, pass a no-op sleeper:
+/// `retry_with_sleep_observed(policy, op, should_retry, |_| {}, on_retry)`.
+///
+/// # Errors
+///
+/// Returns [`RetryError::Exhausted`] when no attempt succeeds — either the
+/// `max_attempts` limit was reached or `should_retry` returned `false`.
+pub fn retry_with_sleep_observed<T, E, Op, ShouldRetry, Sleep, OnRetry>(
+    policy: &RetryPolicy,
+    mut op: Op,
+    mut should_retry: ShouldRetry,
+    mut sleep: Sleep,
+    mut on_retry: OnRetry,
+) -> Result<T, RetryError<E>>
+where
+    Op: FnMut() -> Result<T, E>,
+    ShouldRetry: FnMut(&E) -> bool,
+    Sleep: FnMut(Duration),
+    OnRetry: FnMut(u32, Duration, &E),
 {
     let mut attempt: u32 = 0;
     loop {
@@ -69,7 +101,9 @@ where
                         last_error: error,
                     });
                 }
-                sleep(policy.delay_before_retry(attempt));
+                let delay = policy.delay_before_retry(attempt);
+                on_retry(attempt, delay, &error);
+                sleep(delay);
             }
         }
     }
@@ -90,9 +124,9 @@ where
 /// `max_attempts` limit was reached or `should_retry` returned `false`.
 pub async fn retry_async<T, E, Op, Fut, ShouldRetry, Sleep, SleepFut>(
     policy: &RetryPolicy,
-    mut op: Op,
-    mut should_retry: ShouldRetry,
-    mut sleep: Sleep,
+    op: Op,
+    should_retry: ShouldRetry,
+    sleep: Sleep,
 ) -> Result<T, RetryError<E>>
 where
     Op: FnMut() -> Fut,
@@ -100,6 +134,38 @@ where
     ShouldRetry: FnMut(&E) -> bool,
     Sleep: FnMut(Duration) -> SleepFut,
     SleepFut: Future<Output = ()>,
+{
+    retry_async_observed(policy, op, should_retry, sleep, |_, _, _| {}).await
+}
+
+/// Like [`retry_async`], but also calls `on_retry` just before awaiting each
+/// wait.
+///
+/// `on_retry` receives the number of the attempt that just failed, the
+/// [`Duration`] about to be awaited, and a reference to the error that triggered
+/// the retry. It runs only when another attempt will actually be made, and is a
+/// plain (non-async) `FnMut`, so it cannot accidentally introduce hidden awaits.
+/// Use it for logging or metrics; the crate still logs nothing and allocates
+/// nothing.
+///
+/// # Errors
+///
+/// Returns [`RetryError::Exhausted`] when no attempt succeeds — either the
+/// `max_attempts` limit was reached or `should_retry` returned `false`.
+pub async fn retry_async_observed<T, E, Op, Fut, ShouldRetry, Sleep, SleepFut, OnRetry>(
+    policy: &RetryPolicy,
+    mut op: Op,
+    mut should_retry: ShouldRetry,
+    mut sleep: Sleep,
+    mut on_retry: OnRetry,
+) -> Result<T, RetryError<E>>
+where
+    Op: FnMut() -> Fut,
+    Fut: Future<Output = Result<T, E>>,
+    ShouldRetry: FnMut(&E) -> bool,
+    Sleep: FnMut(Duration) -> SleepFut,
+    SleepFut: Future<Output = ()>,
+    OnRetry: FnMut(u32, Duration, &E),
 {
     let mut attempt: u32 = 0;
     loop {
@@ -113,7 +179,9 @@ where
                         last_error: error,
                     });
                 }
-                sleep(policy.delay_before_retry(attempt)).await;
+                let delay = policy.delay_before_retry(attempt);
+                on_retry(attempt, delay, &error);
+                sleep(delay).await;
             }
         }
     }

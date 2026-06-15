@@ -119,6 +119,38 @@ assert_eq!(result.unwrap(), 200);
 async-std, or `futures`. The `async_retry` example shows it running under a tiny
 in-file executor with no runtime at all.
 
+## Observing retries (logging, metrics)
+
+To watch retries without changing the basic calls, use `retry_with_sleep_observed`
+or `retry_async_observed`. They take the same arguments plus an
+`on_retry: FnMut(u32, Duration, &E)` hook called just before each wait, with the
+failed attempt's number, the delay about to be waited, and the error that
+triggered the retry:
+
+```rust
+use core::time::Duration;
+use reliakit_retry::{retry_with_sleep_observed, Backoff, RetryError, RetryPolicy};
+
+let policy = RetryPolicy::new(3, Backoff::constant(Duration::from_millis(10))).unwrap();
+
+let mut calls = 0;
+let result: Result<u32, RetryError<&str>> = retry_with_sleep_observed(
+    &policy,
+    || { calls += 1; if calls < 2 { Err("temporary") } else { Ok(42) } },
+    |_error| true,
+    |_delay| {},                                   // your sleeper
+    |attempt, delay, error| {
+        eprintln!("retry #{attempt} after {delay:?}: {error}");
+    },
+);
+assert_eq!(result.unwrap(), 42);
+```
+
+The hook fires only when another attempt will be made — not on success, and not
+on the final failure that exhausts the policy — and it **allocates nothing**. The
+crate still does no logging itself; the hook is yours. (To observe the no-sleep
+driver, pass a no-op sleeper.)
+
 ## Attempt counting
 
 `max_attempts` is the **total** number of attempts, including the first:
