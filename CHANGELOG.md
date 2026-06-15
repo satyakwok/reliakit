@@ -10,6 +10,11 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 
 ### Added
 
+- `typed_csv` example in the `reliakit` umbrella: derives `CsvEncode`/`CsvDecode`
+  via `reliakit::derive` and round-trips records through `reliakit::csv`
+  (run with `--features "csv derive"`).
+- Zero-dependency benchmark harness (`benches` crate) timing `json::parse` and
+  codec encode/decode with `std::time`; see `BENCHMARKS.md`.
 - `CsvField` impl for `char` in `reliakit-csv`, so a single character can be
   used directly as a CSV row field alongside the existing primitive impls.
 - `CsvField` impl for `IpAddr`/`SocketAddr` types (including `V4`/`V6` forms)

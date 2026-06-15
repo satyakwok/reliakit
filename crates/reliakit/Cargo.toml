@@ -134,3 +134,8 @@ required-features = ["primitives", "validate", "secret"]
 name = "typed_json"
 path = "examples/typed_json.rs"
 required-features = ["json", "primitives"]
+
+[[example]]
+name = "typed_csv"
+path = "examples/typed_csv.rs"
+required-features = ["csv", "derive"]

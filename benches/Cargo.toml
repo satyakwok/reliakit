@@ -1,0 +1,22 @@
+# Internal, unpublished benchmark harness. Zero third-party dependencies: it
+# times the serialization crates with std::time and std::hint::black_box, so it
+# does not pull in criterion or any other bench framework.
+[package]
+name = "reliakit-benches"
+version = "0.0.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[[bench]]
+name = "serialization"
+path = "serialization.rs"
+harness = false
+
+[dependencies]
+reliakit-json = { path = "../crates/reliakit-json" }
+reliakit-codec = { path = "../crates/reliakit-codec" }
