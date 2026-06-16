@@ -33,6 +33,41 @@ other `reliakit-*` crates — a CI check fails the build if any third-party
 dependency appears), `#![forbid(unsafe_code)]`, and usable on its own. You adopt
 **one crate at a time**, not a framework.
 
+## 30-second example
+
+Retry a flaky operation with backoff — no runtime, no sleeping, no third-party
+dependencies:
+
+```rust
+use core::time::Duration;
+use reliakit_retry::{retry, Backoff, RetryError, RetryPolicy};
+
+let policy = RetryPolicy::new(3, Backoff::constant(Duration::from_millis(10))).unwrap();
+let mut calls = 0;
+let result: Result<u32, RetryError<&str>> = retry(
+    &policy,
+    || {
+        calls += 1;
+        if calls < 2 { Err("temporary") } else { Ok(42) }
+    },
+    |_error| true, // retry every error
+);
+assert_eq!(result.unwrap(), 42);
+```
+
+```toml
+[dependencies]
+reliakit-retry = "1"
+```
+
+## How it's different
+
+Reliakit is **zero third-party dependencies, `no_std`, and runtime-agnostic**. No
+async runtime is baked in and nothing sleeps on its own — you inject the clock or
+sleeper, so the same code runs synchronously, under any async runtime, or in a
+test with no real time. You provide the time source; in return the code stays
+dependency-free, portable to embedded targets, and deterministic to test.
+
 ## Why Reliakit?
 
 - **Validate once, at the boundary.** Construct a typed value where data enters
