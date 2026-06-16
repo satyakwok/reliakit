@@ -6,8 +6,8 @@
 //! `no_std` / embedded contexts, with deterministic, exact-byte-style tests.
 //!
 //! The core type is [`Backoff`]: a small, `Copy` policy describing a base delay,
-//! a growth strategy (constant, linear, or exponential), an optional maximum
-//! delay, and an optional retry limit. [`Backoff::delay`] maps a zero-based
+//! a growth strategy (constant, linear, exponential, or Fibonacci), an optional
+//! maximum delay, and an optional retry limit. [`Backoff::delay`] maps a zero-based
 //! attempt number to the delay to wait before that retry, or `None` once the
 //! retry limit is reached.
 //!
@@ -60,13 +60,16 @@ enum Kind {
     Linear { step: Duration },
     /// `base * factor^attempt`.
     Exponential { factor: u32 },
+    /// `base * fib(attempt)`, with the Fibonacci sequence `1, 1, 2, 3, 5, 8, ...`.
+    Fibonacci,
 }
 
 /// A retry backoff policy.
 ///
 /// `Backoff` is a small, `Copy` value. Construct one with [`Backoff::constant`],
-/// [`Backoff::linear`], or [`Backoff::exponential`], then optionally cap it with
-/// [`Backoff::with_max_delay`] and [`Backoff::with_max_retries`].
+/// [`Backoff::linear`], [`Backoff::exponential`], or [`Backoff::fibonacci`], then
+/// optionally cap it with [`Backoff::with_max_delay`] and
+/// [`Backoff::with_max_retries`].
 ///
 /// [`Backoff::delay`] takes a zero-based attempt number (attempt `0` is the wait
 /// before the first retry) and returns the delay, or `None` when the retry limit
@@ -108,6 +111,20 @@ impl Backoff {
         Self {
             base,
             kind: Kind::Exponential { factor },
+            max_delay: Duration::MAX,
+            max_retries: None,
+        }
+    }
+
+    /// A Fibonacci backoff: attempt `n` waits `base * fib(n)`, where `fib` is the
+    /// sequence `1, 1, 2, 3, 5, 8, ...`.
+    ///
+    /// So attempts `0` and `1` both wait `base`, then each delay is the sum of
+    /// the previous two — growth between linear and exponential.
+    pub const fn fibonacci(base: Duration) -> Self {
+        Self {
+            base,
+            kind: Kind::Fibonacci,
             max_delay: Duration::MAX,
             max_retries: None,
         }
@@ -182,6 +199,31 @@ impl Backoff {
                     }
                     delay
                 }
+            }
+            Kind::Fibonacci => {
+                // delay(n) = base * fib(n) with fib = 1, 1, 2, 3, 5, ... Because
+                // base * fib(n) = base * fib(n-1) + base * fib(n-2), the delays
+                // themselves satisfy d(n) = d(n-1) + d(n-2) with d(0) = d(1) =
+                // base — so this stays in `Duration` with no multiplier overflow.
+                let mut prev = self.base; // d(i-1)
+                let mut curr = self.base; // d(i), starting at i = 1 (also d(0))
+                let mut i: u32 = 1;
+                while i < attempt {
+                    if curr >= self.max_delay {
+                        curr = self.max_delay;
+                        break;
+                    }
+                    let next = prev.saturating_add(curr);
+                    if next == curr {
+                        // Saturated (or zero base): no further growth possible,
+                        // so stop instead of looping the full attempt count.
+                        break;
+                    }
+                    prev = curr;
+                    curr = next;
+                    i += 1;
+                }
+                curr
             }
         };
 
@@ -284,6 +326,43 @@ mod tests {
         let b = Backoff::exponential(MS(7), 1);
         assert_eq!(b.delay(0), Some(MS(7)));
         assert_eq!(b.delay(9), Some(MS(7)));
+    }
+
+    #[test]
+    fn fibonacci_follows_sequence() {
+        // multipliers 1, 1, 2, 3, 5, 8, 13
+        let b = Backoff::fibonacci(MS(10));
+        assert_eq!(b.delay(0), Some(MS(10)));
+        assert_eq!(b.delay(1), Some(MS(10)));
+        assert_eq!(b.delay(2), Some(MS(20)));
+        assert_eq!(b.delay(3), Some(MS(30)));
+        assert_eq!(b.delay(4), Some(MS(50)));
+        assert_eq!(b.delay(5), Some(MS(80)));
+        assert_eq!(b.delay(6), Some(MS(130)));
+    }
+
+    #[test]
+    fn fibonacci_max_delay_caps() {
+        let b = Backoff::fibonacci(MS(10)).with_max_delay(MS(50));
+        assert_eq!(b.delay(3), Some(MS(30)));
+        assert_eq!(b.delay(4), Some(MS(50))); // exactly at the cap
+        assert_eq!(b.delay(5), Some(MS(50))); // 80 capped to 50
+        assert_eq!(b.delay(100), Some(MS(50)));
+    }
+
+    #[test]
+    fn fibonacci_huge_attempt_saturates_without_hanging() {
+        // The delays grow fast and saturate within ~140 steps, so delay(u32::MAX)
+        // must return promptly rather than loop billions of times.
+        let b = Backoff::fibonacci(Duration::from_secs(1));
+        assert_eq!(b.delay(u32::MAX), Some(Duration::MAX));
+    }
+
+    #[test]
+    fn fibonacci_zero_base_does_not_hang() {
+        let b = Backoff::fibonacci(Duration::ZERO);
+        assert_eq!(b.delay(0), Some(Duration::ZERO));
+        assert_eq!(b.delay(u32::MAX), Some(Duration::ZERO));
     }
 
     #[test]

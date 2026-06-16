@@ -6,6 +6,15 @@ This project follows normal Rust crate versioning. Crate releases may use a
 workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 `CRATE-vMAJOR.MINOR.PATCH`.
 
+## Unreleased
+
+### Added
+
+- `reliakit-backoff`: `Backoff::fibonacci(base)` — a Fibonacci backoff schedule
+  where attempt `n` waits `base * fib(n)` (`1, 1, 2, 3, 5, 8, ...`), growth
+  between linear and exponential. Saturating and bounded like the other
+  strategies (ships as `reliakit-backoff` 1.1.0).
+
 ## 1.0.0 - 2026-06-15
 
 All crates are promoted to **1.0.0**: their public APIs are now stable and follow

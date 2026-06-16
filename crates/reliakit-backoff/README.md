@@ -24,7 +24,7 @@ The crate has no dependencies, is `#![no_std]`, and forbids unsafe code.
 ## What This Crate Does
 
 - `Backoff` — a small `Copy` policy: a base delay, a growth strategy (constant,
-  linear, or exponential), an optional maximum delay, and an optional retry
+  linear, exponential, or Fibonacci), an optional maximum delay, and an optional retry
   limit.
 - `Backoff::delay(attempt)` — maps a zero-based attempt number to the delay to
   wait, or `None` once the retry limit is reached. All arithmetic saturates, so
@@ -79,6 +79,7 @@ for base in policy.delays() {
 | `Backoff::constant(base)` | `base` |
 | `Backoff::linear(base, step)` | `base + step * n` |
 | `Backoff::exponential(base, factor)` | `base * factor^n` |
+| `Backoff::fibonacci(base)` | `base * fib(n)` (`1, 1, 2, 3, 5, 8, ...`) |
 
 All are clamped to `with_max_delay(..)` and stop at `with_max_retries(..)`.
 `factor` is an integer multiplier (e.g. `2` doubles each attempt).
