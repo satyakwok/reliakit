@@ -177,4 +177,11 @@ mod tests {
         let j = full_jitter(huge, u32::MAX / 4);
         assert!(j <= huge);
     }
+
+    #[test]
+    fn duration_from_nanos_saturates_past_u64_seconds() {
+        // A nanosecond count whose seconds exceed `u64::MAX` saturates to `Duration::MAX`
+        // instead of truncating.
+        assert_eq!(duration_from_nanos(u128::MAX), Duration::MAX);
+    }
 }
