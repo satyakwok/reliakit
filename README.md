@@ -62,13 +62,11 @@ reliakit-retry = "1"
 
 ## How it's different
 
-Most Rust retry and rate-limiting crates (`backoff`, `tokio-retry`, `governor`,
-`tower`) pull third-party dependencies and lean on an async runtime. Reliakit
-takes the opposite stance: **zero third-party dependencies, `no_std`, and
-runtime-agnostic** — you inject the clock or sleeper, so the same code runs sync,
-async, or in a test with no real time. You trade a little magic (you provide the
-time source) for code that stays dependency-free, portable, and deterministic to
-test.
+Reliakit is **zero third-party dependencies, `no_std`, and runtime-agnostic**. No
+async runtime is baked in and nothing sleeps on its own — you inject the clock or
+sleeper, so the same code runs synchronously, under any async runtime, or in a
+test with no real time. You provide the time source; in return the code stays
+dependency-free, portable to embedded targets, and deterministic to test.
 
 ## Why Reliakit?
 
