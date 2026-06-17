@@ -1071,6 +1071,23 @@ mod tests {
     }
 
     #[test]
+    fn json_rejects_enums() {
+        let parsed = ok_of(enum_raw(vec![unit_variant("A")], false, false));
+        assert!(
+            parsed
+                .json_encode_impl()
+                .unwrap_err()
+                .contains("does not support enums")
+        );
+        assert!(
+            parsed
+                .json_decode_impl()
+                .unwrap_err()
+                .contains("does not support enums")
+        );
+    }
+
+    #[test]
     fn csv_named_struct_builds_methods() {
         let body = Body::Struct(Shape::Named(vec!["id".to_string(), "r#type".to_string()]));
         let fields = csv_named_fields(&body, "CsvEncode").expect("named struct accepted");
