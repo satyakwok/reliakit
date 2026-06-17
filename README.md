@@ -413,10 +413,10 @@ reliakit targets **Rust 1.85**, the minimum required by the 2024 edition.
 The MSRV is pinned at this floor, the lowest edition 2024 allows, so the crates
 remain usable as low-level dependencies. It is verified in CI.
 
-Raising the MSRV is treated as a **breaking change**: it ships with a version
-bump (a minor bump while a crate is pre-1.0, a major bump once it is 1.0) and is
-noted in the changelog. It is never raised silently in a patch release, so
-pinning a crate version keeps it building on the Rust it shipped with.
+Raising the MSRV is treated as a **breaking change**: it ships with a major
+version bump and is noted in the changelog. It is never raised silently in a
+patch release, so pinning a crate version keeps it building on the Rust it
+shipped with.
 
 ## Contributing
 
