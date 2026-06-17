@@ -11,6 +11,7 @@ secrets, bounded inputs, deterministic data, and runtime-agnostic resilience —
 [![CI](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml/badge.svg)](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/satyakwok/reliakit/branch/main/graph/badge.svg)](https://codecov.io/gh/satyakwok/reliakit)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![MSRV: Rust 1.85](https://img.shields.io/badge/MSRV-Rust%201.85-blue.svg)](#minimum-supported-rust-version-msrv)
 [![zero dependencies](https://img.shields.io/badge/dependencies-0-success)](#footprint)
 [![GitHub stars](https://img.shields.io/github/stars/satyakwok/reliakit?style=flat)](https://github.com/satyakwok/reliakit/stargazers)
 [![Last commit](https://img.shields.io/github/last-commit/satyakwok/reliakit)](https://github.com/satyakwok/reliakit/commits/main)
@@ -406,15 +407,15 @@ crate — check each crate's README for the exact flags.
   host, so the usual `no_std`/`alloc` discussion does not apply to it; the code
   it generates inherits the `no_std` support of the trait crate.
 
-## Minimum supported Rust version
+## Minimum Supported Rust Version (MSRV)
 
-The MSRV is **Rust 1.85**, declared as `rust-version` on every crate and checked
-in CI on each change (the build is compiled with 1.85, not just the latest
-stable). No nightly or unstable features are used.
+reliakit targets **Rust 1.85**, the minimum required by the 2024 edition.
+The MSRV is pinned at this floor, the lowest edition 2024 allows, so the crates
+remain usable as low-level dependencies. It is verified in CI.
 
 Raising the MSRV is treated as a **breaking change**: it ships with a version
 bump (a minor bump while a crate is pre-1.0, a major bump once it is 1.0) and is
-noted in the changelog — it is never raised silently in a patch release. So
+noted in the changelog. It is never raised silently in a patch release, so
 pinning a crate version keeps it building on the Rust it shipped with.
 
 ## Contributing
