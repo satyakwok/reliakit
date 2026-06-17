@@ -57,6 +57,18 @@ jobs:
       - name: Clippy
         run: cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
 
+      # Lint every crate with its default features disabled so a no_std build path
+      # cannot regress with a warning that the all-features pass would hide.
+      - name: Clippy (no default features)
+        run: |
+          for pkg in $(cargo metadata --no-deps --format-version 1 \
+            | tr ',' '\n' | grep -oE '"reliakit[a-z-]*"' | tr -d '"' \
+            | sort -u | grep -v '^reliakit-benches$'); do
+            echo "::group::clippy --no-default-features -p $pkg"
+            cargo clippy -p "$pkg" --no-default-features --locked -- -D warnings
+            echo "::endgroup::"
+          done
+
   msrv:
     name: MSRV
     runs-on: ubuntu-latest

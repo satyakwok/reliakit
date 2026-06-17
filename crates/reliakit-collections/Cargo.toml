@@ -25,6 +25,7 @@ alloc = []
 [[example]]
 name = "collections_basic"
 path = "examples/basic.rs"
+required-features = ["alloc"]
 
 [lints]
 workspace = true

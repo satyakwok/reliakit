@@ -24,6 +24,7 @@ std = []
 [[example]]
 name = "clock_basic"
 path = "examples/basic.rs"
+required-features = ["std"]
 
 [lints]
 workspace = true
