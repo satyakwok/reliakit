@@ -323,23 +323,23 @@ supported Rust version is **1.85**.
 
 | Crate | Purpose | Use when | Status |
 |---|---|---|---|
-| [`reliakit-primitives`](https://crates.io/crates/reliakit-primitives) | Validated primitive types | You want `Email`, `Port`, `Percent`, `BoundedStr`, … instead of unchecked strings/numbers. | Published (pre-1.0) |
-| [`reliakit-secret`](https://crates.io/crates/reliakit-secret) | Secret redaction wrappers | A value must not leak through `Debug`/`Display`/logs. | Published (pre-1.0) |
-| [`reliakit-validate`](https://crates.io/crates/reliakit-validate) | Validation trait + error aggregation | You want to collect every field error at once. | Published (pre-1.0) |
-| [`reliakit-collections`](https://crates.io/crates/reliakit-collections) | Bounded collection types | A collection must stay within a fixed size range. | Published (pre-1.0) |
-| [`reliakit-codec`](https://crates.io/crates/reliakit-codec) | Canonical binary encoding/decoding | You need deterministic bytes (cache keys, fixtures, framing). | Published (pre-1.0) |
-| [`reliakit-json`](https://crates.io/crates/reliakit-json) | Strict, deterministic JSON + typed encode/decode | You parse untrusted JSON or need predictable output. | Published (pre-1.0) |
-| [`reliakit-csv`](https://crates.io/crates/reliakit-csv) | Strict, deterministic CSV + typed encode/decode | You parse untrusted CSV or need reproducible output. | Published (pre-1.0) |
-| [`reliakit-backoff`](https://crates.io/crates/reliakit-backoff) | Retry backoff delays + jitter | You retry an operation and want explicit spacing. | Published (pre-1.0) |
-| [`reliakit-retry`](https://crates.io/crates/reliakit-retry) | Runtime-agnostic retry helper (sync + async) | You retry fallible operations and want attempt limits, backoff, and an error classifier without forcing a runtime. | Published (pre-1.0) |
-| [`reliakit-bulkhead`](https://crates.io/crates/reliakit-bulkhead) | Concurrency limiter (counting semaphore) | You cap how many operations run at once and shed the rest. | Published (pre-1.0) |
-| [`reliakit-health`](https://crates.io/crates/reliakit-health) | Health status + criticality-aware aggregator | You expose a `/health`/`readyz` endpoint or status page. | Published (pre-1.0) |
-| [`reliakit-circuit`](https://crates.io/crates/reliakit-circuit) | Circuit breaker state machine | You want to stop calling a failing dependency. | Published (pre-1.0) |
-| [`reliakit-ratelimit`](https://crates.io/crates/reliakit-ratelimit) | Token-bucket rate limiter | You cap how often something may happen. | Published (pre-1.0) |
-| [`reliakit-timeout`](https://crates.io/crates/reliakit-timeout) | Deadlines / time budgets | You track whether a budget has run out. | Published (pre-1.0) |
-| [`reliakit-core`](https://crates.io/crates/reliakit-core) | Shared `Clock` trait + clocks | You want a ready-made `u64` time source for the resilience crates. | Published (pre-1.0) |
-| [`reliakit-derive`](https://crates.io/crates/reliakit-derive) | Derive macros for codec + JSON traits | You want `#[derive(...)]` instead of hand-writing encode/decode. | Published (pre-1.0) |
-| [`reliakit-decide`](https://crates.io/crates/reliakit-decide) | Deterministic utility decision engine | You want graded, explainable, testable decisions (routing, selection, when to call an LLM). | Published (pre-1.0) |
+| [`reliakit-primitives`](https://crates.io/crates/reliakit-primitives) | Validated primitive types | You want `Email`, `Port`, `Percent`, `BoundedStr`, … instead of unchecked strings/numbers. | Published (1.0) |
+| [`reliakit-secret`](https://crates.io/crates/reliakit-secret) | Secret redaction wrappers | A value must not leak through `Debug`/`Display`/logs. | Published (1.0) |
+| [`reliakit-validate`](https://crates.io/crates/reliakit-validate) | Validation trait + error aggregation | You want to collect every field error at once. | Published (1.0) |
+| [`reliakit-collections`](https://crates.io/crates/reliakit-collections) | Bounded collection types | A collection must stay within a fixed size range. | Published (1.0) |
+| [`reliakit-codec`](https://crates.io/crates/reliakit-codec) | Canonical binary encoding/decoding | You need deterministic bytes (cache keys, fixtures, framing). | Published (1.0) |
+| [`reliakit-json`](https://crates.io/crates/reliakit-json) | Strict, deterministic JSON + typed encode/decode | You parse untrusted JSON or need predictable output. | Published (1.0) |
+| [`reliakit-csv`](https://crates.io/crates/reliakit-csv) | Strict, deterministic CSV + typed encode/decode | You parse untrusted CSV or need reproducible output. | Published (1.0) |
+| [`reliakit-backoff`](https://crates.io/crates/reliakit-backoff) | Retry backoff delays + jitter | You retry an operation and want explicit spacing. | Published (1.0) |
+| [`reliakit-retry`](https://crates.io/crates/reliakit-retry) | Runtime-agnostic retry helper (sync + async) | You retry fallible operations and want attempt limits, backoff, and an error classifier without forcing a runtime. | Published (1.0) |
+| [`reliakit-bulkhead`](https://crates.io/crates/reliakit-bulkhead) | Concurrency limiter (counting semaphore) | You cap how many operations run at once and shed the rest. | Published (1.0) |
+| [`reliakit-health`](https://crates.io/crates/reliakit-health) | Health status + criticality-aware aggregator | You expose a `/health`/`readyz` endpoint or status page. | Published (1.0) |
+| [`reliakit-circuit`](https://crates.io/crates/reliakit-circuit) | Circuit breaker state machine | You want to stop calling a failing dependency. | Published (1.0) |
+| [`reliakit-ratelimit`](https://crates.io/crates/reliakit-ratelimit) | Token-bucket rate limiter | You cap how often something may happen. | Published (1.0) |
+| [`reliakit-timeout`](https://crates.io/crates/reliakit-timeout) | Deadlines / time budgets | You track whether a budget has run out. | Published (1.0) |
+| [`reliakit-core`](https://crates.io/crates/reliakit-core) | Shared `Clock` trait + clocks | You want a ready-made `u64` time source for the resilience crates. | Published (1.0) |
+| [`reliakit-derive`](https://crates.io/crates/reliakit-derive) | Derive macros for codec + JSON traits | You want `#[derive(...)]` instead of hand-writing encode/decode. | Published (1.0) |
+| [`reliakit-decide`](https://crates.io/crates/reliakit-decide) | Deterministic utility decision engine | You want graded, explainable, testable decisions (routing, selection, when to call an LLM). | Published (1.0) |
 
 The resilience crates (`backoff`, `bulkhead`, `circuit`, `ratelimit`, `timeout`)
 are **clock-agnostic** — you pass the time in (where they need it), so they

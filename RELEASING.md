@@ -8,9 +8,10 @@ independently.
 - **Zero third-party dependencies.** Every crate depends only on the standard
   library and on other `reliakit-*` crates. CI enforces this (the "Zero
   dependencies" job); never add an external crate to pass a release.
-- **Semantic versioning.** Crates are pre-1.0, so a breaking change bumps the
-  minor (`0.2.x` → `0.3.0`) and a backward-compatible change bumps the patch
-  (`0.2.0` → `0.2.1`).
+- **Semantic versioning.** Crates are 1.0, so a backward-compatible addition
+  bumps the minor (`1.0.x` → `1.1.0`), a fix bumps the patch (`1.0.0` →
+  `1.0.1`), and a breaking change bumps the major (`1.x` → `2.0.0`) and is
+  avoided.
 - Publishing uses **crates.io Trusted Publishing over GitHub Actions OIDC**;
   there is no API token stored in the repository.
 

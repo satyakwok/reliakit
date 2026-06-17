@@ -72,9 +72,8 @@ Rust `1.85` and newer. No nightly features are used.
 
 ## Status
 
-Published to crates.io and pre-1.0. The crate is intentionally minimal — a
-`Clock` trait plus two clocks — and its API may receive backward-compatible
-refinements before a `1.0` release.
+Published to crates.io at `1.0`. The crate is intentionally minimal: a `Clock`
+trait plus two clocks. Further changes will be additive under semver.
 
 ## License
 

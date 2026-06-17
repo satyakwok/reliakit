@@ -115,8 +115,8 @@ Rust `1.85` and newer. No nightly features are used.
 
 ## Status
 
-Published to crates.io and pre-1.0. The API is small and stable; it may receive
-backward-compatible refinements before a `1.0` release.
+Published to crates.io at `1.0`. The API is small and stable; further changes
+will be additive under semver.
 
 ## License
 
