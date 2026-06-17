@@ -255,6 +255,8 @@ fn retry_error_accessors() {
 }
 
 // RetryError Display and std::error::Error::source.
+// `source` exists only when the `std` feature enables the `Error` impl.
+#[cfg(feature = "std")]
 #[test]
 fn retry_error_display_and_source() {
     use std::error::Error;
