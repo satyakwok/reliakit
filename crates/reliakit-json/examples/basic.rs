@@ -4,7 +4,7 @@
 //! cargo run -p reliakit-json --example basic
 //! ```
 
-use reliakit_json::{parse_with_limits, to_compact_string, JsonLimits, JsonValue};
+use reliakit_json::{JsonLimits, JsonValue, parse_with_limits, to_compact_string};
 
 fn main() {
     // Treat this as untrusted input: parse under a conservative limit profile.

@@ -12,7 +12,7 @@
 //! cargo run -p reliakit --example typed_json --features "json primitives"
 //! ```
 
-use reliakit::json::{parse_with_limits, JsonLimits, JsonValue};
+use reliakit::json::{JsonLimits, JsonValue, parse_with_limits};
 use reliakit::primitives::{Hostname, Port};
 
 fn main() {

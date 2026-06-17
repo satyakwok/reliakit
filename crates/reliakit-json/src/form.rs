@@ -29,8 +29,8 @@
 use reliakit_primitives::PrimitiveError;
 use reliakit_validate::{ValidateResult, ValidationError, Violation};
 
-use crate::primitives::JsonExtractErrorKind;
 use crate::JsonObject;
+use crate::primitives::JsonExtractErrorKind;
 
 /// Accumulates field-extraction failures from a [`JsonObject`] into a single
 /// [`ValidationError`].

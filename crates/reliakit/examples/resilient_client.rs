@@ -31,7 +31,7 @@ use std::time::{Duration, Instant};
 use reliakit::backoff::Backoff;
 use reliakit::circuit::CircuitBreaker;
 use reliakit::ratelimit::RateLimiter;
-use reliakit::retry::{retry_with_sleep, RetryPolicy};
+use reliakit::retry::{RetryPolicy, retry_with_sleep};
 use reliakit::timeout::{Deadline, Timeout};
 
 /// Why a single guarded attempt did not succeed.

@@ -9,7 +9,7 @@
 
 use std::time::Duration;
 
-use reliakit_backoff::{full_jitter, Backoff};
+use reliakit_backoff::{Backoff, full_jitter};
 
 fn main() {
     // 100ms base, double each attempt, capped at 2s, up to 5 retries.

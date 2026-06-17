@@ -179,11 +179,7 @@ impl Deadline {
     /// Handy for bounding a backoff delay by the time left in the budget.
     pub const fn clamp(&self, now: u64, duration: u64) -> u64 {
         let left = self.remaining(now);
-        if duration < left {
-            duration
-        } else {
-            left
-        }
+        if duration < left { duration } else { left }
     }
 }
 

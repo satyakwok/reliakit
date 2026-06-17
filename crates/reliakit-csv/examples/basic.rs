@@ -3,8 +3,8 @@
 //! Run with: `cargo run -p reliakit-csv --example csv_basic`
 
 use reliakit_csv::{
-    from_csv_str, read_str, to_csv_string, CsvDecode, CsvDecodeError, CsvEncode, CsvField,
-    CsvWriter,
+    CsvDecode, CsvDecodeError, CsvEncode, CsvField, CsvWriter, from_csv_str, read_str,
+    to_csv_string,
 };
 
 #[derive(Debug, PartialEq)]

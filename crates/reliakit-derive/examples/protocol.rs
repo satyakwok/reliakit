@@ -10,7 +10,7 @@
 //! cargo run -p reliakit-derive --example protocol
 //! ```
 
-use reliakit_codec::{decode_from_slice_exact, encode_to_vec, CodecErrorKind};
+use reliakit_codec::{CodecErrorKind, decode_from_slice_exact, encode_to_vec};
 use reliakit_derive::{CanonicalDecode, CanonicalEncode};
 
 #[derive(Debug, PartialEq, CanonicalEncode, CanonicalDecode)]

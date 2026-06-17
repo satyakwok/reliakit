@@ -1,6 +1,6 @@
 //! Tests for the `reliakit-csv` derives.
 
-use reliakit_csv::{from_csv_str, to_csv_string, CsvDecode, CsvDecodeErrorKind, CsvFromStrError};
+use reliakit_csv::{CsvDecode, CsvDecodeErrorKind, CsvFromStrError, from_csv_str, to_csv_string};
 use reliakit_derive::{CsvDecode, CsvEncode};
 
 #[derive(Debug, PartialEq, CsvEncode, CsvDecode)]

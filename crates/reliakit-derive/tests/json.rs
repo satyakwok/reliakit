@@ -1,7 +1,7 @@
 //! Tests for the `reliakit-json` derives.
 
 use reliakit_derive::{JsonDecode, JsonEncode};
-use reliakit_json::{from_json_str, to_json_string, JsonDecodeErrorKind, JsonFromStrError};
+use reliakit_json::{JsonDecodeErrorKind, JsonFromStrError, from_json_str, to_json_string};
 
 #[derive(Debug, PartialEq, JsonEncode, JsonDecode)]
 struct Point {

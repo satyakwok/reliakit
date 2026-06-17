@@ -6,8 +6,8 @@ use core::task::{Context, Poll, Waker};
 use core::time::Duration;
 
 use reliakit_retry::{
-    retry, retry_async, retry_async_observed, retry_with_sleep, retry_with_sleep_observed, Backoff,
-    RetryError, RetryPolicy,
+    Backoff, RetryError, RetryPolicy, retry, retry_async, retry_async_observed, retry_with_sleep,
+    retry_with_sleep_observed,
 };
 
 /// Minimal executor: polls a future to completion on the current thread. The
@@ -51,11 +51,7 @@ fn succeeds_after_retries() {
         &policy(5),
         || {
             calls += 1;
-            if calls < 3 {
-                Err("temporary")
-            } else {
-                Ok(99)
-            }
+            if calls < 3 { Err("temporary") } else { Ok(99) }
         },
         |_| true,
     );
@@ -114,11 +110,7 @@ fn should_retry_controls_continuation() {
         &policy(5),
         || {
             calls += 1;
-            if calls < 4 {
-                Err("transient")
-            } else {
-                Ok(1)
-            }
+            if calls < 4 { Err("transient") } else { Ok(1) }
         },
         |error| *error == "transient",
     );
@@ -263,6 +255,8 @@ fn retry_error_accessors() {
 }
 
 // RetryError Display and std::error::Error::source.
+// `source` exists only when the `std` feature enables the `Error` impl.
+#[cfg(feature = "std")]
 #[test]
 fn retry_error_display_and_source() {
     use std::error::Error;
@@ -306,11 +300,7 @@ fn observed_hook_records_retry_sequence() {
         &policy,
         || {
             calls += 1;
-            if calls < 3 {
-                Err("temporary")
-            } else {
-                Ok(7)
-            }
+            if calls < 3 { Err("temporary") } else { Ok(7) }
         },
         |_| true,
         |_delay| {},

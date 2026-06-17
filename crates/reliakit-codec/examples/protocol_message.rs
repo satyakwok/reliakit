@@ -1,6 +1,6 @@
 use reliakit_codec::{
-    decode_from_slice_exact, encode_to_vec, CanonicalDecode, CanonicalEncode, CodecError,
-    CodecErrorKind, DecodeSource, EncodeSink,
+    CanonicalDecode, CanonicalEncode, CodecError, CodecErrorKind, DecodeSource, EncodeSink,
+    decode_from_slice_exact, encode_to_vec,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]

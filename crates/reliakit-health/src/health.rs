@@ -31,20 +31,12 @@ impl Health {
     /// status. Use [`from_ok_or`](Health::from_ok_or) when a failure should only
     /// degrade.
     pub const fn from_ok(ok: bool) -> Self {
-        if ok {
-            Self::Healthy
-        } else {
-            Self::Unhealthy
-        }
+        if ok { Self::Healthy } else { Self::Unhealthy }
     }
 
     /// Maps `true` to [`Healthy`](Health::Healthy) and `false` to `on_failure`.
     pub const fn from_ok_or(ok: bool, on_failure: Health) -> Self {
-        if ok {
-            Self::Healthy
-        } else {
-            on_failure
-        }
+        if ok { Self::Healthy } else { on_failure }
     }
 
     /// Returns the more severe (worse) of two statuses.

@@ -145,8 +145,9 @@ pub use field::CsvField;
 pub use limits::CsvLimits;
 pub use reader::{read_str, read_str_with_limits};
 pub use record::{
-    from_csv_str, from_csv_str_headerless, from_csv_str_headerless_with_limits,
-    from_csv_str_with_limits, to_csv_string, to_csv_string_headerless, CsvDecode, CsvEncode,
+    CsvDecode, CsvEncode, from_csv_str, from_csv_str_headerless,
+    from_csv_str_headerless_with_limits, from_csv_str_with_limits, to_csv_string,
+    to_csv_string_headerless,
 };
 pub use writer::CsvWriter;
 

@@ -105,7 +105,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use super::{aggregate, Check};
+    use super::{Check, aggregate};
     use crate::{Criticality, Health};
 
     #[test]
