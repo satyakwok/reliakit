@@ -267,7 +267,7 @@ impl Parser<'_> {
                         CsvErrorKind::QuoteInUnquotedField,
                         record_index,
                         field_index,
-                    )
+                    );
                 }
                 Some(c) => {
                     self.push_field_byte(&mut buf, c, record_index, field_index)?;

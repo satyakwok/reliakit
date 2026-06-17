@@ -24,7 +24,7 @@ core = ["dep:reliakit-core"]
 [dependencies]
 reliakit-core = { path = "../reliakit-core", version = "1", optional = true, default-features = false }
 
-# Dev-only: used by the `resilient_client` example to show the resilience crates
+# Dev-only: used by the `circuit_resilient_client` example to show the resilience crates
 # working together. These do not affect the runtime dependencies of the
 # published library, which remain zero.
 [dev-dependencies]
@@ -36,8 +36,8 @@ name = "circuit_basic"
 path = "examples/basic.rs"
 
 [[example]]
-name = "resilient_client"
-path = "examples/resilient_client.rs"
+name = "circuit_resilient_client"
+path = "examples/circuit_resilient_client.rs"
 
 [lints]
 workspace = true

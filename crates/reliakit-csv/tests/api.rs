@@ -2,9 +2,9 @@
 //! `Display`, and builder methods that the format tests do not exercise.
 
 use reliakit_csv::{
-    from_csv_str, read_str, read_str_with_limits, CsvDecode, CsvDecodeError, CsvDecodeErrorKind,
-    CsvEncode, CsvError, CsvErrorKind, CsvField, CsvFromStrError, CsvLimitKind, CsvLimits,
-    CsvWriter,
+    CsvDecode, CsvDecodeError, CsvDecodeErrorKind, CsvEncode, CsvError, CsvErrorKind, CsvField,
+    CsvFromStrError, CsvLimitKind, CsvLimits, CsvWriter, from_csv_str, read_str,
+    read_str_with_limits,
 };
 
 #[derive(Debug)]

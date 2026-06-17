@@ -179,7 +179,7 @@ mod impls {
 
 #[cfg(all(test, feature = "primitives"))]
 mod tests {
-    use crate::{decode_from_slice_exact, encode_to_vec, CodecErrorKind};
+    use crate::{CodecErrorKind, decode_from_slice_exact, encode_to_vec};
     use alloc::string::ToString;
     use alloc::vec;
     use reliakit_primitives::{

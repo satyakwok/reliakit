@@ -4,7 +4,7 @@
 
 use core::time::Duration;
 
-use reliakit_retry::{retry_with_sleep, Backoff, RetryError, RetryPolicy};
+use reliakit_retry::{Backoff, RetryError, RetryPolicy, retry_with_sleep};
 
 #[derive(Debug)]
 enum ApiError {

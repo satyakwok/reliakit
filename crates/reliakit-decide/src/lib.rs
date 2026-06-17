@@ -748,7 +748,7 @@ mod tests {
         // one below stays in "a" (target 2499) and the boundary crosses to "b".
         assert_eq!(r.decide_weighted(1_073_741_823).unwrap().id, "a"); // target 2499 < 2500
         assert_eq!(r.decide_weighted(1_073_741_824).unwrap().id, "b"); // target 2500, crosses
-                                                                       // deterministic: the same rand always yields the same choice
+        // deterministic: the same rand always yields the same choice
         assert_eq!(
             r.decide_weighted(1_234_567).unwrap().id,
             r.decide_weighted(1_234_567).unwrap().id

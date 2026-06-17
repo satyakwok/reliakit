@@ -99,8 +99,8 @@ mod write;
 
 #[cfg(feature = "canonical")]
 pub use canonical::{to_canonical_string, to_canonical_vec};
-pub use decode::{from_json_str, JsonDecode};
-pub use encode::{to_json_string, to_json_vec, JsonEncode};
+pub use decode::{JsonDecode, from_json_str};
+pub use encode::{JsonEncode, to_json_string, to_json_vec};
 pub use error::{
     JsonDecodeError, JsonDecodeErrorKind, JsonError, JsonErrorKind, JsonFromStrError,
     JsonLimitKind, JsonNumberError, JsonPath, JsonPathSegment,
@@ -158,14 +158,15 @@ mod tests {
         let obj = value.as_object().unwrap();
         assert_eq!(obj.len(), 2);
         assert_eq!(obj.get("a").unwrap().as_array().unwrap().len(), 3);
-        assert!(obj
-            .get("b")
-            .unwrap()
-            .as_object()
-            .unwrap()
-            .get("c")
-            .unwrap()
-            .is_null());
+        assert!(
+            obj.get("b")
+                .unwrap()
+                .as_object()
+                .unwrap()
+                .get("c")
+                .unwrap()
+                .is_null()
+        );
     }
 
     #[test]
@@ -428,9 +429,11 @@ mod tests {
     #[test]
     fn object_insert_replaces_in_place() {
         let mut object = JsonObject::new();
-        assert!(object
-            .insert(String::from("a"), JsonValue::Bool(true))
-            .is_none());
+        assert!(
+            object
+                .insert(String::from("a"), JsonValue::Bool(true))
+                .is_none()
+        );
         let old = object.insert(String::from("a"), JsonValue::Bool(false));
         assert_eq!(old, Some(JsonValue::Bool(true)));
         assert_eq!(object.len(), 1);

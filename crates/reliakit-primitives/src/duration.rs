@@ -69,7 +69,7 @@ impl HumanDuration {
                 _ => {
                     return Err(PrimitiveError::Invalid {
                         message: "unknown time unit; use h, m, s, or ms",
-                    })
+                    });
                 }
             };
 

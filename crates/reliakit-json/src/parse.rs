@@ -6,7 +6,7 @@ use alloc::vec::Vec;
 
 use crate::error::{JsonError, JsonErrorKind, JsonLimitKind, JsonPath, JsonPathSegment};
 use crate::limits::JsonLimits;
-use crate::number::{is_valid_json_number, JsonNumber};
+use crate::number::{JsonNumber, is_valid_json_number};
 use crate::value::{JsonObject, JsonValue};
 
 /// Parses a JSON value from UTF-8 bytes using the default

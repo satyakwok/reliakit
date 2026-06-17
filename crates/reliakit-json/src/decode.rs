@@ -90,7 +90,7 @@ impl<T: JsonDecode> JsonDecode for Vec<T> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::encode::{to_json_string, JsonEncode};
+    use crate::encode::{JsonEncode, to_json_string};
     use crate::error::JsonDecodeErrorKind;
 
     fn decode<T: JsonDecode>(input: &str) -> T {
@@ -178,12 +178,16 @@ mod tests {
         assert_eq!(error.to_string(), "bad number");
 
         // Both `JsonFromStrError` arms render their inner error.
-        assert!(JsonFromStrError::Decode(error)
-            .to_string()
-            .contains("bad number"));
-        assert!(from_json_str::<u8>("nope")
-            .unwrap_err()
-            .to_string()
-            .contains("invalid JSON"));
+        assert!(
+            JsonFromStrError::Decode(error)
+                .to_string()
+                .contains("bad number")
+        );
+        assert!(
+            from_json_str::<u8>("nope")
+                .unwrap_err()
+                .to_string()
+                .contains("invalid JSON")
+        );
     }
 }

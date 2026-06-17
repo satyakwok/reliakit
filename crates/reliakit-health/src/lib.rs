@@ -77,7 +77,7 @@ mod health;
 #[cfg(feature = "alloc")]
 mod report;
 
-pub use check::{aggregate, Check};
+pub use check::{Check, aggregate};
 pub use health::{Criticality, Health};
 #[cfg(feature = "alloc")]
 pub use report::{Component, HealthReport, Summary};

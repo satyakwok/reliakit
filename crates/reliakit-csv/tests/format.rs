@@ -2,9 +2,9 @@
 //! changing any assertion here is a breaking format change.
 
 use reliakit_csv::{
-    from_csv_str, read_str, read_str_with_limits, to_csv_string, to_csv_string_headerless,
     CsvDecode, CsvDecodeError, CsvDecodeErrorKind, CsvEncode, CsvErrorKind, CsvField, CsvLimitKind,
-    CsvLimits, CsvWriter,
+    CsvLimits, CsvWriter, from_csv_str, read_str, read_str_with_limits, to_csv_string,
+    to_csv_string_headerless,
 };
 
 #[derive(Debug, PartialEq, Clone)]

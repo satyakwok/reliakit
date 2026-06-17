@@ -33,7 +33,9 @@ macro_rules! impl_int {
         }
     )*};
 }
-impl_int!(u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, i128, isize);
+impl_int!(
+    u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, i128, isize
+);
 
 macro_rules! impl_net_addr {
     ($($t:ty),* $(,)?) => {$(
@@ -194,9 +196,11 @@ mod tests {
         );
 
         // Valid Decode Tests
-        assert!(SocketAddr::decode_field("127.0.0.1:8080")
-            .unwrap()
-            .is_ipv4());
+        assert!(
+            SocketAddr::decode_field("127.0.0.1:8080")
+                .unwrap()
+                .is_ipv4()
+        );
         assert!(SocketAddr::decode_field("[::1]:443").unwrap().is_ipv6());
         assert_eq!(
             SocketAddrV4::decode_field("127.0.0.1:8080").unwrap(),

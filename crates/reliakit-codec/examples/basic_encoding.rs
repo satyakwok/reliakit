@@ -1,5 +1,5 @@
 use reliakit_codec::{
-    decode_from_slice, decode_from_slice_exact, encode_to_vec, CodecError, CodecErrorKind,
+    CodecError, CodecErrorKind, decode_from_slice, decode_from_slice_exact, encode_to_vec,
 };
 
 fn main() -> Result<(), CodecError> {

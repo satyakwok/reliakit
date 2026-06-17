@@ -11,7 +11,7 @@ use core::future::Future;
 use core::task::{Context, Poll, Waker};
 use core::time::Duration;
 
-use reliakit_retry::{retry_async, Backoff, RetryError, RetryPolicy};
+use reliakit_retry::{Backoff, RetryError, RetryPolicy, retry_async};
 
 /// Polls a future to completion on the current thread. The futures here are
 /// always immediately ready, so this never spins.

@@ -304,7 +304,7 @@ impl Parsed {
         let value = match &self.body {
             Body::Struct(shape) => json_encode_value(shape),
             Body::Enum(_) => {
-                return Err("reliakit-derive: JsonEncode does not support enums yet".into())
+                return Err("reliakit-derive: JsonEncode does not support enums yet".into());
             }
         };
 
@@ -324,7 +324,7 @@ impl Parsed {
         let body = match &self.body {
             Body::Struct(shape) => json_decode_body(shape),
             Body::Enum(_) => {
-                return Err("reliakit-derive: JsonDecode does not support enums yet".into())
+                return Err("reliakit-derive: JsonDecode does not support enums yet".into());
             }
         };
 
@@ -1054,16 +1054,20 @@ mod tests {
                 .unwrap_err()
                 .contains("requires a struct with named fields")
         );
-        assert!(csv_named_fields(&Body::Struct(Shape::Unit), "CsvDecode")
-            .unwrap_err()
-            .contains("named fields"));
+        assert!(
+            csv_named_fields(&Body::Struct(Shape::Unit), "CsvDecode")
+                .unwrap_err()
+                .contains("named fields")
+        );
         let enum_body = Body::Enum(vec![Variant {
             name: "A".to_string(),
             shape: Shape::Unit,
         }]);
-        assert!(csv_named_fields(&enum_body, "CsvEncode")
-            .unwrap_err()
-            .contains("does not support enums"));
+        assert!(
+            csv_named_fields(&enum_body, "CsvEncode")
+                .unwrap_err()
+                .contains("does not support enums")
+        );
     }
 
     #[test]

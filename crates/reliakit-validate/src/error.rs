@@ -141,11 +141,7 @@ impl ValidationError {
     /// This removes the footgun of returning an empty `ValidationError` as an
     /// error (see [`empty`](Self::empty)).
     pub fn finish(self) -> ValidateResult {
-        if self.is_empty() {
-            Ok(())
-        } else {
-            Err(self)
-        }
+        if self.is_empty() { Ok(()) } else { Err(self) }
     }
 
     /// Returns all violations.
