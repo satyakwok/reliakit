@@ -1,0 +1,9 @@
+# Configuration for the `typos` spell-checker CI job.
+#
+# The allowlisted words below are deliberate test fixtures, not misspellings:
+#   - `tru`: truncated JSON literals used to test that the parser rejects
+#     incomplete tokens (e.g. `b"tru"`).
+#   - `fo`:  Base32-decoded ASCII shown in the encoding tests (e.g. `// "fo"`).
+[default.extend-words]
+tru = "tru"
+fo = "fo"

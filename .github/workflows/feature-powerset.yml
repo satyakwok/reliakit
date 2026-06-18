@@ -1,0 +1,68 @@
+name: Feature powerset
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  feature-powerset:
+    name: Feature powerset
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - name: Install Rust stable
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+          rustc --version
+          cargo --version
+
+      - name: Cache Cargo
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ github.job }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-${{ github.job }}-
+            ${{ runner.os }}-cargo-
+
+      - name: Install cargo-hack
+        uses: taiki-e/install-action@b8cecb83565409bcc297b2df6e77f030b2a468d5 # v2.82.0
+        with:
+          tool: cargo-hack
+
+      # Check every library crate against the full powerset of its features, so a
+      # feature combination that fails to compile cannot slip past the
+      # all-features build. The leaf crates have few features each, so the
+      # powerset stays small. `reliakit-benches` is an internal, unpublished
+      # benchmark crate and is excluded. (`check` builds only the library, so
+      # dev-dependencies are not pulled in; `--no-dev-deps` is avoided because it
+      # rewrites manifests and so cannot run under `--locked`.)
+      - name: Check feature powerset (library crates)
+        run: >
+          cargo hack --feature-powerset --workspace
+          --exclude reliakit --exclude reliakit-benches
+          check --locked
+
+      # The umbrella `reliakit` re-exports every crate behind its own feature
+      # flag (25 features), so a full powerset is infeasible. Check each feature
+      # on its own, plus the no-features and all-features baselines.
+      - name: Check each feature (umbrella crate)
+        run: cargo hack --each-feature -p reliakit check --locked
