@@ -9,7 +9,7 @@ use crate::error::JsonNumberError;
 ///
 /// Parsing never silently rounds or truncates: the original token is kept
 /// verbatim and conversions to `i64`/`u64`/`f64` are explicit and fallible.
-/// Equality is **structural** over the representation — `1.0`, `1`, and `1e0`
+/// Equality is **structural** over the representation: `1.0`, `1`, and `1e0`
 /// are distinct `JsonNumber`s. Compare numerically by converting first.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct JsonNumber {

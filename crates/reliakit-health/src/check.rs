@@ -5,7 +5,7 @@ use crate::{Criticality, Health};
 /// `Check` is a small `Copy` value that pairs a component name with its
 /// [`Health`], a [`Criticality`], and an optional detail message. It borrows its
 /// `&str` fields, so it needs no allocation and works in `no_std` without
-/// `alloc` — build a fixed array of `Check`s and hand them to [`aggregate`].
+/// `alloc`: build a fixed array of `Check`s and hand them to [`aggregate`].
 ///
 /// For a dynamically built, owned collection use
 /// [`HealthReport`](crate::HealthReport) (requires `alloc`).
@@ -81,7 +81,7 @@ impl<'a> Check<'a> {
 /// The result is the worst (most severe) [effective](Check::effective) status,
 /// so a `Critical` `Unhealthy` makes the whole result `Unhealthy` while an
 /// `Optional` `Unhealthy` only degrades it. An empty input is
-/// [`Healthy`](Health::Healthy) — nothing is wrong.
+/// [`Healthy`](Health::Healthy): nothing is wrong.
 ///
 /// # Example
 ///

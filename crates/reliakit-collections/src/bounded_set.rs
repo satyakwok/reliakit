@@ -7,7 +7,7 @@ use core::ops::Deref;
 /// `BoundedSet<T, MIN, MAX>` guarantees that the number of elements is always in
 /// the range `MIN..=MAX` and that every element is unique. It is backed by a
 /// `Vec<T>` in insertion order, so iteration is deterministic and pulls in no
-/// hashing or ordering machinery — membership tests are a linear scan, which is
+/// hashing or ordering machinery, membership tests are a linear scan, which is
 /// fine for the small, bounded sizes this type is meant for.
 ///
 /// Mutations that would violate the bounds return a [`CollectionError`] instead

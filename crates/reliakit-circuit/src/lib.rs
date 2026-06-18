@@ -6,7 +6,7 @@
 //! through to test recovery.
 //!
 //! [`CircuitBreaker`] is a small, `Copy` state machine. It does **not** read the
-//! clock, sleep, or allocate — you pass the current time in on each call as a
+//! clock, sleep, or allocate; you pass the current time in on each call as a
 //! plain `u64` in whatever monotonic unit you choose (milliseconds is typical).
 //! That keeps it usable from synchronous code, any async runtime, and `no_std`
 //! / embedded targets, and makes its behavior fully deterministic in tests.
@@ -25,11 +25,11 @@
 //!                        └──────────────▶ Open
 //! ```
 //!
-//! - **Closed** — calls flow normally. Consecutive failures are counted; once
+//! - **Closed**, calls flow normally. Consecutive failures are counted; once
 //!   they reach `failure_threshold` the breaker trips to **Open**.
-//! - **Open** — calls are rejected immediately. After `cooldown` time units the
+//! - **Open**, calls are rejected immediately. After `cooldown` time units the
 //!   next [`allow`](CircuitBreaker::allow) moves it to **HalfOpen**.
-//! - **HalfOpen** — trial calls are allowed. `success_threshold` consecutive
+//! - **HalfOpen**, trial calls are allowed. `success_threshold` consecutive
 //!   successes close the breaker; the first failure reopens it.
 //!
 //! # Example
@@ -60,7 +60,7 @@
 //! # Counting failures by rate
 //!
 //! [`CircuitBreaker`] counts *consecutive* failures. For a *failure rate* over a
-//! rolling window — "trip if N of the last M calls failed" — use
+//! rolling window, "trip if N of the last M calls failed", use
 //! [`RollingBreaker`], a const-generic, inline (zero-allocation) variant.
 //!
 //! # Feature flags
@@ -95,7 +95,7 @@ pub enum State {
 ///
 /// Time is a plain `u64` in any monotonic unit you choose (commonly
 /// milliseconds); `cooldown` uses the same unit. The breaker never reads the
-/// clock itself — pass `now` to [`allow`](Self::allow) and
+/// clock itself; pass `now` to [`allow`](Self::allow) and
 /// [`on_failure`](Self::on_failure).
 ///
 /// `CircuitBreaker` is not internally synchronized. Share one across threads by

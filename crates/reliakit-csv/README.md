@@ -25,13 +25,13 @@ unsafe code.
 
 ## What This Crate Does
 
-- `read_str` / `read_str_with_limits` — parse text into `Vec<Vec<String>>`,
+- `read_str` / `read_str_with_limits`: parse text into `Vec<Vec<String>>`,
   strictly and within bounds.
-- `CsvWriter` — build CSV text one record at a time; a field is quoted only when
+- `CsvWriter`: build CSV text one record at a time; a field is quoted only when
   it must be, and every record ends with `\r\n`.
-- `CsvField` — encode/decode a single field for the integer types, `bool`,
+- `CsvField`: encode/decode a single field for the integer types, `bool`,
   `char`, `String`, `IpAddr`/`SocketAddr` types (including `V4`/`V6` forms), and `Option<T>` (an empty field is `None`).
-- `CsvEncode` / `CsvDecode` — map your record type to and from a row, with a
+- `CsvEncode` / `CsvDecode`: map your record type to and from a row, with a
   header. `to_csv_string` / `from_csv_str` write and read a header row;
   `*_headerless` variants skip it.
 

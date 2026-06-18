@@ -7,7 +7,7 @@ use crate::number::JsonNumber;
 
 /// An owned JSON value.
 ///
-/// JSON has exactly six value kinds, so this enum is intentionally exhaustive —
+/// JSON has exactly six value kinds, so this enum is intentionally exhaustive:
 /// you can `match` it without a wildcard arm.
 #[derive(Debug, Clone, PartialEq)]
 pub enum JsonValue {
@@ -98,7 +98,7 @@ impl JsonMember {
 
 /// A JSON object: members in insertion order with unique keys.
 ///
-/// Keys are guaranteed unique — the parser rejects duplicates, and
+/// Keys are guaranteed unique: the parser rejects duplicates, and
 /// [`insert`](Self::insert) replaces an existing key in place rather than
 /// adding a second entry. Lookup is linear; object size is bounded by
 /// [`JsonLimits`](crate::JsonLimits) when parsing untrusted input.

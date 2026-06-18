@@ -3,7 +3,7 @@
 //! Available with the `validate` feature (which also enables `primitives`).
 //! [`JsonForm`] pulls several fields out of a JSON object and collects *every*
 //! failure into a single [`ValidationError`], rather than stopping at the first
-//! one — the usual shape for validating an untrusted request body.
+//! one, the usual shape for validating an untrusted request body.
 //!
 //! ```
 //! use reliakit_json::{JsonForm, parse_str};

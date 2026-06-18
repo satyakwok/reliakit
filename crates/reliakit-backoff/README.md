@@ -15,7 +15,7 @@
 Clock-agnostic retry backoff policies for Rust.
 
 `reliakit-backoff` computes *how long to wait* between retries. It does not
-sleep, spawn tasks, or read the clock — you decide when to call it and how to
+sleep, spawn tasks, or read the clock; you decide when to call it and how to
 wait. That keeps it usable from synchronous code, any async runtime, and
 `no_std` / embedded targets, with deterministic tests.
 
@@ -23,14 +23,14 @@ The crate has no dependencies, is `#![no_std]`, and forbids unsafe code.
 
 ## What This Crate Does
 
-- `Backoff` — a small `Copy` policy: a base delay, a growth strategy (constant,
+- `Backoff`: a small `Copy` policy: a base delay, a growth strategy (constant,
   linear, exponential, or Fibonacci), an optional maximum delay, and an optional retry
   limit.
-- `Backoff::delay(attempt)` — maps a zero-based attempt number to the delay to
+- `Backoff::delay(attempt)`: maps a zero-based attempt number to the delay to
   wait, or `None` once the retry limit is reached. All arithmetic saturates, so
   large attempt numbers never overflow, panic, or hang.
-- `Backoff::delays()` — an iterator over successive delays.
-- `full_jitter` / `equal_jitter` / `decorrelated_jitter` — pure jitter helpers
+- `Backoff::delays()`: an iterator over successive delays.
+- `full_jitter` / `equal_jitter` / `decorrelated_jitter`: pure jitter helpers
   that take a caller-supplied random value, so the crate stays dependency-free
   and the math stays testable.
 
@@ -101,7 +101,7 @@ This crate has no feature flags.
 
 ## `no_std`
 
-`reliakit-backoff` is `#![no_std]` and allocation-free — it depends only on
+`reliakit-backoff` is `#![no_std]` and allocation-free: it depends only on
 `core`, with no third-party crates. All delay arithmetic saturates, so large
 attempt numbers never overflow, panic, or hang.
 

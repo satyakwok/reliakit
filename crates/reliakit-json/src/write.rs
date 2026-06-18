@@ -9,7 +9,7 @@ use crate::value::JsonValue;
 ///
 /// Output is deterministic for a given value: object members are emitted in
 /// stored (insertion) order and numbers keep their exact representation. This
-/// is *not* the canonical (RFC 8785) form — it does not sort keys or reformat
+/// is *not* the canonical (RFC 8785) form: it does not sort keys or reformat
 /// numbers. In-memory serialization cannot fail, so this is infallible.
 pub fn to_compact_string(value: &JsonValue) -> String {
     let mut out = String::new();

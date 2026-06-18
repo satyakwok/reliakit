@@ -9,9 +9,9 @@ use crate::error::{CollectionError, CollectionResult};
 ///
 /// Unlike [`BoundedVec`](crate::BoundedVec), pushing onto a full `RingBuffer`
 /// never fails: it evicts and returns the oldest element instead. That makes it
-/// a good fit for rolling windows — recent log lines, the last *N* samples,
-/// event histories — where keeping the newest data and bounding memory matters
-/// more than keeping everything.
+/// a good fit for rolling windows such as recent log lines, the last *N*
+/// samples, or event histories, where keeping the newest data and bounding
+/// memory matters more than keeping everything.
 ///
 /// Capacity is fixed at construction and must be greater than zero. Order is
 /// preserved oldest-to-newest, which is the order [`iter`](Self::iter) yields.

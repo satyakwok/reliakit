@@ -15,8 +15,8 @@ that is disrespectful, demeaning, or harassing is not tolerated.
 
 ## Scope
 
-This applies in all project spaces — the repository, issues, pull requests,
-discussions, and any other official channel — and whenever someone is
+This applies in all project spaces (the repository, issues, pull requests,
+discussions, and any other official channel) and whenever someone is
 representing the project in public.
 
 ## Reporting

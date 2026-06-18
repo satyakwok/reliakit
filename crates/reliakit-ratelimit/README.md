@@ -20,12 +20,12 @@ tokens every `refill_interval`; each request spends one or more tokens, and when
 the bucket is empty requests are denied until it refills. Two numbers describe
 the whole policy:
 
-- **capacity** — the largest burst you will allow at once.
-- **refill rate** (`refill_amount` per `refill_interval`) — the sustained rate
+- **capacity**: the largest burst you will allow at once.
+- **refill rate** (`refill_amount` per `refill_interval`), the sustained rate
   once the burst is spent.
 
 `reliakit-ratelimit` implements this with **no dependencies**, no `std`, and no
-hidden behavior. It does not read the clock, sleep, spawn, or allocate — *you*
+hidden behavior. It does not read the clock, sleep, spawn, or allocate; *you*
 pass the current time in, and *you* decide what to do when a request is denied.
 That makes it equally usable from synchronous code, any async runtime, and
 `no_std` / embedded targets, and every decision is deterministic and trivial to
@@ -38,9 +38,9 @@ Most rate limiters reach for `std::time::Instant` or a runtime timer. This one
 takes the current time as a `u64` argument in whatever monotonic unit you choose
 (milliseconds is typical) and uses that same unit for `refill_interval`:
 
-- **Runtime-neutral** — Tokio, async-std, blocking threads, or a bare-metal loop.
-- **`no_std`-friendly** — CI builds it for `thumbv7em-none-eabi`.
-- **Deterministic & testable** — behavior depends only on the timestamps you
+- **Runtime-neutral**: Tokio, async-std, blocking threads, or a bare-metal loop.
+- **`no_std`-friendly**: CI builds it for `thumbv7em-none-eabi`.
+- **Deterministic & testable**: behavior depends only on the timestamps you
   pass; tests assert exact token counts and wait times with no sleeping.
 
 A clock that briefly moves backwards is handled with saturating arithmetic (no
@@ -65,7 +65,7 @@ The bucket starts full, so an initial burst up to `capacity` is allowed:
 ```rust
 use reliakit_ratelimit::RateLimiter;
 
-// Capacity 10, refill 1 token every 100ms — about 10 requests/second sustained,
+// Capacity 10, refill 1 token every 100ms, about 10 requests/second sustained,
 // with bursts of up to 10.
 let mut limiter = RateLimiter::new(10, 1, 100);
 
@@ -73,7 +73,7 @@ let now = now_millis(); // your own monotonic clock, in milliseconds
 if limiter.try_acquire_one(now) {
     // proceed with the request
 } else {
-    // over the limit — drop it, queue it, or tell the caller to back off
+    // over the limit, drop it, queue it, or tell the caller to back off
 }
 ```
 
@@ -123,8 +123,8 @@ refill allows a big one-off burst but a low steady rate.
 
 ## Concurrency
 
-`RateLimiter` is a plain value and is **not** internally synchronized (no atomics
-— keeping it dependency-free and `no_std`). To share one limiter across threads
+`RateLimiter` is a plain value and is **not** internally synchronized (no atomics,
+keeping it dependency-free and `no_std`). To share one limiter across threads
 or tasks, wrap it in your own `Mutex`/lock. For per-key limiting, keep a separate
 limiter per key.
 
@@ -143,9 +143,9 @@ retries). All three are clock-agnostic and `no_std`.
 
 ## When not to use it
 
-- Distributed rate limiting across many processes — this is an in-process
+- Distributed rate limiting across many processes, this is an in-process
   limiter; coordinate through a shared store for a global limit.
-- Precise sub-token (fractional) rates — the bucket works in whole tokens; scale
+- Precise sub-token (fractional) rates, the bucket works in whole tokens; scale
   your unit (e.g. count in tenths) if you need finer granularity.
 
 ## Feature Flags
@@ -159,7 +159,7 @@ convenience.
 
 ## `no_std`
 
-`reliakit-ratelimit` is `#![no_std]` and allocation-free — pure `core`, zero
+`reliakit-ratelimit` is `#![no_std]` and allocation-free, pure `core`, zero
 third-party dependencies. The limiter is a small `Copy` value, so it runs on
 embedded targets without changes.
 

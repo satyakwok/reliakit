@@ -3,8 +3,8 @@
 //! This crate provides `#[derive(...)]` support for the trait pairs defined by
 //! other `reliakit-*` crates. It is written using only the standard
 //! [`proc_macro`] API and pulls in no third-party crates. To stay free of a
-//! full Rust-grammar parser, it reads only what the generated code needs — the
-//! type name and its field shape — and rejects constructs it does not yet
+//! full Rust-grammar parser, it reads only what the generated code needs (the
+//! type name and its field shape) and rejects constructs it does not yet
 //! handle with a clear compile error rather than guessing.
 //!
 //! # Supported types
@@ -24,7 +24,7 @@
 //! [`CanonicalEncode`] and [`CanonicalDecode`] generate implementations of the
 //! same-named traits from `reliakit-codec`, encoding each field in declaration
 //! order. The derived code is exactly what a handwritten implementation would
-//! be — one `encode`/`decode` call per field, in order.
+//! be: one `encode`/`decode` call per field, in order.
 //!
 //! ```
 //! # // The derives reference `::reliakit_codec`, which must be a dependency of
@@ -89,8 +89,8 @@
 //! [`CsvEncode`] and [`CsvDecode`] generate implementations of the same-named
 //! `reliakit-csv` traits. A struct with named fields becomes a CSV row, one
 //! column per field in declaration order, with the field names as the header.
-//! Because CSV columns need names, only structs with named fields are supported
-//! — tuple structs, unit structs, and enums are rejected. Decoding is strict:
+//! Because CSV columns need names, only structs with named fields are supported:
+//! tuple structs, unit structs, and enums are rejected. Decoding is strict:
 //! the row must have one field per struct field, and each must parse.
 //!
 //! ```
@@ -168,7 +168,7 @@ pub fn derive_json_decode(input: TokenStream) -> TokenStream {
 /// one column per field in declaration order, with the field names as the
 /// header.
 ///
-/// Only structs with named fields are supported — CSV columns need names, so
+/// Only structs with named fields are supported: CSV columns need names, so
 /// tuple structs, unit structs, and enums are rejected. See the [crate]
 /// documentation.
 #[proc_macro_derive(CsvEncode)]
@@ -512,7 +512,7 @@ fn csv_decode_method(fields: &[String]) -> String {
 }
 
 /// Validates a [`Raw`] item, rejecting unsupported forms with a descriptive
-/// message. Pure — it touches no `proc_macro` types, so it is unit-testable.
+/// message. Pure: it touches no `proc_macro` types, so it is unit-testable.
 fn validate(raw: Raw) -> Result<Parsed, String> {
     match raw.body {
         RawBody::Union => Err("reliakit-derive does not support unions".into()),

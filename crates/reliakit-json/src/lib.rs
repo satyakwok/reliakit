@@ -8,7 +8,7 @@
 //! unsafe code, and supports `no_std` (with `alloc`).
 //!
 //! It maps to and from your own types through the [`JsonEncode`] / [`JsonDecode`]
-//! traits — the optional `reliakit-derive` crate provides
+//! traits; the optional `reliakit-derive` crate provides
 //! `#[derive(JsonEncode, JsonDecode)]`. It deliberately does **not** include
 //! schema validation, JSON5, comments, trailing commas, lenient parsing, or
 //! SIMD throughput.

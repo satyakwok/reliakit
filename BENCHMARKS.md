@@ -37,7 +37,7 @@ codec::decode_from_slice         46750.6 ns/op       232.4 MiB/s
 ## Why no criterion
 
 criterion is a third-party dependency, and the workspace forbids third-party
-crates everywhere — including dev and tooling dependencies (CI enforces this
+crates everywhere, including dev and tooling dependencies (CI enforces this
 against `Cargo.lock`). The hand-rolled harness keeps that guarantee. For the
 non-runtime cost of depending on reliakit (zero dependencies, no `unsafe`,
 `no_std`, compile footprint), see the Footprint section of the root README.

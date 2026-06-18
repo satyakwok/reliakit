@@ -1,11 +1,11 @@
-//! One call to a flaky dependency, guarded by the whole reliability stack —
+//! One call to a flaky dependency, guarded by the whole reliability stack,
 //! reached through a single crate name.
 //!
 //! Five building blocks cooperate, each clock-agnostic and driven by one
 //! millisecond clock owned here:
 //!
 //! - [`reliakit::retry`] owns the retry loop: it counts attempts, decides
-//!   whether an error is worth retrying, and asks for the backoff delay — it
+//!   whether an error is worth retrying, and asks for the backoff delay; it
 //!   never sleeps on its own, so we hand it a sleeper.
 //! - [`reliakit::backoff`] supplies the delay between attempts.
 //! - [`reliakit::timeout`] caps the total effort with an overall [`Deadline`];
@@ -37,9 +37,9 @@ use reliakit::timeout::{Deadline, Timeout};
 /// Why a single guarded attempt did not succeed.
 #[derive(Debug)]
 enum CallError {
-    /// The dependency was reachable but returned an error — worth retrying.
+    /// The dependency was reachable but returned an error: worth retrying.
     Unavailable(&'static str),
-    /// The overall deadline ran out — not worth retrying.
+    /// The overall deadline ran out: not worth retrying.
     DeadlineExpired,
 }
 
@@ -59,7 +59,7 @@ fn main() {
     let mut limiter = RateLimiter::new(5, 1, 200);
     // Trip after 3 consecutive failures; probe again after 500ms.
     let mut breaker = CircuitBreaker::new(3, 500);
-    // Back off 100ms, doubling, capped at 1s — used by the retry policy below.
+    // Back off 100ms, doubling, capped at 1s, used by the retry policy below.
     let backoff =
         Backoff::exponential(Duration::from_millis(100), 2).with_max_delay(Duration::from_secs(1));
     // Up to 12 attempts (the deadline usually stops us first).

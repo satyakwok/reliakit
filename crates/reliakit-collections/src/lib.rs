@@ -7,13 +7,13 @@
 //!
 //! # Types
 //!
-//! - [`BoundedVec<T, MIN, MAX>`] — an owned `Vec<T>` constrained to hold
+//! - [`BoundedVec<T, MIN, MAX>`], an owned `Vec<T>` constrained to hold
 //!   between `MIN` and `MAX` elements inclusive.
-//! - [`BoundedMap<K, V, MIN, MAX>`] — an insertion-ordered key-value map with
+//! - [`BoundedMap<K, V, MIN, MAX>`], an insertion-ordered key-value map with
 //!   unique keys and an enforced entry-count range.
-//! - [`BoundedSet<T, MIN, MAX>`] — an insertion-ordered set of unique elements
+//! - [`BoundedSet<T, MIN, MAX>`], an insertion-ordered set of unique elements
 //!   with an enforced count range.
-//! - [`RingBuffer<T>`] — a fixed-capacity circular buffer that overwrites the
+//! - [`RingBuffer<T>`], a fixed-capacity circular buffer that overwrites the
 //!   oldest element when full (a rolling window that never fails to push).
 //!
 //! [`BoundedMap`] and [`BoundedSet`] are backed by a `Vec` and use linear scans

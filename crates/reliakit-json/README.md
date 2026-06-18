@@ -15,7 +15,7 @@
 A **strict, bounded, and deterministic** JSON library for Rust.
 
 `reliakit-json` is built for systems that process **untrusted** JSON or need
-**predictable** output — API payloads, protocol messages, config, audit logs,
+**predictable** output, API payloads, protocol messages, config, audit logs,
 and signed or hashed documents. It parses a strict subset of [RFC 8259], rejects
 duplicate object keys, enforces explicit resource limits, preserves number
 precision, reports errors with location and path, and serializes
@@ -29,7 +29,7 @@ predictable behavior on hostile input, not maximum throughput or convenience.
 ## What it guarantees
 
 - **Strict parsing.** A conservative, I-JSON-oriented subset of RFC 8259.
-- **Duplicate keys are rejected**, not silently resolved — and detection happens
+- **Duplicate keys are rejected**, not silently resolved, and detection happens
   *after* escape decoding, so `"role"` and `"role"` collide.
 - **Explicit resource limits** are part of the API. Untrusted parsing cannot run
   away on input size, nesting depth, string/number length, item counts, or total
@@ -88,7 +88,7 @@ match parse_with_limits(untrusted_bytes, limits) {
 ```
 
 [`parse`] and [`parse_str`] apply [`JsonLimits::new`] (a conservative default)
-automatically — there is no implicitly unlimited entry point.
+automatically; there is no implicitly unlimited entry point.
 
 ## API
 
@@ -130,7 +130,7 @@ that fit the target type.
 ## Numbers
 
 JSON numbers are kept as their exact source text and never auto-converted to
-`f64`. Equality is **structural** — `1.0`, `1`, and `1e0` are distinct values;
+`f64`. Equality is **structural**: `1.0`, `1`, and `1e0` are distinct values;
 compare numerically by converting first. Conversions report whether they failed
 on range, integer-ness, or finiteness.
 
@@ -138,7 +138,7 @@ on range, integer-ness, or finiteness.
 
 `JsonLimits` bounds *logical* decoded data (counts and byte lengths), not exact
 allocator memory. Profiles: `conservative()` (small, low-trust payloads),
-`new()` (the default), and `permissive()` (larger trusted documents) — all
+`new()` (the default), and `permissive()` (larger trusted documents), all
 explicit and finite. Tune individual fields with the `with_*` builders.
 
 ## When to use it
@@ -152,7 +152,7 @@ explicit and finite. Tune individual fields with the `with_*` builders.
 
 - You want automatic struct (de)serialization driven by derive macros.
 - You need the fastest possible parsing throughput above all else.
-- You need JSON5, comments, or lenient parsing — this crate rejects them by design.
+- You need JSON5, comments, or lenient parsing; this crate rejects them by design.
 
 ## Canonical output (RFC 8785 / JCS)
 

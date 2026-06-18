@@ -3,7 +3,7 @@
 /// Resource limits enforced while parsing.
 ///
 /// Limits bound *logical* decoded data (counts and byte lengths), not exact
-/// allocator memory — real heap use also depends on `String`/`Vec` capacity and
+/// allocator memory; real heap use also depends on `String`/`Vec` capacity and
 /// the platform. Parsing untrusted input should always go through limits;
 /// [`crate::parse`] applies [`JsonLimits::new`] by default.
 ///

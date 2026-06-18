@@ -7,7 +7,7 @@
 //! sustained throughput.
 //!
 //! [`RateLimiter`] is a small, `Copy` value. It does **not** read the clock,
-//! sleep, or allocate — you pass the current time in on each call as a plain
+//! sleep, or allocate; you pass the current time in on each call as a plain
 //! `u64` in whatever monotonic unit you choose (milliseconds is typical), and
 //! the intervals use that same unit. That keeps it usable from synchronous
 //! code, any async runtime, and `no_std` / embedded targets, and makes every
@@ -56,7 +56,7 @@ use core::cmp::min;
 ///
 /// Time is a plain `u64` in any monotonic unit you choose (commonly
 /// milliseconds); `refill_interval` uses that same unit. The limiter never reads
-/// the clock itself — pass `now` to each method.
+/// the clock itself; pass `now` to each method.
 ///
 /// `RateLimiter` is not internally synchronized. Share one across threads by
 /// wrapping it in your own `Mutex`/lock.

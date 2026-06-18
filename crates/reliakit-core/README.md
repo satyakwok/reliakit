@@ -17,18 +17,18 @@ Shared building blocks for the Reliakit workspace.
 Reliakit's resilience crates (`reliakit-backoff`, `reliakit-circuit`,
 `reliakit-ratelimit`, `reliakit-timeout`) are *clock-agnostic*: you pass the
 current time in as a `u64` tick in any monotonic unit. `reliakit-core` provides
-the small piece they share — a `Clock` trait plus ready-made clocks — so you do
+the small piece they share (a `Clock` trait plus ready-made clocks), so you do
 not have to hand-roll one.
 
 The crate has no dependencies and forbids unsafe code.
 
 ## What This Crate Does
 
-- `Clock` — a trait with a single `now(&self) -> u64`. There is a blanket impl
+- `Clock`: a trait with a single `now(&self) -> u64`. There is a blanket impl
   for `&C`, and it is object-safe (`&dyn Clock`).
-- `ManualClock` — a settable clock for deterministic tests (`new`, `set`,
+- `ManualClock`: a settable clock for deterministic tests (`new`, `set`,
   `advance`); uses interior mutability so every method takes `&self`. `no_std`.
-- `MonotonicClock` — milliseconds since creation, backed by
+- `MonotonicClock`: milliseconds since creation, backed by
   `std::time::Instant`, so it never goes backwards and ignores wall-clock
   adjustments. Requires the `std` feature.
 

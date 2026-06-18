@@ -5,7 +5,7 @@
 # Reliakit
 
 Small, zero-dependency Rust reliability crates: explicit invariants, redacted
-secrets, bounded inputs, deterministic data, and runtime-agnostic resilience —
+secrets, bounded inputs, deterministic data, and runtime-agnostic resilience.
 `no_std`-friendly, no `unsafe`, adopt one crate at a time.
 
 [![CI](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml/badge.svg)](https://github.com/satyakwok/reliakit/actions/workflows/ci.yml)
@@ -18,7 +18,7 @@ secrets, bounded inputs, deterministic data, and runtime-agnostic resilience —
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/satyakwok/reliakit)
 
 Reliakit is a workspace of small, focused crates for building reliable Rust
-software — CLIs, services, bots, libraries, and infrastructure tools. The core
+software: CLIs, services, bots, libraries, and infrastructure tools. The core
 idea is simple: **validate and constrain data at the boundary, then carry the
 trusted invariant deeper into your program** so the rest of the code cannot hold
 an invalid state.
@@ -27,16 +27,16 @@ It is a general-purpose reliability toolkit. Validated primitives, secret
 redaction, bounded collections, deterministic encoding, and runtime-agnostic
 resilience utilities (retry backoff, circuit breaker, rate limiter, timeouts)
 are useful in web backends, command-line tools, embedded code, data pipelines,
-and protocol or blockchain work alike — none of those is the primary target.
+and protocol or blockchain work alike. None of those is the primary target.
 
 Every crate is small, dependency-free at runtime (only the standard library and
-other `reliakit-*` crates — a CI check fails the build if any third-party
+other `reliakit-*` crates; a CI check fails the build if any third-party
 dependency appears), `#![forbid(unsafe_code)]`, and usable on its own. You adopt
 **one crate at a time**, not a framework.
 
 ## 30-second example
 
-Retry a flaky operation with backoff — no runtime, no sleeping, no third-party
+Retry a flaky operation with backoff, with no runtime, no sleeping, no third-party
 dependencies:
 
 ```rust
@@ -64,7 +64,7 @@ reliakit-retry = "1"
 ## How it's different
 
 Reliakit is **zero third-party dependencies, `no_std`, and runtime-agnostic**. No
-async runtime is baked in and nothing sleeps on its own — you inject the clock or
+async runtime is baked in and nothing sleeps on its own. You inject the clock or
 sleeper, so the same code runs synchronously, under any async runtime, or in a
 test with no real time. You provide the time source; in return the code stays
 dependency-free, portable to embedded targets, and deterministic to test.
@@ -81,33 +81,33 @@ dependency-free, portable to embedded targets, and deterministic to test.
 - **Bound your inputs and collections.** `BoundedVec<T, MIN, MAX>` cannot be
   built outside its size limits.
 - **Encode data deterministically.** `reliakit-codec` (binary) and
-  `reliakit-json` (text) produce the same bytes for the same value — handy for
+  `reliakit-json` (text) produce the same bytes for the same value, handy for
   cache keys, fixtures, hashing, and signing.
 - **Handle resilience explicitly.** Backoff, circuit breaking, rate limiting,
-  and timeouts are plain values you pass the current time into — no runtime, no
+  and timeouts are plain values you pass the current time into, with no runtime, no
   hidden threads, no global state.
 - **Keep adoption cost low.** Small independent crates compile fast and pull in
   nothing extra.
-- **One cohesive family — take one or all.** Use a single crate for one job, or
+- **One cohesive family: take one or all.** Use a single crate for one job, or
   the `reliakit` umbrella for several; every block follows the same conventions
   and the same zero-dependency, `no_std`, no-`unsafe` rules. Reliability patterns
   usually mean stitching together unrelated crates with different designs and
-  dependency trees — here they are built to fit.
+  dependency trees; here they are built to fit.
 
 ## Footprint
 
-Adding Reliakit is close to free — the costs you usually weigh before taking on a
+Adding Reliakit is close to free; the costs you usually weigh before taking on a
 dependency mostly aren't here:
 
 - **Zero third-party dependencies.** With every feature enabled, the entire
-  dependency tree is `reliakit-*` crates and the standard library — nothing else
+  dependency tree is `reliakit-*` crates and the standard library, with nothing else
   to vet, audit, or track for security advisories. A CI check fails the build if
   a third-party crate ever appears, and `cargo tree -p reliakit --all-features`
   proves it.
 - **No `unsafe`.** Every crate declares `#![forbid(unsafe_code)]`.
 - **`no_std`-friendly.** The core crates build for bare metal (for example
   `thumbv7em-none-eabi`); `alloc` and `std` are opt-in features.
-- **Fast cold builds.** There is no third-party graph to compile — you build
+- **Fast cold builds.** There is no third-party graph to compile, so you build
   Reliakit and nothing else.
 - **Small, readable surface.** Each crate does one thing and is small enough to
   read end to end before you depend on it.
@@ -125,7 +125,7 @@ dependency mostly aren't here:
 | Canonical binary codec | `reliakit-codec` | `CanonicalEncode` / `CanonicalDecode`, strict decoding |
 | Strict JSON | `reliakit-json` | Strict parser + limits, deterministic output, typed `JsonEncode` / `JsonDecode` |
 | Strict CSV | `reliakit-csv` | Strict, bounded reader + deterministic writer, typed `CsvEncode` / `CsvDecode` |
-| Resilience | `reliakit-backoff`, `reliakit-bulkhead`, `reliakit-circuit`, `reliakit-ratelimit`, `reliakit-timeout` | Retry backoff, concurrency limiter, circuit breaker, token-bucket rate limiter, deadlines — all clock-agnostic |
+| Resilience | `reliakit-backoff`, `reliakit-bulkhead`, `reliakit-circuit`, `reliakit-ratelimit`, `reliakit-timeout` | Retry backoff, concurrency limiter, circuit breaker, token-bucket rate limiter, deadlines, all clock-agnostic |
 | Retry helper | `reliakit-retry` | `RetryPolicy` + `retry` / `retry_with_sleep` / `retry_async`; runtime-agnostic, never sleeps internally |
 | Health reporting | `reliakit-health` | `Health` status + criticality-aware aggregator for `/health`, probes, and status pages |
 | Shared clock | `reliakit-core` | `Clock` trait + `ManualClock` / `MonotonicClock` |
@@ -135,7 +135,7 @@ dependency mostly aren't here:
 ## Which resilience block do I use?
 
 The resilience crates each solve one problem, and each is a plain value you drive
-with the current time — no runtime, no hidden threads, no global state. Pick by the
+with the current time, with no runtime, no hidden threads, no global state. Pick by the
 question you are asking:
 
 | Question | Block | Crate |
@@ -150,7 +150,7 @@ question you are asking:
 They compose rather than overlap: `retry` drives `backoff` between attempts;
 `circuit` stops calling a dependency once it has failed enough; `ratelimit` and
 `bulkhead` shed load before you start (too often / too many at once); and `timeout`
-bounds the whole operation. None of them sleep or spawn for you — you pass the
+bounds the whole operation. None of them sleep or spawn for you; you pass the
 clock (or a sleeper) in, so they stay runtime-agnostic and trivial to test.
 
 The [`resilient_client`](crates/reliakit/examples/resilient_client.rs) example shows
@@ -191,7 +191,7 @@ assert_eq!(api_key.to_string(), "[REDACTED]"); // never leaks in Display/Debug/l
 assert_eq!(api_key.expose_secret(), "rk_live_example"); // explicit opt-in to read it
 ```
 
-### 3. Microservices / external calls — rate limiting and circuit breaking
+### 3. Microservices / external calls: rate limiting and circuit breaking
 
 Clock-agnostic resilience values you drive with your own time source:
 
@@ -243,14 +243,14 @@ assert_eq!(from_json_str::<Event>(&json).unwrap(), Event { id: 1, name: "deploy"
 
 The resilience crates and the allocation-free primitives work without `std` or
 even `alloc`. A `CircuitBreaker` or `RateLimiter` is a small `Copy` value with
-saturating, panic-free integer math — you pass a `u64` tick in, so it runs on
+saturating, panic-free integer math; you pass a `u64` tick in, so it runs on
 embedded targets just as well as on a server.
 
 ### 7. Protocols and deterministic encoding (incl. blockchain)
 
 Because `reliakit-codec` defines one canonical byte representation per type and
 `reliakit-json` can emit RFC 8785 (JCS) canonical JSON (opt-in `canonical`
-feature), the same value always produces the same bytes — useful for cache keys,
+feature), the same value always produces the same bytes, useful for cache keys,
 content addressing, and hashing or signing in protocol and blockchain work. This
 is one use case among many, not the focus.
 
@@ -260,7 +260,7 @@ is one use case among many, not the focus.
 `/readyz` endpoint or a status page. You build a `HealthReport` from `critical`
 and `optional` checks, and the aggregate is criticality-aware: an `optional`
 dependency (say a cache) being `Unhealthy` degrades the service rather than
-failing it, while a `critical` one (the database) fails it. It only reports — it
+failing it, while a `critical` one (the database) fails it. It only reports; it
 never retries, sleeps, or acts.
 
 ### 9. Graded, explainable decisions (routing, selection, agents)
@@ -269,7 +269,7 @@ never retries, sleeps, or acts.
 is too blunt. A `Reasoner` scores candidate `Action`s from weighted
 `Consideration`s shaped by a `Curve`, with `gate(...)` for hard constraints (an
 option that is down or rate-limited is skipped entirely) and `explain()` for why
-a choice won — useful for request routing, picking a backend, or deciding when an
+a choice won, useful for request routing, picking a backend, or deciding when an
 agent should call an LLM. Same inputs, same decision, every time.
 
 ## Quick start / installation
@@ -292,7 +292,7 @@ Nothing is pulled in beyond the features you enable, so the zero-dependency,
 `no_std`-friendly nature of each block is preserved. Use `features = ["full"]`
 for everything.
 
-Prefer the tightest possible dependency graph? The crates are fully independent —
+Prefer the tightest possible dependency graph? The crates are fully independent;
 depend on just the ones you need:
 
 ```toml
@@ -316,7 +316,7 @@ reliakit-derive      = "1.0"
 reliakit-decide      = "1.0"
 ```
 
-Each crate is independent — most projects use two or three. The minimum
+Each crate is independent; most projects use two or three. The minimum
 supported Rust version is **1.85**.
 
 ## Crate overview
@@ -342,7 +342,7 @@ supported Rust version is **1.85**.
 | [`reliakit-decide`](https://crates.io/crates/reliakit-decide) | Deterministic utility decision engine | You want graded, explainable, testable decisions (routing, selection, when to call an LLM). | Published (1.0) |
 
 The resilience crates (`backoff`, `bulkhead`, `circuit`, `ratelimit`, `timeout`)
-are **clock-agnostic** — you pass the time in (where they need it), so they
+are **clock-agnostic**; you pass the time in (where they need it), so they
 compose and work in sync, async, and embedded code: a rate limiter decides
 whether to call, a bulkhead bounds how many calls run at once, a circuit breaker
 stops calling a failing dependency, backoff spaces out retries, and a timeout
@@ -350,16 +350,16 @@ bounds how long you wait.
 
 ## Design philosophy
 
-- **Small, independent crates** you adopt one at a time — no framework lock-in.
+- **Small, independent crates** you adopt one at a time, with no framework lock-in.
 - **Explicit invariants** validated at construction; invalid states are hard to
   represent.
-- **Boring, predictable APIs** — plain types and traits, no hidden runtime,
+- **Boring, predictable APIs**: plain types and traits, no hidden runtime,
   threads, or global state.
 - **Zero runtime dependencies** (standard library + other `reliakit-*` crates
   only) and `#![forbid(unsafe_code)]` throughout.
-- **Deterministic behavior** — same input, same output; saturating arithmetic in
+- **Deterministic behavior**: same input, same output; saturating arithmetic in
   the resilience crates.
-- **Feature-gated integrations** — cross-crate links (e.g. codec ↔ primitives,
+- **Feature-gated integrations**: cross-crate links (e.g. codec ↔ primitives,
   JSON ↔ validate) are opt-in features, never default.
 
 ## When to use Reliakit
@@ -387,7 +387,7 @@ else when you need:
 ## Feature flags & `no_std`
 
 Reliakit is `no_std`-friendly where it makes sense, but the details differ per
-crate — check each crate's README for the exact flags.
+crate; check each crate's README for the exact flags.
 
 - **Default features** enable `std`, which implies `alloc`. Building with
   `--no-default-features` gives the `no_std` subset.

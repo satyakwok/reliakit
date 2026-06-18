@@ -14,8 +14,8 @@
 //!
 //! # Output stability
 //!
-//! The writer is deterministic: the same records always produce the same text —
-//! a field is quoted only when required, and every record ends with CRLF. That
+//! The writer is deterministic: the same records always produce the same text.
+//! A field is quoted only when required, and every record ends with CRLF. That
 //! mapping is stable and will not change in a backwards-incompatible way without
 //! a major version bump, so the output is safe for fixtures, diffing, hashing,
 //! and signing.
@@ -152,7 +152,7 @@ pub use record::{
 pub use writer::CsvWriter;
 
 /// Implementation details used by the `CsvEncode`/`CsvDecode` derives in
-/// `reliakit-derive`. Not part of the public API — do not use it directly; it
+/// `reliakit-derive`. Not part of the public API. Do not use it directly; it
 /// may change at any time. It only re-exports `alloc` types so generated code
 /// can name them without assuming they are in scope on `no_std`.
 #[doc(hidden)]

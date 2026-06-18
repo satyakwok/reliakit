@@ -15,29 +15,29 @@
 Clock-agnostic deadlines and timeouts for Rust.
 
 `reliakit-timeout` answers one question: *has my time budget run out, and how
-much is left?* It does not read the clock, sleep, or spawn anything — you
+much is left?* It does not read the clock, sleep, or spawn anything; you
 capture a start instant and a budget, then pass `now` to the query methods. That
 keeps it usable from synchronous code, any async runtime, and `no_std` /
 embedded targets, with deterministic tests.
 
 Time is a plain `u64` in any monotonic unit you choose (milliseconds is
 typical), matching `reliakit-circuit` and `reliakit-ratelimit`. All arithmetic
-saturates, so no method panics — not on overflow, and not on a clock that moves
+saturates, so no method panics, not on overflow, and not on a clock that moves
 backwards.
 
 The crate has no required dependencies, is `#![no_std]`, and forbids unsafe code.
 
 ## What This Crate Does
 
-- `Timeout` — a reusable budget that is not yet pinned to a timeline. Configure
+- `Timeout`: a reusable budget that is not yet pinned to a timeline. Configure
   it once, then call `Timeout::start(now)` per operation to get a `Deadline`.
-- `Deadline` — a budget pinned to a start instant; it expires at `start +
+- `Deadline`: a budget pinned to a start instant; it expires at `start +
   budget`. Query it with:
-  - `remaining(now)` / `elapsed(now)` — saturating time left / time used.
-  - `is_expired(now)` — whether `now >= expiry`.
-  - `check(now)` — `Some(remaining)` while live, `None` once expired.
-  - `allows(now, duration)` — whether an operation of that length still fits.
-  - `clamp(now, duration)` — `duration` capped to the time left in the budget.
+  - `remaining(now)` / `elapsed(now)`: saturating time left / time used.
+  - `is_expired(now)`: whether `now >= expiry`.
+  - `check(now)`: `Some(remaining)` while live, `None` once expired.
+  - `allows(now, duration)`: whether an operation of that length still fits.
+  - `clamp(now, duration)`: `duration` capped to the time left in the budget.
 
 ## What This Crate Does Not Do
 
@@ -109,15 +109,15 @@ convenience.
 
 ## `no_std`
 
-`reliakit-timeout` is `#![no_std]` and allocation-free — pure `core`, with no
+`reliakit-timeout` is `#![no_std]` and allocation-free: pure `core`, with no
 required dependencies. Every query method is a `const fn` over saturating
 arithmetic.
 
 ## Safety
 
 This crate is `#![forbid(unsafe_code)]` and `#![no_std]`. Every method is a
-`const fn` over saturating integer arithmetic, so there is no input — including a
-backwards clock or an overflowing `start + budget` — that panics.
+`const fn` over saturating integer arithmetic, so there is no input, including a
+backwards clock or an overflowing `start + budget`, that panics.
 
 ## Minimum Supported Rust Version
 

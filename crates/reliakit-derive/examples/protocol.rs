@@ -1,7 +1,7 @@
 //! A real, runnable example: a small protocol built from a derived struct and a
 //! derived enum with all three variant kinds (including a nested struct inside a
 //! struct variant). It encodes each frame to canonical bytes, prints them,
-//! decodes them back, and checks the round-trip — then shows that an unknown
+//! decodes them back, and checks the round-trip, then shows that an unknown
 //! variant tag is rejected.
 //!
 //! Run with:

@@ -2,7 +2,7 @@
 //!
 //! Available with the `primitives` feature. These helpers pull a value out of a
 //! parsed JSON document and run it through a `reliakit-primitives` validating
-//! constructor, so you get a typed, validated value instead of a raw string —
+//! constructor, so you get a typed, validated value instead of a raw string,
 //! and on failure the error carries the [`JsonPath`] of the offending location.
 //!
 //! ```

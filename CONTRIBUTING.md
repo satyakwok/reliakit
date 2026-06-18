@@ -9,7 +9,7 @@ that way are very welcome.
 A few constraints hold across every crate, and changes are reviewed against them:
 
 - **Zero third-party dependencies.** Crates depend only on the standard library
-  and, optionally, on other `reliakit-*` crates — no `syn`, `quote`,
+  and, optionally, on other `reliakit-*` crates, no `syn`, `quote`,
   proc-macros, or serde-family crates. A CI job fails the build if any crate
   gains a third-party dependency of any kind.
 - **No unsafe.** Every crate is `#![forbid(unsafe_code)]`.
@@ -27,7 +27,7 @@ are scoped for newcomers; [`help wanted`](https://github.com/satyakwok/reliakit/
 ones need a bit more design judgment. Both usually list the files to touch and an
 acceptance checklist, so they're a good way in.
 
-For non-trivial changes, open an issue first so the direction can be discussed —
+For non-trivial changes, open an issue first so the direction can be discussed;
 it avoids wasted effort. Small fixes (typos, doc corrections, obvious bugs) can
 go straight to a pull request.
 
@@ -64,9 +64,9 @@ cargo check -p <crate> --no-default-features --features alloc   # if it has an a
 ## Guidelines
 
 - Keep each crate focused on its stated purpose. If a change doesn't fit,
-  consider proposing a new crate instead — see the
+  consider proposing a new crate instead; see the
   [crate overview](./README.md#crate-overview) for what each one covers.
-- Add tests for any new public behavior. Tests must be deterministic — no
+- Add tests for any new public behavior. Tests must be deterministic, no
   reliance on wall-clock time or iteration order. Codec and serialization
   changes need exact-output (byte- or text-level) tests.
 - Don't let coverage regress; most crates target 90% (a couple are higher).
@@ -79,9 +79,9 @@ cargo check -p <crate> --no-default-features --features alloc   # if it has an a
 
 ### Serialization and wire formats
 
-Typed serialization in Reliakit is a set of per-format trait pairs —
+Typed serialization in Reliakit is a set of per-format trait pairs:
 `CanonicalEncode`/`CanonicalDecode` for binary, `JsonEncode`/`JsonDecode` for
-JSON, `CsvEncode`/`CsvDecode` for CSV — not a single serde-style abstraction. A
+JSON, `CsvEncode`/`CsvDecode` for CSV, not a single serde-style abstraction. A
 new format follows the same pattern.
 
 Wire formats are permanent once published. If you change what a format reads or
@@ -91,7 +91,7 @@ impact in your pull request.
 ## Commit and pull request style
 
 - **Sign your commits.** Every commit in a pull request must be cryptographically
-  signed and show as *Verified* on GitHub — CI rejects unsigned commits. Set up
+  signed and show as *Verified* on GitHub; CI rejects unsigned commits. Set up
   GPG or SSH commit signing once and enable it (`git config commit.gpgsign true`);
   see [GitHub's guide](https://docs.github.com/authentication/managing-commit-signature-verification).
 - Write plain, human commit messages in the imperative mood: `Add TryFrom<u32>
@@ -112,9 +112,9 @@ Open an issue with:
 
 reliakit is currently led by a single maintainer, with decisions made in the open
 on issues and pull requests. The maintainer set grows from its contributors:
-sustained, high-quality work — a track record of merged non-trivial PRs (around
+sustained, high-quality work: a track record of merged non-trivial PRs (around
 five is a rough guide, not a quota), good judgment about the project's
-constraints, and helpful participation in reviews — leads to an invitation to
+constraints, and helpful participation in reviews. This leads to an invitation to
 become a collaborator with review and merge rights. See
 [GOVERNANCE.md](GOVERNANCE.md) for the full picture, including how and when the
 project will move to a GitHub organization.

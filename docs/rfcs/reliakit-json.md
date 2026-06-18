@@ -43,7 +43,7 @@ there is no `alloc` feature. `default = ["std"]`; `std` only adds
 Rejected, never silently resolved. Equality is compared on the decoded key.
 Objects preserve insertion order with guaranteed-unique keys
 (`Vec<JsonMember>`). Detection during parse uses an `alloc::collections::BTreeSet`
-of seen keys — `O(n log n)`, guaranteed, and immune to hash-flooding (chosen
+of seen keys, `O(n log n)`, guaranteed, and immune to hash-flooding (chosen
 over a hand-rolled hash set for that reason).
 
 ## Resource limits
@@ -58,7 +58,7 @@ logical decoded data, not exact allocator memory.
 ## Parser architecture
 
 Depth-bounded recursive descent: `max_depth` is checked **before** each descent,
-so recursion never exceeds the configured depth and cannot exhaust the stack —
+so recursion never exceeds the configured depth and cannot exhaust the stack,
 the same safety guarantee the RFC's "explicit stack" requirement targets. May be
 refactored to an explicit stack during hardening without any API change.
 
@@ -95,7 +95,7 @@ surrogate handling, all limit kinds, error locations/paths, golden compact bytes
 roundtrip, and an arbitrary-input panic smoke test. Hardening (Phase 3, done):
 JSONTestSuite-style conformance tests and a dependency-free, deterministic in-test
 fuzzer (hand-written PRNG) covering parser safety (no panic), compact roundtrip,
-and canonical idempotence. Coverage-guided fuzzing is intentionally omitted — it
+and canonical idempotence. Coverage-guided fuzzing is intentionally omitted; it
 needs a third-party engine, and reliakit takes no third-party dependencies.
 
 ## Release gates
@@ -110,19 +110,19 @@ Unicode ordering, idempotence, differential checks, and fuzzing all pass.
 
 ## Implementation phases
 
-1. Parser foundation — errors, limits, tokenizer, strict parser, dup-key
+1. Parser foundation: errors, limits, tokenizer, strict parser, dup-key
    rejection, `JsonValue`, `JsonNumber`. **(done)**
 2. Compact writer + exact-byte and roundtrip tests. **(done)**
-3. Hardening — JSONTestSuite-style conformance tests, limit-boundary tests, and
+3. Hardening: JSONTestSuite-style conformance tests, limit-boundary tests, and
    a dependency-free in-test fuzzer (hand-written PRNG) covering parse safety,
    compact round-trip, and canonical idempotence. **(done)** Coverage-guided
    fuzzing is intentionally omitted: it would require a third-party engine, and
    reliakit takes no third-party dependencies.
-4. Canonicalization — RFC 8785 design, number formatting (ECMAScript), key
+4. Canonicalization: RFC 8785 design, number formatting (ECMAScript), key
    ordering (UTF-16). **(done behind the `canonical` feature; validated against
    the RFC 8785 number examples and a large randomized `f64` round-trip sample.
    A dedicated fuzz target remains optional future hardening.)**
-5. Optional integrations — Reliakit primitive conversions, validation, std I/O
+5. Optional integrations: Reliakit primitive conversions, validation, std I/O
    adapters, manual typed encode/decode traits.
 
 ## Decisions recorded during review

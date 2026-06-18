@@ -3,13 +3,13 @@ use core::fmt;
 /// The health of a component or a whole service.
 ///
 /// The three states are ordered by severity: `Healthy < Degraded < Unhealthy`.
-/// That ordering is the whole point — aggregating a set of statuses is just
+/// That ordering is the whole point: aggregating a set of statuses is just
 /// taking the [worst](Health::worst) (maximum) one, so `Ord` does the work.
 ///
-/// - `Healthy` — fully operational.
-/// - `Degraded` — operational but impaired (serving with reduced capacity,
+/// - `Healthy`: fully operational.
+/// - `Degraded`: operational but impaired (serving with reduced capacity,
 ///   higher latency, or a non-critical dependency down).
-/// - `Unhealthy` — not able to serve.
+/// - `Unhealthy`: not able to serve.
 ///
 /// This is a deliberately closed enum: callers are expected to match all three
 /// states (e.g. to map to HTTP codes), so it is **not** `#[non_exhaustive]`.
@@ -57,7 +57,7 @@ impl Health {
         }
     }
 
-    /// Caps the status at `ceiling` — a status more severe than `ceiling` is
+    /// Caps the status at `ceiling`: a status more severe than `ceiling` is
     /// lowered to `ceiling`.
     ///
     /// This expresses "this signal can degrade the service but must not be able
@@ -81,7 +81,7 @@ impl Health {
         matches!(self, Self::Unhealthy)
     }
 
-    /// Returns `true` when the service can still serve — `Healthy` or
+    /// Returns `true` when the service can still serve: `Healthy` or
     /// `Degraded`, i.e. not `Unhealthy`.
     ///
     /// This is the usual readiness check: a degraded service still takes

@@ -1,7 +1,7 @@
 //! Small, runtime-agnostic retry helpers for fallible operations.
 //!
 //! `reliakit-retry` turns a [`Backoff`] schedule and an attempt limit into a
-//! [`RetryPolicy`], then drives a fallible operation against it — synchronously
+//! [`RetryPolicy`], then drives a fallible operation against it, synchronously
 //! or asynchronously. It is deliberately minimal: it decides *whether* to retry
 //! and *how long* the gap should be, but it never sleeps, spawns, or assumes an
 //! async runtime. You inject the waiting.
@@ -39,11 +39,11 @@
 //! # Retry predicate
 //!
 //! Every helper takes a `should_retry: FnMut(&E) -> bool` classifier. Returning
-//! `false` stops immediately — use it to retry only transient errors and fail
+//! `false` stops immediately; use it to retry only transient errors and fail
 //! fast on permanent ones. It is consulted only when another attempt is actually
 //! possible (so it is never called when `max_attempts` is already reached).
 //!
-//! # Example — sync, no sleeping
+//! # Example: sync, no sleeping
 //!
 //! ```
 //! use core::time::Duration;
@@ -65,7 +65,7 @@
 //! assert_eq!(calls, 2);
 //! ```
 //!
-//! # Example — sync, with an injected sleeper
+//! # Example: sync, with an injected sleeper
 //!
 //! ```
 //! use core::time::Duration;
@@ -97,8 +97,8 @@
 //! [`retry_async_observed`]). They take the same arguments plus an
 //! `on_retry: FnMut(u32, Duration, &E)` hook called just before each wait, with
 //! the failed attempt's number, the delay about to be waited, and the error that
-//! triggered the retry. It fires only when another attempt will be made — not on
-//! success, and not on the final failure that exhausts the policy — and it
+//! triggered the retry. It fires only when another attempt will be made (not on
+//! success, and not on the final failure that exhausts the policy), and it
 //! allocates nothing. The crate still does no logging itself; the hook is yours.
 //!
 //! ```

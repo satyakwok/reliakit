@@ -3,7 +3,7 @@
 //!
 //! `reliakit-decide` answers one question well: *given the current signals,
 //! which action should I take?* It scores each candidate action with
-//! utility-based reasoning and picks the best — deterministically, with no
+//! utility-based reasoning and picks the best, deterministically, with no
 //! floating point and no third-party dependencies. [`Reasoner::decide`]
 //! allocates nothing; [`Reasoner::rank`] and [`Reasoner::explain`] allocate only
 //! the result they return. The same signals always produce the same decision, so
@@ -56,7 +56,7 @@ use alloc::vec::Vec;
 /// in `0..=10_000` (steps of `0.0001`).
 ///
 /// Scores are integers so that every computation is bit-for-bit identical on
-/// every platform — decisions are deterministic and exactly testable.
+/// every platform; decisions are deterministic and exactly testable.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Score(u32);
 
@@ -114,7 +114,7 @@ pub enum Curve {
     Linear,
     /// Returns `1.0 - input` (high when the input is low).
     Inverse,
-    /// Returns `input * input` — dampens low inputs, keeps high ones.
+    /// Returns `input * input`: dampens low inputs, keeps high ones.
     Quadratic,
     /// A soft step: returns `above` when `input >= at`, otherwise `below`.
     Threshold {
@@ -188,7 +188,7 @@ impl Consideration {
 /// that score it.
 ///
 /// Utility is the base weight multiplied by every consideration. Because they
-/// multiply, **any near-zero consideration vetoes the action** — all of them
+/// multiply, **any near-zero consideration vetoes the action**; all of them
 /// must be satisfied for a high utility.
 #[non_exhaustive]
 #[derive(Debug, Clone)]
@@ -220,8 +220,8 @@ impl<A> Action<A> {
     /// combine with AND, so `.gate(a).gate(b)` is allowed only when both hold.
     ///
     /// This is how decisions become constraint-aware without any dependency: the
-    /// caller passes whatever it already knows — a deadline, a rate limiter, a
-    /// circuit breaker, business hours, a feature flag — as a `bool`. A gated-off
+    /// caller passes whatever it already knows (a deadline, a rate limiter, a
+    /// circuit breaker, business hours, a feature flag) as a `bool`. A gated-off
     /// action has zero utility and is never chosen. Keep one ungated fallback
     /// action so a decision still resolves when everything else is gated off.
     pub fn gate(mut self, allowed: bool) -> Action<A> {
@@ -300,7 +300,7 @@ pub struct Explanation<A> {
     /// The chosen action's id.
     pub id: A,
     /// Whether the chosen action was permitted. `false` means every action was
-    /// gated off and this one won only by tie-break — its utility is zero.
+    /// gated off and this one won only by tie-break; its utility is zero.
     pub allowed: bool,
     /// The winning utility score.
     pub utility: Score,
@@ -377,7 +377,7 @@ impl<A: Clone> Reasoner<A> {
     /// `None`.
     ///
     /// Use it to say "nothing here is good enough" and fall back to a slower or
-    /// more capable path — for example, escalate to an LLM instead of forcing a
+    /// more capable path: for example, escalate to an LLM instead of forcing a
     /// weak choice. A `threshold` of [`Score::ZERO`] abstains exactly when every
     /// action is vetoed or gated off.
     pub fn decide_above(&self, threshold: Score) -> Option<Decision<A>> {
@@ -400,7 +400,7 @@ impl<A: Clone> Reasoner<A> {
     ///
     /// `rand` is any uniformly-distributed `u32` you supply (e.g. from `rand` or
     /// `getrandom`), interpreted as the fraction `rand / 2^32`. The same `rand`
-    /// and candidates always yield the same choice — the engine never owns a
+    /// and candidates always yield the same choice; the engine never owns a
     /// random source, so it stays deterministic and testable.
     ///
     /// Returns `None` if there are no actions. If every utility is zero, the
@@ -489,7 +489,7 @@ impl<A: Clone> Reasoner<A> {
 /// [`reward`](Policy::reward) to move that weight toward what actually worked.
 ///
 /// The update is a **bounded integer moving average**, so it is deterministic and
-/// can never run away — it is not machine learning, just `weight += rate * (outcome
+/// can never run away; it is not machine learning, just `weight += rate * (outcome
 /// - weight)` in fixed point, clamped to `0.0..=1.0`.
 ///
 /// # Example
@@ -534,7 +534,7 @@ impl<K> Policy<K> {
     }
 
     /// The learned `(key, weight)` pairs, for snapshotting to storage. The host
-    /// serializes these however it likes — the engine pulls in no serializer.
+    /// serializes these however it likes; the engine pulls in no serializer.
     /// Restore them later with [`set`](Policy::set).
     pub fn entries(&self) -> &[(K, Score)] {
         &self.entries
@@ -570,7 +570,7 @@ impl<K: PartialEq> Policy<K> {
         }
     }
 
-    /// Sets `key`'s weight directly (insert or replace) — used to restore learned
+    /// Sets `key`'s weight directly (insert or replace), used to restore learned
     /// weights from storage. Unlike [`reward`](Policy::reward) this does not apply
     /// the learning rate; it stores the value as given.
     pub fn set(&mut self, key: K, weight: Score) {

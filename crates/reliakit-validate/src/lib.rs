@@ -3,11 +3,11 @@
 //! `reliakit-validate` provides a small, focused toolkit for expressing
 //! validation rules as types. The core pieces are:
 //!
-//! - [`Validate`] — a trait that types implement to describe their validity
+//! - [`Validate`]: a trait that types implement to describe their validity
 //!   rules.
-//! - [`Valid<T>`] — a zero-cost wrapper that carries proof of successful
+//! - [`Valid<T>`]: a zero-cost wrapper that carries proof of successful
 //!   validation in the type system.
-//! - [`ValidationError`] — an error type that collects one or more
+//! - [`ValidationError`]: an error type that collects one or more
 //!   [`Violation`]s, useful for validating multiple fields at once and
 //!   returning all failures together.
 //!
@@ -114,8 +114,8 @@
 //! );
 //! ```
 //!
-//! For ready-made typed fields to validate — email, port, percentages, bounded
-//! strings, and more — pair this crate with
+//! For ready-made typed fields to validate (email, port, percentages, bounded
+//! strings, and more), pair this crate with
 //! [`reliakit-primitives`](https://docs.rs/reliakit-primitives). The
 //! `config_check` example in the `reliakit` umbrella crate shows primitives,
 //! validate, and secret working together on one config.

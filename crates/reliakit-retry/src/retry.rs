@@ -20,7 +20,7 @@ use crate::policy::RetryPolicy;
 ///
 /// # Errors
 ///
-/// Returns [`RetryError::Exhausted`] when no attempt succeeds — either the
+/// Returns [`RetryError::Exhausted`] when no attempt succeeds: either the
 /// `max_attempts` limit was reached or `should_retry` returned `false`. The
 /// error carries the number of attempts made and the final error.
 pub fn retry<T, E, Op, ShouldRetry>(
@@ -44,7 +44,7 @@ where
 ///
 /// # Errors
 ///
-/// Returns [`RetryError::Exhausted`] when no attempt succeeds — either the
+/// Returns [`RetryError::Exhausted`] when no attempt succeeds: either the
 /// `max_attempts` limit was reached or `should_retry` returned `false`.
 pub fn retry_with_sleep<T, E, Op, ShouldRetry, Sleep>(
     policy: &RetryPolicy,
@@ -66,7 +66,7 @@ where
 /// [`Duration`] that is about to be waited, and a reference to the error that
 /// triggered the retry. It runs only when another attempt will actually be made:
 /// not on success, and not on the final failure that exhausts the policy. Use it
-/// for logging or metrics — the crate itself still logs nothing and allocates
+/// for logging or metrics; the crate itself still logs nothing and allocates
 /// nothing.
 ///
 /// To observe the no-sleep driver, pass a no-op sleeper:
@@ -74,7 +74,7 @@ where
 ///
 /// # Errors
 ///
-/// Returns [`RetryError::Exhausted`] when no attempt succeeds — either the
+/// Returns [`RetryError::Exhausted`] when no attempt succeeds: either the
 /// `max_attempts` limit was reached or `should_retry` returned `false`.
 pub fn retry_with_sleep_observed<T, E, Op, ShouldRetry, Sleep, OnRetry>(
     policy: &RetryPolicy,
@@ -120,7 +120,7 @@ where
 ///
 /// # Errors
 ///
-/// Returns [`RetryError::Exhausted`] when no attempt succeeds — either the
+/// Returns [`RetryError::Exhausted`] when no attempt succeeds: either the
 /// `max_attempts` limit was reached or `should_retry` returned `false`.
 pub async fn retry_async<T, E, Op, Fut, ShouldRetry, Sleep, SleepFut>(
     policy: &RetryPolicy,
@@ -150,7 +150,7 @@ where
 ///
 /// # Errors
 ///
-/// Returns [`RetryError::Exhausted`] when no attempt succeeds — either the
+/// Returns [`RetryError::Exhausted`] when no attempt succeeds: either the
 /// `max_attempts` limit was reached or `should_retry` returned `false`.
 pub async fn retry_async_observed<T, E, Op, Fut, ShouldRetry, Sleep, SleepFut, OnRetry>(
     policy: &RetryPolicy,

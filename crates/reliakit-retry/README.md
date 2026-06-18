@@ -17,7 +17,7 @@ temporarily.
 
 `reliakit-retry` turns a [`reliakit-backoff`](https://crates.io/crates/reliakit-backoff)
 schedule and an attempt limit into a `RetryPolicy`, then drives a fallible
-operation against it — synchronously or asynchronously. It decides *whether* to
+operation against it, synchronously or asynchronously. It decides *whether* to
 retry and *how long* the gap should be, but it never sleeps, spawns, or assumes
 an async runtime: you inject the waiting.
 
@@ -26,7 +26,7 @@ It has no third-party dependencies, forbids unsafe code, and is `no_std`-friendl
 
 ## What problem it solves
 
-Transient failures — a flaky network call, a momentarily busy resource — are
+Transient failures (a flaky network call, a momentarily busy resource) are
 worth retrying a few times with growing gaps. Writing that loop by hand each time
 means re-deriving attempt counting, backoff, and "is this error even worth
 retrying" every time. This crate is that loop, made explicit and reusable, with
@@ -43,7 +43,7 @@ no opinion about how you wait.
 - You want a framework, middleware stack, or a Tower-style layer system. This is
   a single function, not infrastructure.
 - You want the crate to sleep, spawn, log, or schedule for you. It does none of
-  that by design — you provide the sleeper.
+  that by design; you provide the sleeper.
 
 ## Installation
 
@@ -146,8 +146,8 @@ let result: Result<u32, RetryError<&str>> = retry_with_sleep_observed(
 assert_eq!(result.unwrap(), 42);
 ```
 
-The hook fires only when another attempt will be made — not on success, and not
-on the final failure that exhausts the policy — and it **allocates nothing**. The
+The hook fires only when another attempt will be made (not on success, and not
+on the final failure that exhausts the policy), and it **allocates nothing**. The
 crate still does no logging itself; the hook is yours. (To observe the no-sleep
 driver, pass a no-op sleeper.)
 
