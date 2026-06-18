@@ -6,7 +6,7 @@ use core::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrV4, SocketAddr
 
 /// A scalar value that maps to and from a single CSV field.
 ///
-/// Encoding never fails — every supported value has a text form. Decoding is
+/// Encoding never fails: every supported value has a text form. Decoding is
 /// strict: the field text must parse exactly into the target type.
 ///
 /// Implemented for the integer types, `bool` (`"true"`/`"false"`), `char`, `String`,

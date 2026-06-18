@@ -1,4 +1,4 @@
-//! Validating a service config from raw, untrusted strings — reporting every
+//! Validating a service config from raw, untrusted strings, reporting every
 //! problem at once, with the credential kept out of logs. All through one name.
 //!
 //! Three building blocks cooperate, reached through the single `reliakit` crate:

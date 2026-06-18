@@ -1,15 +1,15 @@
-# reliakit-decide — design
+# reliakit-decide: design
 
 A deterministic, zero-dependency **decision engine** for agents and control
 logic. It is the fast, explainable, testable "judgment" layer that decides
-*what to do*; it does not generate language or understand text — that is a job
+*what to do*; it does not generate language or understand text. That is a job
 for an LLM. In the Cole agent, `reliakit-decide` is the deterministic spine and
 the LLM is the voice.
 
 ## What it is / is not
 
 - **Is:** a utility-based decision engine. Given candidate actions and the
-  current signals, it scores each action and picks the best — deterministically,
+  current signals, it scores each action and picks the best, deterministically,
   with an explanation, in microseconds, with no allocation beyond the action
   list and no third-party dependencies.
 - **Is not:** an LLM, a natural-language understander, or a learner that "knows"
@@ -25,7 +25,7 @@ the LLM is the voice.
    platforms; integer math is identical everywhere, which makes every decision
    reproducible and testable. This mirrors why `reliakit-codec` excludes floats.
 2. **Product-veto utility.** An action's utility is its base weight multiplied by
-   every consideration's score. Any near-zero consideration vetoes the action —
+   every consideration's score. Any near-zero consideration vetoes the action;
    all considerations must be satisfied. (Infinite-axis utility.)
 3. **Saturating, panic-free arithmetic.** No input overflows or panics.
 4. **Deterministic tie-breaking.** Equal utilities resolve in declaration order.
@@ -40,45 +40,45 @@ locked with exact-output tests before any release.
 
 Core (always on, this crate's `0.1`):
 
-- `Score` — fixed-point `0..=1.0`.
-- `Curve` — maps a raw signal to a score (`Linear`, `Inverse`, `Quadratic`,
+- `Score`: fixed-point `0..=1.0`.
+- `Curve`: maps a raw signal to a score (`Linear`, `Inverse`, `Quadratic`,
   `Threshold`, `Constant`; more later).
-- `Consideration` — one signal run through a curve.
-- `Action<A>` — a candidate decision: a base weight + considerations.
-- `Reasoner<A>` — holds actions: `decide()` / `rank()` by utility, `explain()`
+- `Consideration`: one signal run through a curve.
+- `Action<A>`: a candidate decision: a base weight + considerations.
+- `Reasoner<A>`: holds actions: `decide()` / `rank()` by utility, `explain()`
   for the per-consideration breakdown, and `decide_weighted(rand)` for roulette
   selection (caller-supplied RNG; dep-free, so it lives in core, not behind a
   feature).
-- `Decision<A>` / `Explanation<A>` / `Contribution` — the chosen id + utility,
+- `Decision<A>` / `Explanation<A>` / `Contribution`: the chosen id + utility,
   and the breakdown of why it won.
 
-Planned opt-in layers (later releases, behind features — none compromise the
+Planned opt-in layers (later releases, behind features, none compromise the
 small core):
 
-- `bandit` — exploration vs exploitation (epsilon-greedy / softmax) so feedback
+- `bandit`: exploration vs exploitation (epsilon-greedy / softmax) so feedback
   actually improves choices over time.
-- `adapt` — bounded integer weight adjustment from outcome feedback, plus
+- `adapt`: bounded integer weight adjustment from outcome feedback, plus
   save/load of learned weights (serialized via `reliakit-json` / `reliakit-codec`
   so the host can persist them).
-- `constraint` — constraint-aware decisions that compose the rest of the Reliakit
+- `constraint`: constraint-aware decisions that compose the rest of the Reliakit
   toolkit: skip an action when a deadline (`reliakit-timeout`) has passed, a
   limiter (`reliakit-ratelimit`) is empty, or a breaker (`reliakit-circuit`) is
   open. This makes `reliakit-decide` the capstone that ties the toolkit into one
   decision brain.
-- `personas` — per-agent weight profiles, so a roster of agents decides
+- `personas`: per-agent weight profiles, so a roster of agents decides
   distinctly.
 
 ## Honesty / positioning
 
 Public docs describe a "deterministic decision engine", never "AI that
 understands or talks like a human". Over-claiming would mislead adopters and
-damage the toolkit's credibility. The engine is powerful in exactly one domain —
-making fast, consistent, explainable, improvable decisions — and that is enough.
+damage the toolkit's credibility. The engine is powerful in exactly one domain,
+making fast, consistent, explainable, improvable decisions, and that is enough.
 
 ## Roadmap
 
 - `0.1` deterministic utility core (`Score`/`Curve`/`Consideration`/`Action`/
-  `Reasoner`) with exact-output tests — including `explain()` and dep-free
+  `Reasoner`) with exact-output tests, including `explain()` and dep-free
   weighted selection (`decide_weighted`). Can already replace rule-based routing
   / selection.
 - `0.2` `adapt` + persistable weights.

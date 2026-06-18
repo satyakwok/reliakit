@@ -90,7 +90,7 @@ impl<const N: usize> RollingWindow<N> {
 /// [`CircuitBreaker`](crate::CircuitBreaker).
 ///
 /// The window is a fixed-size ring of the most recent `WINDOW` outcomes, stored
-/// inline (`[bool; WINDOW]`) — no allocation, `no_std`-friendly. The breaker
+/// inline (`[bool; WINDOW]`), no allocation, `no_std`-friendly. The breaker
 /// trips to [`State::Open`] once the window holds at least `failure_threshold`
 /// failures, then behaves exactly like `CircuitBreaker` for cooldown and
 /// half-open recovery.
@@ -99,7 +99,7 @@ impl<const N: usize> RollingWindow<N> {
 /// private `RollingWindow` helper. The breaker itself owns only the state
 /// machine: current [`State`], cooldown bookkeeping (`opened_at`), and the
 /// half-open probe streak (`successes`). The streak counter is *not* part of
-/// the rolling window — it tracks consecutive successful probes in
+/// the rolling window; it tracks consecutive successful probes in
 /// [`State::HalfOpen`] and is reset on every transition into half-open, on
 /// [`trip`](Self::trip), and on [`reset`](Self::reset).
 ///

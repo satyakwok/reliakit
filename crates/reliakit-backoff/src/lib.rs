@@ -1,7 +1,7 @@
 //! Clock-agnostic retry backoff policies.
 //!
 //! `reliakit-backoff` computes *how long to wait* between retries. It does not
-//! sleep, spawn tasks, or touch the clock — you decide when to call it and how
+//! sleep, spawn tasks, or touch the clock; you decide when to call it and how
 //! to wait. That makes it usable from sync code, any async runtime, and
 //! `no_std` / embedded contexts, with deterministic, exact-byte-style tests.
 //!
@@ -120,7 +120,7 @@ impl Backoff {
     /// sequence `1, 1, 2, 3, 5, 8, ...`.
     ///
     /// So attempts `0` and `1` both wait `base`, then each delay is the sum of
-    /// the previous two — growth between linear and exponential.
+    /// the previous two, growth between linear and exponential.
     pub const fn fibonacci(base: Duration) -> Self {
         Self {
             base,
@@ -204,7 +204,7 @@ impl Backoff {
                 // delay(n) = base * fib(n) with fib = 1, 1, 2, 3, 5, ... Because
                 // base * fib(n) = base * fib(n-1) + base * fib(n-2), the delays
                 // themselves satisfy d(n) = d(n-1) + d(n-2) with d(0) = d(1) =
-                // base — so this stays in `Duration` with no multiplier overflow.
+                // base, so this stays in `Duration` with no multiplier overflow.
                 let mut prev = self.base; // d(i-1)
                 let mut curr = self.base; // d(i), starting at i = 1 (also d(0))
                 let mut i: u32 = 1;

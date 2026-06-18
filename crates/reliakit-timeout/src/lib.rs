@@ -1,14 +1,14 @@
 //! Clock-agnostic deadlines and timeouts.
 //!
 //! `reliakit-timeout` answers one question: *has my time budget run out, and how
-//! much is left?* It does not read the clock, sleep, or spawn anything — you
+//! much is left?* It does not read the clock, sleep, or spawn anything; you
 //! capture a start instant and a budget, then pass `now` to the query methods.
 //! That makes it usable from sync code, any async runtime, and `no_std` /
 //! embedded contexts, with deterministic tests.
 //!
 //! Time is a plain `u64` in any monotonic unit you choose (milliseconds is
 //! typical), matching [`reliakit-circuit`] and [`reliakit-ratelimit`]. All
-//! arithmetic saturates, so no method panics — not on overflow, and not on a
+//! arithmetic saturates, so no method panics: not on overflow, and not on a
 //! clock that moves backwards.
 //!
 //! Two small types:
@@ -101,12 +101,12 @@ impl Timeout {
 /// A time budget pinned to a monotonic timeline.
 ///
 /// A `Deadline` is a `start` instant plus a `budget`; it expires at
-/// `start + budget`. It never reads the clock — pass `now` to the query
+/// `start + budget`. It never reads the clock; pass `now` to the query
 /// methods. All arithmetic saturates, so a backwards-moving clock or an
 /// overflowing `start + budget` cannot panic.
 ///
 /// A zero budget expires immediately at `start`. For the same reason,
-/// [`Deadline::default`] (`start` and `budget` both `0`) is already expired —
+/// [`Deadline::default`] (`start` and `budget` both `0`) is already expired;
 /// it is not an "infinite" deadline.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub struct Deadline {

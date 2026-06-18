@@ -124,7 +124,7 @@ println!("{error}"); // "email: invalid format; password: too short"
 ### Conditional rules with `require` / `finish`
 
 `require` records a violation only when a check fails, and `finish` turns the
-accumulated violations into a `Result` — so you cannot forget the final
+accumulated violations into a `Result`, so you cannot forget the final
 emptiness check:
 
 ```rust
@@ -153,8 +153,8 @@ assert_eq!(result.unwrap_err().len(), 2);
 
 ## Composing with typed primitives
 
-For ready-made typed fields to validate — `Email`, `Port`, `Percent`,
-`BoundedStr`, and more — pair this crate with
+For ready-made typed fields to validate (`Email`, `Port`, `Percent`,
+`BoundedStr`, and more), pair this crate with
 [`reliakit-primitives`](https://crates.io/crates/reliakit-primitives). The
 `config_check` example in the [`reliakit`](https://crates.io/crates/reliakit)
 umbrella crate shows primitives, validate, and secret validating one config and
@@ -170,7 +170,7 @@ reporting every problem at once.
 ## `no_std`
 
 The crate supports `no_std`. The `Validate` trait, `Valid<T>`, and `Violation`
-are available without `alloc` — implement `Validate` with your own error type in
+are available without `alloc`; implement `Validate` with your own error type in
 allocation-free contexts. `ValidationError` and `ValidateResult` require the
 `alloc` feature (enabled by default via `std`).
 

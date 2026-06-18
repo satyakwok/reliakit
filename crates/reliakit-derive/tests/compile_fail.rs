@@ -6,7 +6,7 @@
 //! test drives a real `cargo build` of a generated fixture crate in a temporary
 //! directory and asserts the build fails with each expected message.
 //!
-//! It uses only the standard library — no `trybuild` or other dev-dependency.
+//! It uses only the standard library: no `trybuild` or other dev-dependency.
 //! When the sibling `reliakit-codec` crate is not reachable by path (e.g. a
 //! packaged copy of this crate), the test skips itself.
 

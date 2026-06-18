@@ -10,7 +10,7 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 
 ### Added
 
-- `reliakit-backoff`: `Backoff::fibonacci(base)` — a Fibonacci backoff schedule
+- `reliakit-backoff`: `Backoff::fibonacci(base)`: a Fibonacci backoff schedule
   where attempt `n` waits `base * fib(n)` (`1, 1, 2, 3, 5, 8, ...`), growth
   between linear and exponential. Saturating and bounded like the other
   strategies (ships as `reliakit-backoff` 1.1.0).
@@ -19,10 +19,10 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 
 All crates are promoted to **1.0.0**: their public APIs are now stable and follow
 standard semver, so a future breaking change will require a 2.0. The freeze
-fixes from the 0.x line — `reliakit-primitives` `PercentFloat`, private
+fixes from the 0.x line, `reliakit-primitives` `PercentFloat`, private
 `reliakit-json` `JsonLimits`, `#[non_exhaustive]` on the `reliakit-health` and
 `reliakit-decide` data types, and the documented-stable codec/JSON/CSV wire
-formats — are part of this frozen surface.
+formats, are part of this frozen surface.
 
 ### Changed
 
@@ -110,7 +110,7 @@ formats — are part of this frozen surface.
 - Initial release. Small, runtime-agnostic retry helpers built on
   `reliakit-backoff`: `RetryPolicy` (total-attempt limit plus a backoff
   schedule), and `retry` / `retry_with_sleep` / `retry_async` drivers with a
-  `should_retry` error classifier. The crate never sleeps or spawns internally —
+  `should_retry` error classifier. The crate never sleeps or spawns internally;
   `retry` runs attempts back-to-back, `retry_with_sleep` calls a caller-provided
   sleeper, and `retry_async` awaits a caller-provided sleep future using only
   `core::future::Future` (no Tokio/async-std/`futures`, no forced runtime).
@@ -122,7 +122,7 @@ formats — are part of this frozen surface.
 ### Added
 
 - `#[derive(CsvEncode, CsvDecode)]` for the `reliakit-csv` traits. A struct with
-  named fields becomes a CSV row — one column per field in declaration order,
+  named fields becomes a CSV row, one column per field in declaration order,
   with the field names as the header. Only structs with named fields are
   supported (CSV columns need names); tuple structs, unit structs, and enums are
   rejected. Decoding is strict. Requires `reliakit-csv` 0.1.1 for the generated
@@ -182,7 +182,7 @@ formats — are part of this frozen surface.
 
 ### Added
 
-- `BoundedMap<K, V, MIN, MAX>` and `BoundedSet<T, MIN, MAX>` — insertion-ordered,
+- `BoundedMap<K, V, MIN, MAX>` and `BoundedSet<T, MIN, MAX>`: insertion-ordered,
   vec-backed types with unique keys/elements and an enforced count range, using
   linear lookup so they stay deterministic and dependency-free.
 - `CollectionError::Duplicate` variant (the enum is `#[non_exhaustive]`).
@@ -201,8 +201,8 @@ formats — are part of this frozen surface.
 
 ### Added
 
-- Documented a real-world pattern — turning collected `Violation`s into an
-  API-style `(field, message)` error list — and how to pair the crate with
+- Documented a real-world pattern, turning collected `Violation`s into an
+  API-style `(field, message)` error list, and how to pair the crate with
   `reliakit-primitives` for ready-made typed fields. Docs only; no API change.
 
 ## reliakit-bulkhead 0.1.0 - 2026-06-08
@@ -278,7 +278,7 @@ formats — are part of this frozen surface.
 
 ### Added
 
-- `decorrelated_jitter(base, prev, cap, rand)` — a pure jitter helper that
+- `decorrelated_jitter(base, prev, cap, rand)`: a pure jitter helper that
   returns a delay uniformly in `base ..= prev * 3`, capped at `cap`. The caller
   feeds each result back in as `prev`, so the delay walks up and down between
   retries while the function stays dependency-free and saturating.
@@ -411,8 +411,8 @@ formats — are part of this frozen surface.
   tuple, and struct variants. Each variant is tagged by its zero-based
   declaration index as a little-endian `u32`, followed by the variant's fields
   in declaration order; decoding reads the tag first and an unknown tag is a
-  clear decode error. Unsupported enum forms — explicit discriminants,
-  `#[repr(...)]`, generic enums, and empty enums — are rejected with descriptive
+  clear decode error. Unsupported enum forms, explicit discriminants,
+  `#[repr(...)]`, generic enums, and empty enums, are rejected with descriptive
   compile errors. Existing struct derive behavior is unchanged.
 
 ## reliakit-derive 0.1.0 - 2026-06-05
@@ -421,8 +421,8 @@ formats — are part of this frozen surface.
 
 - Initial release of `reliakit-derive`: `#[derive(CanonicalEncode)]` and
   `#[derive(CanonicalDecode)]` for the `reliakit-codec` traits. The generated
-  code matches a handwritten implementation — one encode/decode call per field
-  in declaration order — and supports named, tuple, and unit structs; enums,
+  code matches a handwritten implementation, one encode/decode call per field
+  in declaration order, and supports named, tuple, and unit structs; enums,
   unions, and generics are rejected with a descriptive compile error. Built on
   only the standard library proc-macro API with no third-party dependencies.
 
@@ -576,7 +576,7 @@ formats — are part of this frozen surface.
 ### Added
 
 - Added RFC 8785 (JCS) canonical serialization behind the off-by-default
-  `canonical` feature — `to_canonical_string` / `to_canonical_vec`, with UTF-16
+  `canonical` feature, `to_canonical_string` / `to_canonical_vec`, with UTF-16
   key ordering, minimal string escaping, and ECMAScript number formatting.
   Numbers are treated as IEEE-754 doubles; a non-representable magnitude returns
   the new `JsonErrorKind::NonFiniteNumber`. Number formatting is checked against
@@ -805,21 +805,21 @@ Initial release.
 ### Added
 
 - Added the `reliakit-validate` crate with:
-  - `Validate` — trait for types that can validate themselves.
-  - `Valid<T>` — zero-cost wrapper carrying proof of successful validation.
-  - `ValidationError` — error type collecting one or more `Violation`s.
-  - `Violation` — single failed constraint with optional field name.
-  - `ValidateResult<T>` — `Result<T, ValidationError>` type alias.
+  - `Validate`: trait for types that can validate themselves.
+  - `Valid<T>`: zero-cost wrapper carrying proof of successful validation.
+  - `ValidationError`: error type collecting one or more `Violation`s.
+  - `Violation`: single failed constraint with optional field name.
+  - `ValidateResult<T>`: `Result<T, ValidationError>` type alias.
 
 ## reliakit-collections 0.1.0 - 2026-06-02
 
 ### Added
 
 - Added the `reliakit-collections` crate with:
-  - `BoundedVec<T, MIN, MAX>` — owned `Vec<T>` constrained to hold between
+  - `BoundedVec<T, MIN, MAX>`: owned `Vec<T>` constrained to hold between
     `MIN` and `MAX` elements. `push` and `pop` return errors instead of
     panicking when bounds would be violated.
-  - `CollectionError` — error type with `TooFew`, `TooMany`, and
+  - `CollectionError`: error type with `TooFew`, `TooMany`, and
     `InvalidBounds` variants.
 
 ## reliakit-primitives 0.2.2 - 2026-06-02

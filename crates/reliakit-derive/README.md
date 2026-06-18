@@ -24,7 +24,7 @@ outside its supported subset with a clear compile error rather than guessing.
 
 Some `reliakit` traits are deliberately implemented by hand so field order and
 validation stay visible in normal Rust. For plain data structs where the
-implementation is purely mechanical — one call per field, in order — writing it
+implementation is purely mechanical, one call per field, in order, writing it
 out by hand is repetitive without adding clarity. This crate provides an opt-in
 derive for exactly those cases.
 
@@ -40,7 +40,7 @@ This crate provides:
   same-named `reliakit-codec` (binary) traits,
 - `#[derive(JsonEncode)]` and `#[derive(JsonDecode)]` for the same-named
   `reliakit-json` traits,
-- generated implementations identical to a handwritten one — each field encoded
+- generated implementations identical to a handwritten one, each field encoded
   and decoded in declaration order,
 - clear compile errors for unsupported inputs.
 
@@ -131,8 +131,8 @@ An enum value is encoded as a variant tag followed by that variant's fields:
 
 Decoding reads the `u32` tag first, then decodes the matching variant's payload.
 An unknown tag is an `InvalidValue` codec error; a field decode error propagates
-unchanged. Trailing bytes are the caller's concern — use
-`decode_from_slice_exact` to reject them — not the generated impl's.
+unchanged. Trailing bytes are the caller's concern; use
+`decode_from_slice_exact` to reject them, not the generated impl's.
 
 Tags follow declaration order, so **reordering variants is a wire-format
 change**. Adding new variants at the end is backward compatible for decoding
@@ -168,8 +168,8 @@ enum Event {
 }
 ```
 
-A complete runnable example — all three variant kinds plus a nested derived
-struct inside a struct variant — is in `examples/protocol.rs`:
+A complete runnable example, all three variant kinds plus a nested derived
+struct inside a struct variant, is in `examples/protocol.rs`:
 
 ```sh
 cargo run -p reliakit-derive --example protocol
@@ -199,9 +199,9 @@ variants, because the field counter splits on those commas; use a type alias.
 
 The derive reads the derive input as a token stream and extracts two things: the
 type name and the field shape (named field identifiers, tuple field count, or
-unit) — for enums, that shape is read per variant along with its declaration
+unit), for enums, that shape is read per variant along with its declaration
 index. For decoding it calls the trait through its fully qualified path, so it
-never needs to parse or reproduce field *types* — only their names or positions.
+never needs to parse or reproduce field *types*, only their names or positions.
 The generated implementation is then built as source text and parsed back into
 tokens. This keeps the crate small enough to need no parsing library.
 

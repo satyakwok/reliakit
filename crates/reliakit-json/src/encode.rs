@@ -3,7 +3,7 @@
 //! [`JsonEncode`] is the encode half of typed JSON serialization. It is
 //! deliberately small: a value produces a [`JsonValue`], and the existing
 //! [`to_compact_string`](crate::to_compact_string) writer turns that into
-//! deterministic, compact JSON text. Encoding never fails — every supported
+//! deterministic, compact JSON text. Encoding never fails: every supported
 //! value has a JSON representation.
 
 use alloc::string::{String, ToString};

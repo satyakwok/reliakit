@@ -106,7 +106,7 @@ assert_eq!(token, "token");
 ### Redacting a field inside a struct
 
 The common case: a secret living in a config or request struct. Because
-`Secret<T>` redacts itself, deriving `Debug` on the parent stays safe — the
+`Secret<T>` redacts itself, deriving `Debug` on the parent stays safe: the
 secret field shows `[REDACTED]` and the rest prints normally, so you can log the
 whole struct.
 

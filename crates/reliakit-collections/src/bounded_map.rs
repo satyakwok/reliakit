@@ -7,7 +7,7 @@ use core::mem;
 /// `BoundedMap<K, V, MIN, MAX>` guarantees that the number of entries is always
 /// in the range `MIN..=MAX` and that every key is unique. It is backed by a
 /// `Vec<(K, V)>` in insertion order, so iteration is deterministic and pulls in
-/// no hashing or ordering machinery — lookups are a linear scan, which is fine
+/// no hashing or ordering machinery, lookups are a linear scan, which is fine
 /// for the small, bounded sizes this type is meant for.
 ///
 /// Mutations that would violate the bounds return a [`CollectionError`] instead

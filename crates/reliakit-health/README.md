@@ -15,7 +15,7 @@
 Health status types and a criticality-aware aggregator for Rust.
 
 `reliakit-health` answers one question: *given the state of my components, what
-is the overall health of the service?* It is plain data — it does not run checks,
+is the overall health of the service?* It is plain data; it does not run checks,
 read the clock, or perform I/O. You report each component's status; it rolls them
 up into one status, applying per-component **criticality** so a non-critical
 dependency going down *degrades* the service instead of *downing* it.
@@ -27,19 +27,19 @@ The crate has no dependencies, is `no_std`-friendly, and forbids unsafe code.
 
 ## What This Crate Does
 
-- `Health` — `Healthy` / `Degraded` / `Unhealthy`, ordered by severity, with
+- `Health`: `Healthy` / `Degraded` / `Unhealthy`, ordered by severity, with
   `worst`/`best`/`capped_at` combinators, `is_operational`, `from_ok`, `Display`.
-- `Criticality` — `Critical` (default) or `Optional`; an `Optional` component's
+- `Criticality`: `Critical` (default) or `Optional`; an `Optional` component's
   failure is capped at `Degraded`.
-- `Check<'a>` + `aggregate(..)` — an allocation-free, `no_std` path: build a fixed
+- `Check<'a>` + `aggregate(..)`: an allocation-free, `no_std` path: build a fixed
   array of borrowing checks and roll them up.
-- `HealthReport` — an owned, dynamically built report with a
+- `HealthReport`: an owned, dynamically built report with a
   `critical`/`optional`/`with` builder, `overall()`, `summary()` counts,
   `by_status()` filtering, and `reasons()` for non-healthy components.
 
 ## What This Crate Does Not Do
 
-It does not perform health checks, ping anything, read time, or change behavior —
+It does not perform health checks, ping anything, read time, or change behavior;
 it only summarizes statuses you supply. To *act* on a failing dependency (stop
 calling it) use a circuit breaker; `reliakit-health` reports, it does not decide.
 

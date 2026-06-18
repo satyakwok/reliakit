@@ -17,14 +17,14 @@ A clock-agnostic **circuit breaker** for Rust.
 When a dependency starts failing, retrying it immediately makes things worse: you
 pile load onto a service that is already struggling and make your own callers
 wait on calls that are almost certain to fail. A circuit breaker watches the
-recent outcome history and, once failures cross a threshold, **"opens"** — it
+recent outcome history and, once failures cross a threshold, **"opens"**: it
 rejects calls instantly (failing fast) for a cooldown period, then lets a single
 trial call through to check whether the dependency has recovered before resuming
 normal traffic.
 
 `reliakit-circuit` implements that pattern as a small, `Copy` state machine with
 **no dependencies**, no `std`, and no hidden behavior. It does not read the
-clock, sleep, spawn tasks, or allocate — *you* pass the current time in and *you*
+clock, sleep, spawn tasks, or allocate; *you* pass the current time in and *you*
 make the call. That makes it equally usable from synchronous code, any async
 runtime, and `no_std` / embedded targets, and it makes every transition
 deterministic and trivial to unit-test.
@@ -59,13 +59,13 @@ monotonic unit you choose (milliseconds is typical) and `cooldown` in that same
 unit. The benefits:
 
 - **Runtime-neutral.** Works under Tokio, async-std, blocking threads, or a bare
-  metal loop — you decide where time comes from.
+  metal loop, you decide where time comes from.
 - **`no_std`-friendly.** No clock dependency means it compiles for embedded
   targets (CI builds it for `thumbv7em-none-eabi`).
 - **Deterministic & testable.** Transitions depend only on the timestamps you
   pass, so tests assert exact behavior with no sleeping or mocking.
 
-A clock that briefly moves backwards is handled with saturating arithmetic — the
+A clock that briefly moves backwards is handled with saturating arithmetic; the
 breaker simply stays open rather than panicking.
 
 ## Installation
@@ -127,8 +127,8 @@ trips, rejects fast, recovers, and closes again.
 
 ## Failure rate over a window: `RollingBreaker`
 
-`CircuitBreaker` counts *consecutive* failures. When you want a *failure rate* —
-"trip if N of the last M calls failed" — use `RollingBreaker<const WINDOW>`, a
+`CircuitBreaker` counts *consecutive* failures. When you want a *failure rate*,
+"trip if N of the last M calls failed", use `RollingBreaker<const WINDOW>`, a
 const-generic variant that stores the last `WINDOW` outcomes inline (a
 `[bool; WINDOW]` ring, zero allocation, `no_std`). It shares the same cooldown
 and half-open recovery.
@@ -153,13 +153,13 @@ It exposes the same methods as `CircuitBreaker` plus `window_size()` and
 
 A circuit breaker decides **whether** to attempt a call; [`reliakit-backoff`](https://crates.io/crates/reliakit-backoff)
 decides **how long to wait** before the next attempt. Used together, the breaker
-sheds load while a dependency is down and backoff spaces out the retries — both
+sheds load while a dependency is down and backoff spaces out the retries, both
 clock-agnostic, both `no_std`.
 
 ## Concurrency
 
 `CircuitBreaker` is a plain value and is **not** internally synchronized (no
-atomics — keeping it dependency-free and `no_std`). To share one across threads
+atomics, keeping it dependency-free and `no_std`). To share one across threads
 or tasks, wrap it in your own `Mutex`/lock. For per-task breakers, just give each
 its own copy.
 
@@ -171,7 +171,7 @@ its own copy.
 
 ## When not to use it
 
-- For a single retry with a delay, a backoff policy alone is enough — reach for
+- For a single retry with a delay, a backoff policy alone is enough; reach for
   [`reliakit-backoff`](https://crates.io/crates/reliakit-backoff).
 - It does not measure latency, error rates over sliding windows, or perform
   health checks on its own; it reacts to the success/failure outcomes you report.
@@ -187,7 +187,7 @@ convenience.
 
 ## `no_std`
 
-`reliakit-circuit` is `#![no_std]` and allocation-free — pure `core`, zero
+`reliakit-circuit` is `#![no_std]` and allocation-free, pure `core`, zero
 third-party dependencies. The breaker is a small `Copy` value, so it runs on
 embedded targets without changes.
 

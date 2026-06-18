@@ -11,13 +11,13 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/satyakwok/reliakit/blob/main/LICENSE)
 [![zero dependencies](https://img.shields.io/badge/dependencies-0-success)](https://github.com/satyakwok/reliakit#footprint)
 
-One name for the whole **Reliakit** reliability toolkit — a zero-dependency,
+One name for the whole **Reliakit** reliability toolkit, a zero-dependency,
 `no_std`-friendly family of building blocks, each re-exported behind a feature
 flag.
 
 This crate contains no logic of its own. It exists so you can depend on a single
 name and turn on only the pieces you need. Nothing is pulled in by default beyond
-the `std` flag — each module appears only when its feature is enabled, so the
+the `std` flag; each module appears only when its feature is enabled, so the
 zero-dependency, `no_std`-friendly nature of each building block is preserved.
 
 ## What This Crate Does
@@ -32,13 +32,13 @@ zero-dependency, `no_std`-friendly nature of each building block is preserved.
 
 The umbrella adds nothing of its own, and neither do the building blocks:
 
-- **Zero third-party dependencies** — even with `features = ["full"]`, the entire
+- **Zero third-party dependencies**: even with `features = ["full"]`, the entire
   dependency tree is `reliakit-*` crates and the standard library. Nothing to
   vet, audit, or track for security advisories
   (`cargo tree -p reliakit --all-features` proves it).
-- **No `unsafe`** — every crate declares `#![forbid(unsafe_code)]`.
-- **`no_std`-friendly** — `alloc`/`std` are opt-in and forwarded per feature.
-- **Pay only for what you enable** — each module compiles in only when its
+- **No `unsafe`**: every crate declares `#![forbid(unsafe_code)]`.
+- **`no_std`-friendly**: `alloc`/`std` are opt-in and forwarded per feature.
+- **Pay only for what you enable**: each module compiles in only when its
   feature is turned on, so unused blocks cost nothing.
 
 ## When To Use It
@@ -51,7 +51,7 @@ The umbrella adds nothing of its own, and neither do the building blocks:
 ## When Not To Use It
 
 - You need exactly one building block and want the tightest possible dependency
-  graph — depend on that crate directly (e.g. `reliakit-ratelimit`). The umbrella
+  graph; depend on that crate directly (e.g. `reliakit-ratelimit`). The umbrella
   adds no capability, only convenience.
 
 ## Installation
@@ -87,7 +87,7 @@ reliakit = { version = "1.0", features = ["full"] }
 The building blocks are designed to compose, all reached through the one
 `reliakit` name.
 
-**A resilient client** — guard one call to a flaky dependency with an overall
+**A resilient client**: guard one call to a flaky dependency with an overall
 deadline, rate limiting, a circuit breaker, and backoff, driven by a single clock:
 
 ```sh
@@ -97,7 +97,7 @@ cargo run -p reliakit --example resilient_client \
 
 See [`examples/resilient_client.rs`](./examples/resilient_client.rs).
 
-**A config check** — validate a service config from raw, untrusted strings,
+**A config check**: validate a service config from raw, untrusted strings,
 reporting every problem at once with the credential kept out of logs:
 
 ```sh
@@ -107,7 +107,7 @@ cargo run -p reliakit --example config_check \
 
 See [`examples/config_check.rs`](./examples/config_check.rs).
 
-**Typed JSON** — parse untrusted JSON strictly, then lift the raw fields into
+**Typed JSON**: parse untrusted JSON strictly, then lift the raw fields into
 validated primitive types:
 
 ```sh
@@ -120,23 +120,23 @@ See [`examples/typed_json.rs`](./examples/typed_json.rs).
 
 | Feature | Module | Crate |
 |---|---|---|
-| `core` | `reliakit::core` | [`reliakit-core`](https://crates.io/crates/reliakit-core) — `Clock` trait + clocks |
-| `primitives` | `reliakit::primitives` | [`reliakit-primitives`](https://crates.io/crates/reliakit-primitives) — validated primitive types |
-| `secret` | `reliakit::secret` | [`reliakit-secret`](https://crates.io/crates/reliakit-secret) — secret redaction wrappers |
-| `validate` | `reliakit::validate` | [`reliakit-validate`](https://crates.io/crates/reliakit-validate) — validation traits + error aggregation |
-| `collections` | `reliakit::collections` | [`reliakit-collections`](https://crates.io/crates/reliakit-collections) — bounded collections |
-| `codec` | `reliakit::codec` | [`reliakit-codec`](https://crates.io/crates/reliakit-codec) — canonical binary encoding |
-| `csv` | `reliakit::csv` | [`reliakit-csv`](https://crates.io/crates/reliakit-csv) — strict, bounded CSV |
-| `backoff` | `reliakit::backoff` | [`reliakit-backoff`](https://crates.io/crates/reliakit-backoff) — retry backoff policies |
-| `retry` | `reliakit::retry` | [`reliakit-retry`](https://crates.io/crates/reliakit-retry) — runtime-agnostic retry helpers |
-| `bulkhead` | `reliakit::bulkhead` | [`reliakit-bulkhead`](https://crates.io/crates/reliakit-bulkhead) — concurrency limiter |
-| `health` | `reliakit::health` | [`reliakit-health`](https://crates.io/crates/reliakit-health) — criticality-aware health aggregator |
-| `circuit` | `reliakit::circuit` | [`reliakit-circuit`](https://crates.io/crates/reliakit-circuit) — circuit breaker |
-| `ratelimit` | `reliakit::ratelimit` | [`reliakit-ratelimit`](https://crates.io/crates/reliakit-ratelimit) — token-bucket rate limiter |
-| `timeout` | `reliakit::timeout` | [`reliakit-timeout`](https://crates.io/crates/reliakit-timeout) — deadlines and timeouts |
-| `json` | `reliakit::json` | [`reliakit-json`](https://crates.io/crates/reliakit-json) — strict, bounded JSON |
-| `derive` | `reliakit::derive` | [`reliakit-derive`](https://crates.io/crates/reliakit-derive) — derive macros |
-| `decide` | `reliakit::decide` | [`reliakit-decide`](https://crates.io/crates/reliakit-decide) — utility decision engine |
+| `core` | `reliakit::core` | [`reliakit-core`](https://crates.io/crates/reliakit-core), `Clock` trait + clocks |
+| `primitives` | `reliakit::primitives` | [`reliakit-primitives`](https://crates.io/crates/reliakit-primitives), validated primitive types |
+| `secret` | `reliakit::secret` | [`reliakit-secret`](https://crates.io/crates/reliakit-secret), secret redaction wrappers |
+| `validate` | `reliakit::validate` | [`reliakit-validate`](https://crates.io/crates/reliakit-validate), validation traits + error aggregation |
+| `collections` | `reliakit::collections` | [`reliakit-collections`](https://crates.io/crates/reliakit-collections), bounded collections |
+| `codec` | `reliakit::codec` | [`reliakit-codec`](https://crates.io/crates/reliakit-codec), canonical binary encoding |
+| `csv` | `reliakit::csv` | [`reliakit-csv`](https://crates.io/crates/reliakit-csv), strict, bounded CSV |
+| `backoff` | `reliakit::backoff` | [`reliakit-backoff`](https://crates.io/crates/reliakit-backoff), retry backoff policies |
+| `retry` | `reliakit::retry` | [`reliakit-retry`](https://crates.io/crates/reliakit-retry), runtime-agnostic retry helpers |
+| `bulkhead` | `reliakit::bulkhead` | [`reliakit-bulkhead`](https://crates.io/crates/reliakit-bulkhead), concurrency limiter |
+| `health` | `reliakit::health` | [`reliakit-health`](https://crates.io/crates/reliakit-health), criticality-aware health aggregator |
+| `circuit` | `reliakit::circuit` | [`reliakit-circuit`](https://crates.io/crates/reliakit-circuit), circuit breaker |
+| `ratelimit` | `reliakit::ratelimit` | [`reliakit-ratelimit`](https://crates.io/crates/reliakit-ratelimit), token-bucket rate limiter |
+| `timeout` | `reliakit::timeout` | [`reliakit-timeout`](https://crates.io/crates/reliakit-timeout), deadlines and timeouts |
+| `json` | `reliakit::json` | [`reliakit-json`](https://crates.io/crates/reliakit-json), strict, bounded JSON |
+| `derive` | `reliakit::derive` | [`reliakit-derive`](https://crates.io/crates/reliakit-derive), derive macros |
+| `decide` | `reliakit::decide` | [`reliakit-decide`](https://crates.io/crates/reliakit-decide), utility decision engine |
 
 ## Feature Flags
 
@@ -155,7 +155,7 @@ See [`examples/typed_json.rs`](./examples/typed_json.rs).
 ## `no_std`
 
 `no_std`-compatible (`default-features = false`). Enable the umbrella's `alloc`
-feature for the modules whose owned storage is gated behind it — `primitives`,
+feature for the modules whose owned storage is gated behind it: `primitives`,
 `secret`, `validate`, `collections`, `codec`, `csv`, and `health`. `json` and
 `decide` always include `alloc` on their own, so they need no extra feature. The
 pure-`core` blocks (`backoff`, `retry`, `bulkhead`, `circuit`, `ratelimit`,

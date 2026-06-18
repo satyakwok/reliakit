@@ -19,7 +19,7 @@ counting semaphore: acquire a permit before starting work, release it when the
 work finishes. When no permit is available the request is rejected immediately,
 so load is shed instead of piling up on a struggling dependency.
 
-It does not block, sleep, spawn tasks, or read the clock — acquiring a permit
+It does not block, sleep, spawn tasks, or read the clock; acquiring a permit
 either succeeds now or fails now. That keeps it usable from synchronous code, any
 async runtime, and `no_std` / embedded targets, with deterministic tests.
 
@@ -27,14 +27,14 @@ The crate has no dependencies, is `#![no_std]`, and forbids unsafe code.
 
 ## What This Crate Does
 
-- `Bulkhead` — a small `Copy` value: a fixed `capacity` and the number of
+- `Bulkhead`: a small `Copy` value: a fixed `capacity` and the number of
   permits currently held.
-- `try_acquire(n)` / `try_acquire_one()` — reserve permits when room exists and
+- `try_acquire(n)` / `try_acquire_one()`: reserve permits when room exists and
   report whether it succeeded; an over-capacity request always fails and no
   partial acquire ever happens.
-- `release(n)` / `release_one()` — return permits; saturates at zero, so a stray
+- `release(n)` / `release_one()`: return permits; saturates at zero, so a stray
   release cannot underflow or panic.
-- `available()` / `in_flight()` / `is_full()` / `is_empty()` / `reset()` —
+- `available()` / `in_flight()` / `is_full()` / `is_empty()` / `reset()`:
   inspect and clear the limiter.
 
 ## What This Crate Does Not Do
@@ -83,7 +83,7 @@ This crate has no feature flags.
 
 ## `no_std`
 
-`reliakit-bulkhead` is `#![no_std]` and allocation-free — it depends only on
+`reliakit-bulkhead` is `#![no_std]` and allocation-free: it depends only on
 `core`, with no third-party crates. Permit arithmetic saturates and the capacity
 is clamped to at least `1`, so no input overflows, panics, or underflows.
 

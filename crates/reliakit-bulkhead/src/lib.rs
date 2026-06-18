@@ -5,7 +5,7 @@
 //! release it when the work finishes. When no permit is available the request is
 //! rejected immediately so load is shed instead of piling up.
 //!
-//! It does not block, sleep, spawn tasks, or read the clock — acquiring a permit
+//! It does not block, sleep, spawn tasks, or read the clock; acquiring a permit
 //! either succeeds now or fails now. That keeps it usable from synchronous code,
 //! any async runtime, and `no_std` / embedded targets, with deterministic tests.
 //!
@@ -123,7 +123,7 @@ impl Bulkhead {
     /// Releases `permits` permits back to the bulkhead.
     ///
     /// Saturates at zero, so releasing more than are held simply empties the
-    /// bulkhead rather than underflowing — a release without a matching acquire
+    /// bulkhead rather than underflowing; a release without a matching acquire
     /// cannot drive `in_flight` negative or panic.
     pub fn release(&mut self, permits: usize) {
         self.in_flight = self.in_flight.saturating_sub(permits);

@@ -1,5 +1,5 @@
-//! Parse untrusted JSON strictly, then lift the raw fields into validated types
-//! — all through the one `reliakit` name.
+//! Parse untrusted JSON strictly, then lift the raw fields into validated types,
+//! all through the one `reliakit` name.
 //!
 //! - [`reliakit::json`] parses under conservative limits and rejects malformed
 //!   or ambiguous input.

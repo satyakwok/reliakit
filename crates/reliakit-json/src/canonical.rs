@@ -11,7 +11,7 @@
 //!
 //! Numbers are treated as IEEE-754 doubles, exactly as RFC 8785 specifies. A
 //! value carrying more precision than an `f64` can hold (for example an integer
-//! larger than 2^53) is canonicalized as the nearest double — this loss of
+//! larger than 2^53) is canonicalized as the nearest double; this loss of
 //! precision is part of the scheme, not a bug. A number whose magnitude
 //! overflows `f64` to infinity cannot be represented and returns
 //! [`JsonErrorKind::NonFiniteNumber`](crate::JsonErrorKind::NonFiniteNumber).

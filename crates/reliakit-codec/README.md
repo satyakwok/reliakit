@@ -114,7 +114,7 @@ fails when trailing bytes remain.
 
 ### Manual Trait Implementations
 
-This crate ships no derive macro of its own — implementations are handwritten, so
+This crate ships no derive macro of its own; implementations are handwritten, so
 field order and validation stay visible. If you prefer to generate the
 mechanical cases, the optional [`reliakit-derive`](https://crates.io/crates/reliakit-derive)
 crate provides `#[derive(CanonicalEncode, CanonicalDecode)]` for structs and

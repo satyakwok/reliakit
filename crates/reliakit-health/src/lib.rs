@@ -1,7 +1,7 @@
 //! Health status types and a criticality-aware aggregator.
 //!
 //! `reliakit-health` answers one question: *given the state of my components,
-//! what is the overall health of the service?* It is plain data — it does not
+//! what is the overall health of the service?* It is plain data: it does not
 //! run checks, read the clock, or perform I/O. You report each component's
 //! status; it rolls them up into one [`Health`], applying per-component
 //! [`Criticality`] so a non-critical dependency going down *degrades* the

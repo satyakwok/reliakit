@@ -33,7 +33,7 @@
 //! # Redacting a field inside a larger struct
 //!
 //! The common case is a secret that lives in a config or request struct. Because
-//! [`Secret<T>`] redacts itself, deriving `Debug` on the parent stays safe — the
+//! [`Secret<T>`] redacts itself, deriving `Debug` on the parent stays safe: the
 //! secret field renders as `[REDACTED]` while every other field prints normally,
 //! so the whole struct can be logged without leaking:
 //!
@@ -155,7 +155,7 @@ impl<T: AsRef<[u8]>> Secret<T> {
     /// soon as the first differing byte is found, which can leak the secret one
     /// byte at a time through timing. `ct_eq` always inspects every byte, so the
     /// duration reveals only the input length, not its contents. Inputs of
-    /// different lengths always compare unequal — the length itself is not
+    /// different lengths always compare unequal; the length itself is not
     /// treated as secret.
     ///
     /// This is a best-effort, dependency-free implementation built on
