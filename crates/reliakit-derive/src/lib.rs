@@ -875,13 +875,28 @@ fn count_fields(stream: TokenStream) -> usize {
         .count()
 }
 
-/// Splits a token stream on top-level commas, dropping the commas.
+/// Splits a token stream on top-level commas, dropping the commas. Commas inside
+/// a delimited group are already hidden by the token tree, but angle brackets
+/// (`<...>`) are plain punctuation rather than a group, so a generic argument
+/// list like `Result<T, E>` keeps its comma at this level. Tracking the angle
+/// depth keeps that comma from being read as a field separator. A stray `>`
+/// (for example the one in a `->` return arrow at depth zero) saturates rather
+/// than underflowing.
 fn top_level_segments(stream: TokenStream) -> Vec<Vec<TokenTree>> {
     let mut segments = Vec::new();
     let mut current = Vec::new();
+    let mut angle_depth: usize = 0;
     for token in stream {
         match &token {
-            TokenTree::Punct(punct) if punct.as_char() == ',' => {
+            TokenTree::Punct(punct) if punct.as_char() == '<' => {
+                angle_depth += 1;
+                current.push(token);
+            }
+            TokenTree::Punct(punct) if punct.as_char() == '>' => {
+                angle_depth = angle_depth.saturating_sub(1);
+                current.push(token);
+            }
+            TokenTree::Punct(punct) if punct.as_char() == ',' && angle_depth == 0 => {
                 segments.push(core::mem::take(&mut current));
             }
             _ => current.push(token),
