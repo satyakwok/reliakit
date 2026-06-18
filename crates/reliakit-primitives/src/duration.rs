@@ -197,11 +197,58 @@ impl PartialEq<&String> for HumanDuration {
     }
 }
 
+/// A [`Duration`] guaranteed to be strictly positive (non-zero).
+///
+/// Useful for timeouts and intervals where a zero duration is meaningless: the
+/// type turns "must be greater than zero" into a guarantee carried by the value
+/// instead of a check repeated at every call site.
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct PositiveDuration(Duration);
+
+impl PositiveDuration {
+    /// Creates a `PositiveDuration`. Returns `Invalid` if `value` is
+    /// [`Duration::ZERO`].
+    pub fn new(value: Duration) -> PrimitiveResult<Self> {
+        if value.is_zero() {
+            return Err(PrimitiveError::Invalid {
+                message: "duration must be strictly positive",
+            });
+        }
+        Ok(Self(value))
+    }
+
+    /// Returns the wrapped [`Duration`].
+    pub fn get(self) -> Duration {
+        self.0
+    }
+}
+
+impl fmt::Display for PositiveDuration {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:?}", self.0)
+    }
+}
+
+impl TryFrom<Duration> for PositiveDuration {
+    type Error = PrimitiveError;
+
+    fn try_from(value: Duration) -> Result<Self, Self::Error> {
+        Self::new(value)
+    }
+}
+
+impl AsRef<Duration> for PositiveDuration {
+    fn as_ref(&self) -> &Duration {
+        &self.0
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use super::HumanDuration;
+    use super::{HumanDuration, PositiveDuration};
     use crate::PrimitiveError;
     use alloc::string::ToString;
+    use core::time::Duration;
 
     #[test]
     fn parses_seconds() {
@@ -311,5 +358,32 @@ mod tests {
         assert_eq!(duration, "1m30s");
         assert_eq!(duration, owned);
         assert!("1s1m".parse::<HumanDuration>().is_err());
+    }
+
+    #[test]
+    fn positive_duration_accepts_nonzero() {
+        let d = PositiveDuration::new(Duration::from_nanos(1)).unwrap();
+        assert_eq!(d.get(), Duration::from_nanos(1));
+    }
+
+    #[test]
+    fn positive_duration_rejects_zero() {
+        assert!(matches!(
+            PositiveDuration::new(Duration::ZERO),
+            Err(PrimitiveError::Invalid { .. })
+        ));
+    }
+
+    #[test]
+    fn positive_duration_try_from_and_as_ref() {
+        let d = PositiveDuration::try_from(Duration::from_secs(5)).unwrap();
+        assert_eq!(d.as_ref(), &Duration::from_secs(5));
+        assert!(PositiveDuration::try_from(Duration::ZERO).is_err());
+    }
+
+    #[test]
+    fn positive_duration_display() {
+        let d = PositiveDuration::new(Duration::from_millis(1500)).unwrap();
+        assert_eq!(d.to_string(), "1.5s");
     }
 }

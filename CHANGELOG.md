@@ -14,6 +14,12 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
   where attempt `n` waits `base * fib(n)` (`1, 1, 2, 3, 5, 8, ...`), growth
   between linear and exponential. Saturating and bounded like the other
   strategies (ships as `reliakit-backoff` 1.1.0).
+- `reliakit-primitives`: `Probability`, a finite `f64` in `0.0..=1.0` for rates,
+  weights, and sampling. Has `new`/`TryFrom<f64>`/`Display` and a `complement`
+  helper. Rejects NaN, infinity, and out-of-range values.
+- `reliakit-primitives`: `PositiveDuration`, a `Duration` that rejects
+  `Duration::ZERO`. Has `new`/`TryFrom<Duration>`/`Display`/`AsRef<Duration>`.
+  (Both ship as `reliakit-primitives` 1.1.0.)
 
 ## 1.0.0 - 2026-06-15
 

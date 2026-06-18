@@ -59,9 +59,9 @@
 //! no `alloc`) provides the allocation-free primitives:
 //!
 //! - numeric: [`Percent`], [`PercentFloat`], [`Port`], [`PositiveInt`],
-//!   [`PositiveFloat`], [`ByteSize`],
-//! - [`Uuid`], [`MacAddress`], and [`HumanDuration`] (parsing and `Display` do
-//!   not allocate),
+//!   [`PositiveFloat`], [`Probability`], [`ByteSize`],
+//! - [`Uuid`], [`MacAddress`], [`HumanDuration`], and [`PositiveDuration`]
+//!   (parsing and `Display` do not allocate),
 //! - the error types ([`PrimitiveError`], [`PrimitiveErrorKind`],
 //!   [`PrimitiveResult`]).
 //!
@@ -110,13 +110,13 @@ pub mod uuid;
 pub use bounded::BoundedStr;
 #[cfg(feature = "alloc")]
 pub use collections::NonEmptyVec;
-pub use duration::HumanDuration;
+pub use duration::{HumanDuration, PositiveDuration};
 pub use error::{PrimitiveError, PrimitiveErrorKind, PrimitiveResult};
 pub use mac::MacAddress;
 pub use net::Cidr;
 #[cfg(feature = "alloc")]
 pub use non_empty::NonEmptyStr;
-pub use numeric::{ByteSize, Percent, PercentFloat, Port, PositiveFloat, PositiveInt};
+pub use numeric::{ByteSize, Percent, PercentFloat, Port, PositiveFloat, PositiveInt, Probability};
 #[cfg(feature = "alloc")]
 pub use semver::SemVer;
 #[cfg(feature = "alloc")]
