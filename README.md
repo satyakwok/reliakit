@@ -2,6 +2,8 @@
   <img src="./assets/reliakit-logo.png" alt="Reliakit" width="520">
 </p>
 
+[English](./README.md) | [Bahasa Indonesia](./README.id.md)
+
 # Reliakit
 
 Small, zero-dependency Rust reliability crates: explicit invariants, redacted

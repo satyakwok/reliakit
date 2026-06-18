@@ -7,3 +7,8 @@
 [default.extend-words]
 tru = "tru"
 fo = "fo"
+
+# Translated docs are not English prose, so the English dictionary would flag
+# them. Exclude any `*.id.md` (Bahasa Indonesia) file.
+[files]
+extend-exclude = ["*.id.md"]
