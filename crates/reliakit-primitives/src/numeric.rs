@@ -304,9 +304,61 @@ impl TryFrom<f64> for PercentFloat {
     }
 }
 
+// ── Probability ───────────────────────────────────────────────────────────────
+
+/// Probability as `f64` in the range `0.0..=1.0`.
+///
+/// Use this for rates, weights, and sampling. For a `0..=100` percentage use
+/// [`PercentFloat`]; for an integer percentage use [`Percent`].
+#[derive(Debug, Copy, Clone, PartialEq, PartialOrd)]
+pub struct Probability(f64);
+
+impl Probability {
+    /// Minimum allowed probability.
+    pub const MIN: f64 = 0.0;
+    /// Maximum allowed probability.
+    pub const MAX: f64 = 1.0;
+
+    /// Creates a `Probability`. Returns `Invalid` if `value` is not finite or is
+    /// outside `0.0..=1.0`.
+    pub fn new(value: f64) -> PrimitiveResult<Self> {
+        if !value.is_finite() || !(Self::MIN..=Self::MAX).contains(&value) {
+            return Err(PrimitiveError::Invalid {
+                message: "probability must be a finite number between 0.0 and 1.0 inclusive",
+            });
+        }
+        Ok(Self(value))
+    }
+
+    /// Returns the probability value.
+    pub fn get(self) -> f64 {
+        self.0
+    }
+
+    /// Returns the complementary probability, `1.0 - p`. Always valid because
+    /// the complement of a value in `0.0..=1.0` is itself in `0.0..=1.0`.
+    pub fn complement(self) -> Self {
+        Self(Self::MAX - self.0)
+    }
+}
+
+impl fmt::Display for Probability {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl TryFrom<f64> for Probability {
+    type Error = PrimitiveError;
+
+    fn try_from(value: f64) -> Result<Self, Self::Error> {
+        Self::new(value)
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{ByteSize, Percent, PercentFloat, Port, PositiveFloat, PositiveInt};
+    use super::{ByteSize, Percent, PercentFloat, Port, PositiveFloat, PositiveInt, Probability};
     use crate::PrimitiveError;
     use alloc::string::ToString;
 
@@ -512,5 +564,43 @@ mod tests {
     fn percentage_f64_try_from() {
         assert!(PercentFloat::try_from(50.0f64).is_ok());
         assert!(PercentFloat::try_from(101.0f64).is_err());
+    }
+
+    #[test]
+    fn probability_accepts_boundaries() {
+        assert_eq!(Probability::new(0.0).unwrap().get(), 0.0);
+        assert_eq!(Probability::new(0.5).unwrap().get(), 0.5);
+        assert_eq!(Probability::new(1.0).unwrap().get(), 1.0);
+    }
+
+    #[test]
+    fn probability_rejects_out_of_range() {
+        assert!(Probability::new(-0.000001).is_err());
+        assert!(Probability::new(1.000001).is_err());
+    }
+
+    #[test]
+    fn probability_rejects_nan_and_infinity() {
+        assert!(Probability::new(f64::NAN).is_err());
+        assert!(Probability::new(f64::INFINITY).is_err());
+        assert!(Probability::new(f64::NEG_INFINITY).is_err());
+    }
+
+    #[test]
+    fn probability_complement() {
+        assert_eq!(Probability::new(0.25).unwrap().complement().get(), 0.75);
+        assert_eq!(Probability::new(0.0).unwrap().complement().get(), 1.0);
+        assert_eq!(Probability::new(1.0).unwrap().complement().get(), 0.0);
+    }
+
+    #[test]
+    fn probability_display() {
+        assert_eq!(Probability::new(0.5).unwrap().to_string(), "0.5");
+    }
+
+    #[test]
+    fn probability_try_from() {
+        assert!(Probability::try_from(0.5f64).is_ok());
+        assert!(Probability::try_from(2.0f64).is_err());
     }
 }

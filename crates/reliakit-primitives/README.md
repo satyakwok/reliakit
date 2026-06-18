@@ -187,6 +187,7 @@ depending on display text.
 | `Port` | TCP/UDP port from `1` to `65535` inclusive |
 | `PositiveInt` | `u64` strictly greater than zero |
 | `PositiveFloat` | Finite `f64` strictly greater than zero |
+| `Probability` | Finite `f64` from `0.0` to `1.0` inclusive |
 | `ByteSize` | Byte size value with human-readable display output |
 
 ### Collections
@@ -203,6 +204,7 @@ depending on display text.
 | `Uuid` | UUID in `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx` format |
 | `MacAddress` | 48-bit MAC address (`aa:bb:cc:dd:ee:ff` or `-` form), allocation-free |
 | `HumanDuration` | Duration parsed from `1h`, `30m`, `45s`, `500ms`, or combinations |
+| `PositiveDuration` | `Duration` guaranteed to be non-zero |
 
 ### Networking
 
@@ -223,9 +225,9 @@ The crate supports `no_std`. Building with `--no-default-features` (no `std`,
 no `alloc`) provides the allocation-free primitives:
 
 - numeric: `Percent`, `PercentFloat`, `Port`, `PositiveInt`, `PositiveFloat`,
-  `ByteSize`,
-- `Uuid`, `MacAddress`, `Cidr`, and `HumanDuration` (parsing and `Display` do
-  not allocate),
+  `Probability`, `ByteSize`,
+- `Uuid`, `MacAddress`, `Cidr`, `HumanDuration`, and `PositiveDuration` (parsing
+  and `Display` do not allocate),
 - the error types (`PrimitiveError`, `PrimitiveErrorKind`, `PrimitiveResult`).
 
 Enabling `alloc` adds the owned, allocation-backed types: `Slug`, `Email`,
