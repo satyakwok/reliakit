@@ -329,6 +329,47 @@ fn nested_and_composite_roundtrip() {
     }
 }
 
+/// A tuple field whose type carries a top-level comma inside angle brackets
+/// (`Result<T, E>`). The parser must count this as one field, not two: angle
+/// brackets are punctuation, not a delimited group, so the inner comma reaches
+/// the field splitter.
+#[derive(Debug, PartialEq, CanonicalEncode, CanonicalDecode)]
+struct GenericTuple(Result<u8, u16>, u8);
+
+#[test]
+fn tuple_field_with_generic_comma_roundtrip() {
+    for value in [GenericTuple(Ok(7), 9), GenericTuple(Err(600), 1)] {
+        let bytes = encode_to_vec(&value).unwrap();
+        assert_eq!(
+            decode_from_slice_exact::<GenericTuple>(&bytes).unwrap(),
+            value
+        );
+    }
+}
+
+/// The same case inside a tuple enum variant, which shares the field-counting
+/// path.
+#[derive(Debug, PartialEq, CanonicalEncode, CanonicalDecode)]
+enum GenericVariant {
+    One(Result<u16, u8>),
+    Two(u8, Result<u8, u8>),
+}
+
+#[test]
+fn tuple_variant_with_generic_comma_roundtrip() {
+    for value in [
+        GenericVariant::One(Ok(700)),
+        GenericVariant::One(Err(3)),
+        GenericVariant::Two(5, Ok(6)),
+    ] {
+        let bytes = encode_to_vec(&value).unwrap();
+        assert_eq!(
+            decode_from_slice_exact::<GenericVariant>(&bytes).unwrap(),
+            value
+        );
+    }
+}
+
 // Raw-identifier variants are necessarily keywords, hence lower case.
 #[allow(non_camel_case_types)]
 #[derive(Debug, PartialEq, CanonicalEncode, CanonicalDecode)]
