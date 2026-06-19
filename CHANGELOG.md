@@ -9,7 +9,12 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 ## Unreleased
 
 ### Added
-
+- `reliakit-circuit`: `allow_observed`, `on_success_observed`, and
+  `on_failure_observed` on both `CircuitBreaker` and `RollingBreaker`, which
+  take an `on_state_change(from, to)` hook called only on actual state
+  transitions for logging or metrics. The existing `allow`/`on_success`/
+  `on_failure` are unchanged and delegate to these with a no-op hook.
+  Allocation-free, `no_std`, zero-dependency.
 - `reliakit-backoff`: `Backoff::fibonacci(base)`: a Fibonacci backoff schedule
   where attempt `n` waits `base * fib(n)` (`1, 1, 2, 3, 5, 8, ...`), growth
   between linear and exponential. Saturating and bounded like the other
