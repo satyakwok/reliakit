@@ -207,6 +207,13 @@ jobs:
             echo "::endgroup::"
           done
 
+      # The umbrella's bare-metal example must keep building for a no_std target.
+      - name: Check the embedded no_std example
+        run: |
+          cargo check -p reliakit --example embedded_no_std \
+            --no-default-features --features "core backoff circuit" \
+            --target thumbv7em-none-eabi --locked
+
   no-third-party-deps:
     name: Zero dependencies
     runs-on: ubuntu-latest
