@@ -20,6 +20,10 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 - `reliakit-primitives`: `PositiveDuration`, a `Duration` that rejects
   `Duration::ZERO`. Has `new`/`TryFrom<Duration>`/`Display`/`AsRef<Duration>`.
   (Both ship as `reliakit-primitives` 1.1.0.)
+- `reliakit`: an `intake_pipeline` example carrying one batch end to end: typed
+  CSV in, per-field validation, a bounded buffer that sheds when full, canonical
+  encoding for the wire, a resilient flush behind retry/backoff/circuit, and a
+  closing health report.
 
 ## reliakit-derive 1.0.2 - 2026-06-19
 
