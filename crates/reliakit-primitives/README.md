@@ -169,6 +169,7 @@ depending on display text.
 |---|---|
 | `NonEmptyStr` | Owned string that is not empty and not whitespace-only |
 | `BoundedStr<MIN, MAX>` | Owned string constrained by character length |
+| `InlineStr<MIN, MAX>` | Stack-allocated string constrained by byte length (no `alloc`) |
 | `Slug` | Lowercase alphanumeric + hyphens, URL-safe |
 | `Email` | Basic structural email validation |
 | `HttpUrl` | URL that must start with `http://` or `https://` |

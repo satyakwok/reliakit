@@ -19,7 +19,10 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
   helper. Rejects NaN, infinity, and out-of-range values.
 - `reliakit-primitives`: `PositiveDuration`, a `Duration` that rejects
   `Duration::ZERO`. Has `new`/`TryFrom<Duration>`/`Display`/`AsRef<Duration>`.
-  (Both ship as `reliakit-primitives` 1.1.0.)
+- `reliakit-primitives`: `InlineStr<MIN, MAX>`, a stack-allocated bounded string
+  stored in a `[u8; MAX]` buffer with no heap allocation, so it works in `no_std`
+  without `alloc`. Bounds the byte length (not the character count like
+  `BoundedStr`) and is `Copy`. (All ship as `reliakit-primitives` 1.1.0.)
 - `reliakit`: an `intake_pipeline` example carrying one batch end to end: typed
   CSV in, per-field validation, a bounded buffer that sheds when full, canonical
   encoding for the wire, a resilient flush behind retry/backoff/circuit, and a
