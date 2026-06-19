@@ -69,6 +69,52 @@ jobs:
             echo "::endgroup::"
           done
 
+  # Portability gate: run the test suite across the three major OSes and the
+  # stable/beta/nightly channels. The `rust` job above is the canonical
+  # fmt/clippy/lint gate on ubuntu+stable, so that combination is excluded here.
+  # Nightly is informational (a compiler-side regression there must not block a PR).
+  test:
+    name: Test (${{ matrix.os }} / ${{ matrix.toolchain }})
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.toolchain == 'nightly' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        toolchain: [stable, beta, nightly]
+        exclude:
+          - os: ubuntu-latest
+            toolchain: stable
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Install Rust ${{ matrix.toolchain }}
+        run: |
+          rustup toolchain install ${{ matrix.toolchain }} --profile minimal
+          rustup default ${{ matrix.toolchain }}
+          rustc --version
+          cargo --version
+
+      - name: Cache Cargo
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-test-${{ matrix.toolchain }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-test-${{ matrix.toolchain }}-
+            ${{ runner.os }}-cargo-
+
+      - name: Test
+        run: cargo test --workspace --all-features --locked
+
   msrv:
     name: MSRV
     runs-on: ubuntu-latest
