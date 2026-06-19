@@ -414,3 +414,143 @@ fn async_retry_exhausts() {
     assert_eq!(calls, 3);
     assert_eq!(sleeps, 2, "slept before retries 2 and 3");
 }
+
+// ---- total backoff budget (#135) ----
+
+#[test]
+fn budget_accessor_defaults_to_none() {
+    assert_eq!(policy(3).budget(), None);
+    let p = policy(3).with_budget(Duration::from_millis(50));
+    assert_eq!(p.budget(), Some(Duration::from_millis(50)));
+}
+
+#[test]
+fn budget_stops_before_the_next_wait_exceeds_it() {
+    // Constant 5ms backoff, budget 12ms: waits of 5 + 5 fit (10ms); the third
+    // would reach 15ms > 12ms, so the driver stops there.
+    let p = RetryPolicy::new(10, Backoff::constant(Duration::from_millis(5)))
+        .unwrap()
+        .with_budget(Duration::from_millis(12));
+    let mut calls = 0;
+    let mut slept = Duration::ZERO;
+    let result: Result<u32, RetryError<&str>> = retry_with_sleep(
+        &p,
+        || {
+            calls += 1;
+            Err("always")
+        },
+        |_| true,
+        |delay| slept = slept.saturating_add(delay),
+    );
+    assert_eq!(result.unwrap_err().attempts(), 3);
+    assert_eq!(calls, 3);
+    assert_eq!(
+        slept,
+        Duration::from_millis(10),
+        "only the two waits that fit"
+    );
+}
+
+#[test]
+fn budget_is_inclusive_of_a_wait_that_lands_exactly_on_it() {
+    // Budget 10ms, constant 5ms: 5 + 5 == 10 exactly, so the second wait fits
+    // (the budget is inclusive); only the third, which would reach 15ms, stops it.
+    let p = RetryPolicy::new(10, Backoff::constant(Duration::from_millis(5)))
+        .unwrap()
+        .with_budget(Duration::from_millis(10));
+    let mut slept = Duration::ZERO;
+    let result: Result<u32, RetryError<&str>> = retry_with_sleep(
+        &p,
+        || Err("always"),
+        |_| true,
+        |delay| slept = slept.saturating_add(delay),
+    );
+    assert_eq!(result.unwrap_err().attempts(), 3);
+    assert_eq!(
+        slept,
+        Duration::from_millis(10),
+        "the wait that lands exactly on the budget still happens"
+    );
+}
+
+#[test]
+fn budget_large_enough_lets_max_attempts_govern() {
+    let p = RetryPolicy::new(4, Backoff::constant(Duration::from_millis(5)))
+        .unwrap()
+        .with_budget(Duration::from_secs(10));
+    let mut calls = 0;
+    let result: Result<u32, RetryError<&str>> = retry_with_sleep(
+        &p,
+        || {
+            calls += 1;
+            Err("always")
+        },
+        |_| true,
+        |_| {},
+    );
+    assert_eq!(result.unwrap_err().attempts(), 4);
+    assert_eq!(calls, 4);
+}
+
+#[test]
+fn budget_zero_prevents_any_backed_off_retry() {
+    let p = RetryPolicy::new(5, Backoff::constant(Duration::from_millis(5)))
+        .unwrap()
+        .with_budget(Duration::ZERO);
+    let mut calls = 0;
+    let result: Result<u32, RetryError<&str>> = retry_with_sleep(
+        &p,
+        || {
+            calls += 1;
+            Err("always")
+        },
+        |_| true,
+        |_| {},
+    );
+    assert_eq!(
+        result.unwrap_err().attempts(),
+        1,
+        "any 5ms wait blows a 0 budget"
+    );
+    assert_eq!(calls, 1);
+}
+
+#[test]
+fn budget_applies_to_the_no_sleep_driver() {
+    // `retry` never sleeps, but the budget still bounds the backoff it computes.
+    let p = RetryPolicy::new(10, Backoff::constant(Duration::from_millis(5)))
+        .unwrap()
+        .with_budget(Duration::from_millis(12));
+    let mut calls = 0;
+    let result: Result<u32, RetryError<&str>> = retry(
+        &p,
+        || {
+            calls += 1;
+            Err("always")
+        },
+        |_| true,
+    );
+    assert_eq!(result.unwrap_err().attempts(), 3);
+    assert_eq!(calls, 3);
+}
+
+#[test]
+fn budget_applies_to_the_async_driver() {
+    // Budget 10ms == 5 + 5 exactly: the second wait fits, the third would exceed,
+    // so it stops at 3 attempts (this also pins the budget as inclusive on async).
+    let p = RetryPolicy::new(10, Backoff::constant(Duration::from_millis(5)))
+        .unwrap()
+        .with_budget(Duration::from_millis(10));
+    let mut calls = 0;
+    let result: Result<u32, RetryError<&str>> = block_on(retry_async(
+        &p,
+        || {
+            calls += 1;
+            core::future::ready(Err("always"))
+        },
+        |_| true,
+        |_delay| core::future::ready(()),
+    ));
+    assert_eq!(result.unwrap_err().attempts(), 3);
+    assert_eq!(calls, 3);
+}

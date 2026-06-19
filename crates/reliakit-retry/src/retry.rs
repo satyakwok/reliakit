@@ -90,6 +90,7 @@ where
     OnRetry: FnMut(u32, Duration, &E),
 {
     let mut attempt: u32 = 0;
+    let mut spent = Duration::ZERO;
     loop {
         attempt += 1;
         match op() {
@@ -102,6 +103,15 @@ where
                     });
                 }
                 let delay = policy.delay_before_retry(attempt);
+                if let Some(budget) = policy.budget() {
+                    if spent.saturating_add(delay) > budget {
+                        return Err(RetryError::Exhausted {
+                            attempts: attempt,
+                            last_error: error,
+                        });
+                    }
+                }
+                spent = spent.saturating_add(delay);
                 on_retry(attempt, delay, &error);
                 sleep(delay);
             }
@@ -168,6 +178,7 @@ where
     OnRetry: FnMut(u32, Duration, &E),
 {
     let mut attempt: u32 = 0;
+    let mut spent = Duration::ZERO;
     loop {
         attempt += 1;
         match op().await {
@@ -180,6 +191,15 @@ where
                     });
                 }
                 let delay = policy.delay_before_retry(attempt);
+                if let Some(budget) = policy.budget() {
+                    if spent.saturating_add(delay) > budget {
+                        return Err(RetryError::Exhausted {
+                            attempts: attempt,
+                            last_error: error,
+                        });
+                    }
+                }
+                spent = spent.saturating_add(delay);
                 on_retry(attempt, delay, &error);
                 sleep(delay).await;
             }
