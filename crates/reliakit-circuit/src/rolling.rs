@@ -212,6 +212,32 @@ impl<const WINDOW: usize> RollingBreaker<WINDOW> {
         }
         !matches!(self.state, State::Open)
     }
+    /// Like [`Self::allow`], but invokes `on_state_change(from, to)` if this
+    /// call causes a state transition (Open→HalfOpen when the cooldown elapses).
+    ///
+    /// The hook is opt-in per call and is never invoked when the state is
+    /// unchanged. The closure receives the previous and new [`State`] in that
+    /// order.
+    pub fn allow_observed<OnStateChange>(
+        &mut self,
+        now: u64,
+        mut on_state_change: OnStateChange,
+    ) -> bool
+    where
+        OnStateChange: FnMut(State, State),
+    {
+        let from_state = self.state;
+        if matches!(self.state, State::Open) && now.saturating_sub(self.opened_at) >= self.cooldown
+        {
+            self.state = State::HalfOpen;
+            self.successes = 0;
+        }
+
+        if self.state != from_state {
+            on_state_change(from_state, self.state);
+        }
+        !matches!(self.state, State::Open)
+    }
 
     /// Records that an allowed call succeeded.
     ///
@@ -219,6 +245,21 @@ impl<const WINDOW: usize> RollingBreaker<WINDOW> {
     /// failure out of it). In [`State::HalfOpen`] it counts toward
     /// `success_threshold`. Has no effect while [`State::Open`].
     pub fn on_success(&mut self) {
+        self.on_success_observed(|_, _| {});
+    }
+
+    /// Like [`Self::on_success`], but invokes `on_state_change(from, to)` if
+    /// this call causes a state transition (HalfOpen→Closed when
+    /// `success_threshold` is reached).
+    ///
+    /// The hook is opt-in per call and is never invoked when the state is
+    /// unchanged. The closure receives the previous and new [`State`] in that
+    /// order.
+    pub fn on_success_observed<OnStateChange>(&mut self, mut on_state_change: OnStateChange)
+    where
+        OnStateChange: FnMut(State, State),
+    {
+        let from_state = self.state;
         match self.state {
             State::Closed => self.window.record(false),
             State::HalfOpen => {
@@ -229,6 +270,10 @@ impl<const WINDOW: usize> RollingBreaker<WINDOW> {
             }
             State::Open => {}
         }
+
+        if self.state != from_state {
+            on_state_change(from_state, self.state);
+        }
     }
 
     /// Records that an allowed call failed, at time `now`.
@@ -237,6 +282,25 @@ impl<const WINDOW: usize> RollingBreaker<WINDOW> {
     /// once the window holds `failure_threshold` failures. In [`State::HalfOpen`]
     /// any failure reopens the breaker. Has no effect while [`State::Open`].
     pub fn on_failure(&mut self, now: u64) {
+        self.on_failure_observed(now, |_, _| {});
+    }
+
+    /// Like [`Self::on_failure`], but invokes `on_state_change(from, to)` if
+    /// this call causes a state transition (Closed→Open once the window holds
+    /// `failure_threshold` failures, or HalfOpen→Open on any failure during
+    /// probe).
+    ///
+    /// The hook is opt-in per call and is never invoked when the state is
+    /// unchanged. The closure receives the previous and new [`State`] in that
+    /// order.
+    pub fn on_failure_observed<OnStateChange>(
+        &mut self,
+        now: u64,
+        mut on_state_change: OnStateChange,
+    ) where
+        OnStateChange: FnMut(State, State),
+    {
+        let from_state = self.state;
         match self.state {
             State::Closed => {
                 self.window.record(true);
@@ -246,6 +310,10 @@ impl<const WINDOW: usize> RollingBreaker<WINDOW> {
             }
             State::HalfOpen => self.trip(now),
             State::Open => {}
+        }
+
+        if self.state != from_state {
+            on_state_change(from_state, self.state);
         }
     }
 
@@ -483,6 +551,135 @@ mod tests {
                 w.record(true);
             }
             assert_eq!(w.failures(), 4); // capped at N
+        }
+    }
+    mod observed_transitions {
+        use super::super::*;
+        use crate::test_utils::{Log, ManualClock};
+
+        #[test]
+        fn closed_to_open_fires_on_threshold() {
+            let clock = ManualClock::new();
+            let mut b = RollingBreaker::<4>::new(2, 100);
+            let mut log = Log::new();
+
+            b.on_failure_observed(clock.now(), |f, t| log.push((f, t))); // failures=1, still Closed
+            assert_eq!(log.as_slice(), &[]);
+
+            b.on_failure_observed(clock.now(), |f, t| log.push((f, t))); // failures=2 >= threshold -> Closed→Open
+            assert_eq!(log.as_slice(), &[(State::Closed, State::Open)]);
+        }
+
+        #[test]
+        fn open_to_halfopen_after_cooldown() {
+            let mut clock = ManualClock::new();
+            let mut b = RollingBreaker::<4>::new(2, 100);
+            let mut log = Log::new();
+            let mut record = |f, t| log.push((f, t));
+
+            b.on_failure_observed(clock.now(), &mut record); // failures=1, Closed
+            b.on_failure_observed(clock.now(), &mut record); // failures=2 -> Closed→Open, opened_at=0
+
+            clock.advance(50);
+            assert!(!b.allow_observed(clock.now(), &mut record)); // 50 < cooldown, stays Open
+
+            clock.advance(50);
+            assert!(b.allow_observed(clock.now(), &mut record)); // 100 >= cooldown -> Open→HalfOpen
+
+            assert_eq!(
+                log.as_slice(),
+                &[(State::Closed, State::Open), (State::Open, State::HalfOpen),]
+            );
+        }
+
+        #[test]
+        fn halfopen_to_closed_after_successes() {
+            let mut clock = ManualClock::new();
+            let mut b = RollingBreaker::<4>::new(2, 100).with_success_threshold(2);
+            let mut log = Log::new();
+            let mut record = |f, t| log.push((f, t));
+
+            b.on_failure_observed(clock.now(), &mut record); // Closed
+            b.on_failure_observed(clock.now(), &mut record); // Closed→Open
+            clock.advance(100);
+            b.allow_observed(clock.now(), &mut record); // Open→HalfOpen
+
+            b.on_success_observed(&mut record); // successes=1, still HalfOpen
+            assert_eq!(b.state(), State::HalfOpen);
+            b.on_success_observed(&mut record); // successes=2 >= threshold -> HalfOpen→Closed
+
+            assert_eq!(
+                log.as_slice(),
+                &[
+                    (State::Closed, State::Open),
+                    (State::Open, State::HalfOpen),
+                    (State::HalfOpen, State::Closed),
+                ]
+            );
+        }
+
+        #[test]
+        fn halfopen_to_open_on_failure() {
+            let mut clock = ManualClock::new();
+            let mut b = RollingBreaker::<4>::new(2, 100);
+            let mut log = Log::new();
+            let mut record = |f, t| log.push((f, t));
+
+            b.on_failure_observed(clock.now(), &mut record); // Closed
+            b.on_failure_observed(clock.now(), &mut record); // Closed→Open
+            clock.advance(100);
+            b.allow_observed(clock.now(), &mut record); // Open→HalfOpen
+            b.on_failure_observed(clock.now(), &mut record); // single failure in HalfOpen -> HalfOpen→Open
+
+            assert_eq!(
+                log.as_slice(),
+                &[
+                    (State::Closed, State::Open),
+                    (State::Open, State::HalfOpen),
+                    (State::HalfOpen, State::Open),
+                ]
+            );
+        }
+
+        #[test]
+        fn no_transition_no_callback() {
+            let clock = ManualClock::new();
+            let mut b = RollingBreaker::<4>::new(3, 100);
+            let mut log = Log::new();
+
+            b.on_failure_observed(clock.now(), |f, t| log.push((f, t))); // failures=1 < threshold, no transition
+            b.on_success_observed(|f, t| log.push((f, t))); // Closed, success is a no-op for transitions
+
+            assert_eq!(log.as_slice(), &[]);
+        }
+
+        #[test]
+        fn full_cycle_records_all_four_edges() {
+            let mut clock = ManualClock::new();
+            let mut b = RollingBreaker::<4>::new(2, 100).with_success_threshold(2);
+            let mut log = Log::new();
+            let mut record = |f, t| log.push((f, t));
+
+            b.on_failure_observed(clock.now(), &mut record); // Closed
+            b.on_failure_observed(clock.now(), &mut record); // Closed→Open, opened_at=0
+            clock.advance(100);
+            b.allow_observed(clock.now(), &mut record); // Open→HalfOpen
+            b.on_failure_observed(clock.now(), &mut record); // HalfOpen→Open, opened_at=100
+            clock.advance(100);
+            b.allow_observed(clock.now(), &mut record); // Open→HalfOpen (second time)
+            b.on_success_observed(&mut record); // successes=1, HalfOpen
+            b.on_success_observed(&mut record); // successes=2 -> HalfOpen→Closed
+
+            assert_eq!(
+                log.as_slice(),
+                &[
+                    (State::Closed, State::Open),
+                    (State::Open, State::HalfOpen),
+                    (State::HalfOpen, State::Open),
+                    (State::Open, State::HalfOpen),
+                    (State::HalfOpen, State::Closed),
+                ]
+            );
         }
     }
 }
