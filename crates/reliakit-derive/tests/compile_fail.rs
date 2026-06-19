@@ -40,6 +40,26 @@ const CASES: &[(&str, &str)] = &[
         "#[derive(CanonicalEncode)] union Onion { a: u32 }",
         "does not support unions",
     ),
+    (
+        "#[derive(CanonicalEncode)] struct BadFieldAttr { #[reliakit(nope)] a: u32 }",
+        "unknown `#[reliakit(...)]` field option",
+    ),
+    (
+        "#[derive(CanonicalEncode)] struct BadRename { #[reliakit(rename = 1)] a: u32 }",
+        "`rename` must be a string literal",
+    ),
+    (
+        "#[derive(CanonicalEncode)] struct EmptyRename { #[reliakit(rename = \"\")] a: u32 }",
+        "`rename` needs a non-empty string literal",
+    ),
+    (
+        "#[derive(CanonicalEncode)] struct RenameSep { #[reliakit(rename : \"a\")] a: u32 }",
+        "`rename` must be written",
+    ),
+    (
+        "#[derive(CanonicalEncode)] struct BraceAttr { #[reliakit{skip}] a: u32 }",
+        "must be a parenthesized list",
+    ),
 ];
 
 #[test]

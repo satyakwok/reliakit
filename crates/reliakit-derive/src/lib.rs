@@ -19,6 +19,42 @@
 //! derives currently cover structs only; enums are rejected for now. The CSV
 //! derives cover only structs with named fields, since CSV columns need names.
 //!
+//! # Field attributes
+//!
+//! Named fields accept two `#[reliakit(...)]` options that affect the **JSON and
+//! CSV** derives:
+//!
+//! - `#[reliakit(rename = "...")]` uses the given string as the JSON object key
+//!   or CSV header for that field instead of its Rust name.
+//! - `#[reliakit(skip)]` omits the field from the JSON object / CSV row on
+//!   encode and fills it with `Default::default()` on decode (so the field's
+//!   type must implement `Default`).
+//!
+//! The canonical codec ([`CanonicalEncode`]/[`CanonicalDecode`]) **ignores both**:
+//! it is positional binary with no field names, so it always encodes and decodes
+//! every field in declaration order, and its wire format is unaffected by these
+//! attributes.
+//!
+//! ```
+//! use reliakit_json::{from_json_str, to_json_string};
+//! use reliakit_derive::{JsonDecode, JsonEncode};
+//!
+//! #[derive(Debug, PartialEq, JsonEncode, JsonDecode)]
+//! struct Row {
+//!     #[reliakit(rename = "id")]
+//!     identifier: u32,
+//!     #[reliakit(skip)]
+//!     cached: u8,
+//! }
+//!
+//! let json = to_json_string(&Row { identifier: 7, cached: 99 });
+//! assert_eq!(json, r#"{"id":7}"#); // renamed key, `cached` omitted
+//! assert_eq!(
+//!     from_json_str::<Row>(&json).unwrap(),
+//!     Row { identifier: 7, cached: 0 } // `cached` defaulted on decode
+//! );
+//! ```
+//!
 //! # `reliakit-codec`
 //!
 //! [`CanonicalEncode`] and [`CanonicalDecode`] generate implementations of the
@@ -224,11 +260,33 @@ enum Kind {
 /// exactly what the generated code needs.
 enum Shape {
     /// Named fields, in declaration order.
-    Named(Vec<String>),
+    Named(Vec<NamedField>),
     /// Tuple fields, by count.
     Tuple(usize),
     /// No fields (unit struct or unit variant).
     Unit,
+}
+
+/// One named field and the `#[reliakit(...)]` options on it. `rename`/`skip`
+/// affect only the JSON and CSV derives; the canonical codec ignores them and
+/// always encodes every field positionally, so its wire format is unaffected.
+#[derive(Debug)]
+struct NamedField {
+    /// The Rust field name, used to access the value (`self.<name>`).
+    name: String,
+    /// `#[reliakit(rename = "...")]`: the wire key (JSON) or header (CSV) to use
+    /// instead of the field name. The codec ignores it.
+    rename: Option<String>,
+    /// `#[reliakit(skip)]`: omit from JSON/CSV output and supply
+    /// `Default::default()` on decode. The codec ignores it.
+    skip: bool,
+}
+
+/// The parsed options from one `#[reliakit(...)]` attribute on a field.
+#[derive(Default)]
+struct FieldAttr {
+    rename: Option<String>,
+    skip: bool,
 }
 
 /// One validated enum variant: its name and field shape.
@@ -420,10 +478,14 @@ fn json_encode_value(shape: &Shape) -> String {
         Shape::Named(fields) => {
             let mut inserts = String::new();
             for field in fields {
-                let key = json_key(field);
+                if field.skip {
+                    continue;
+                }
+                let name = &field.name;
+                let key = field.rename.as_deref().unwrap_or_else(|| json_key(name));
                 inserts.push_str(&format!(
                     "__object.insert({key:?}.into(), \
-                     ::reliakit_json::JsonEncode::to_json_value(&self.{field}));",
+                     ::reliakit_json::JsonEncode::to_json_value(&self.{name}));",
                 ));
             }
             format!(
@@ -451,10 +513,15 @@ fn json_decode_body(shape: &Shape) -> String {
         Shape::Named(fields) => {
             let mut inner = String::new();
             for field in fields {
-                let key = json_key(field);
+                let name = &field.name;
+                if field.skip {
+                    inner.push_str(&format!("{name}: ::core::default::Default::default(),"));
+                    continue;
+                }
+                let key = field.rename.as_deref().unwrap_or_else(|| json_key(name));
                 let missing = format!("missing field `{key}`");
                 inner.push_str(&format!(
-                    "{field}: ::reliakit_json::JsonDecode::from_json_value(\
+                    "{name}: ::reliakit_json::JsonDecode::from_json_value(\
                      __object.get({key:?}).ok_or_else(|| \
                      ::reliakit_json::JsonDecodeError::missing_field({missing:?}))?)?,",
                 ));
@@ -499,7 +566,7 @@ fn csv_column(field: &str) -> &str {
 /// Returns the named fields of a struct, or a reject message. CSV needs column
 /// names, so tuple structs, unit structs, and enums are rejected. Pure, so the
 /// reject decisions are unit-testable.
-fn csv_named_fields<'a>(body: &'a Body, trait_name: &str) -> Result<&'a [String], String> {
+fn csv_named_fields<'a>(body: &'a Body, trait_name: &str) -> Result<&'a [NamedField], String> {
     match body {
         Body::Struct(Shape::Named(fields)) => Ok(fields),
         Body::Struct(_) => Err(format!(
@@ -513,14 +580,18 @@ fn csv_named_fields<'a>(body: &'a Body, trait_name: &str) -> Result<&'a [String]
 }
 
 /// The `header` and `encode_fields` method bodies for a named struct.
-fn csv_encode_methods(fields: &[String]) -> String {
+fn csv_encode_methods(fields: &[NamedField]) -> String {
     let mut header = String::new();
     let mut pushes = String::new();
     for field in fields {
-        let column = csv_column(field);
+        if field.skip {
+            continue;
+        }
+        let name = &field.name;
+        let column = field.rename.as_deref().unwrap_or_else(|| csv_column(name));
         header.push_str(&format!("__header.push({column:?});"));
         pushes.push_str(&format!(
-            "__out.push(::reliakit_csv::CsvField::encode_field(&self.{field}));"
+            "__out.push(::reliakit_csv::CsvField::encode_field(&self.{name}));"
         ));
     }
     format!(
@@ -537,14 +608,21 @@ fn csv_encode_methods(fields: &[String]) -> String {
 }
 
 /// The `decode_fields` method body for a named struct.
-fn csv_decode_method(fields: &[String]) -> String {
-    let count = fields.len();
+fn csv_decode_method(fields: &[NamedField]) -> String {
+    let count = fields.iter().filter(|field| !field.skip).count();
     let mut inner = String::new();
-    for (index, field) in fields.iter().enumerate() {
+    let mut column = 0usize;
+    for field in fields {
+        let name = &field.name;
+        if field.skip {
+            inner.push_str(&format!("{name}: ::core::default::Default::default(),"));
+            continue;
+        }
         inner.push_str(&format!(
-            "{field}: ::reliakit_csv::CsvField::decode_field(__fields[{index}])\
-             .map_err(|__e| __e.at_field({index}))?,"
+            "{name}: ::reliakit_csv::CsvField::decode_field(__fields[{column}])\
+             .map_err(|__e| __e.at_field({column}))?,"
         ));
+        column += 1;
     }
     format!(
         "fn decode_fields(__fields: &[&str]) \
@@ -668,7 +746,9 @@ fn classify(input: TokenStream) -> Result<Raw, String> {
             Kind::Union => RawBody::Union,
             Kind::Struct => match tokens.get(idx) {
                 Some(TokenTree::Group(group)) => match group.delimiter() {
-                    Delimiter::Brace => RawBody::Struct(Shape::Named(named_fields(group.stream()))),
+                    Delimiter::Brace => {
+                        RawBody::Struct(Shape::Named(named_fields(group.stream())?))
+                    }
                     Delimiter::Parenthesis => {
                         RawBody::Struct(Shape::Tuple(count_fields(group.stream())))
                     }
@@ -703,8 +783,9 @@ fn struct_encode_statements(shape: &Shape) -> String {
     match shape {
         Shape::Named(fields) => {
             for field in fields {
+                let name = &field.name;
                 body.push_str(&format!(
-                    "::reliakit_codec::CanonicalEncode::encode(&self.{field}, __writer)?;",
+                    "::reliakit_codec::CanonicalEncode::encode(&self.{name}, __writer)?;",
                 ));
             }
         }
@@ -726,8 +807,9 @@ fn struct_decode_value(shape: &Shape) -> String {
         Shape::Named(fields) => {
             let mut inner = String::new();
             for field in fields {
+                let name = &field.name;
                 inner.push_str(&format!(
-                    "{field}: ::reliakit_codec::CanonicalDecode::decode(__reader)?,",
+                    "{name}: ::reliakit_codec::CanonicalDecode::decode(__reader)?,",
                 ));
             }
             format!("Self {{ {inner} }}")
@@ -782,7 +864,8 @@ fn enum_encode_statements(variants: &[Variant]) -> String {
                     }
                     // Bind each named field to a positional local to avoid any
                     // collision with `__writer`.
-                    pattern.push_str(&format!("{field}: __f{i}"));
+                    let name = &field.name;
+                    pattern.push_str(&format!("{name}: __f{i}"));
                     encodes.push_str(&format!(
                         "::reliakit_codec::CanonicalEncode::encode(__f{i}, __writer)?;",
                     ));
@@ -815,8 +898,9 @@ fn enum_decode_value(name: &str, variants: &[Variant]) -> String {
             Shape::Named(fields) => {
                 let mut inner = String::new();
                 for field in fields {
+                    let name = &field.name;
                     inner.push_str(&format!(
-                        "{field}: ::reliakit_codec::CanonicalDecode::decode(__reader)?,",
+                        "{name}: ::reliakit_codec::CanonicalDecode::decode(__reader)?,",
                     ));
                 }
                 format!("Self::{vname} {{ {inner} }}")
@@ -871,7 +955,7 @@ fn raw_variants(stream: TokenStream) -> Vec<RawVariant> {
             None => Ok(Shape::Unit),
             Some(TokenTree::Group(group)) => match group.delimiter() {
                 Delimiter::Parenthesis => Ok(Shape::Tuple(count_fields(group.stream()))),
-                Delimiter::Brace => Ok(Shape::Named(named_fields(group.stream()))),
+                Delimiter::Brace => named_fields(group.stream()).map(Shape::Named),
                 _ => Err(format!(
                     "reliakit-derive: unsupported syntax in enum variant `{name}`"
                 )),
@@ -951,22 +1035,125 @@ fn with_crate_root(code: String, root: Option<&str>) -> String {
     }
 }
 
-/// Collects the names of named fields in declaration order.
-fn named_fields(stream: TokenStream) -> Vec<String> {
+/// Validates the value of `rename = <literal>` from the literal's rendered text
+/// (a string literal renders with surrounding quotes). Pure, so the reject
+/// decisions are unit-tested even though the surrounding token detection is not.
+fn parse_rename_value(rendered: &str) -> Result<String, String> {
+    match rendered.strip_prefix('"').and_then(|s| s.strip_suffix('"')) {
+        Some(value) if !value.is_empty() => Ok(value.to_string()),
+        Some(_) => Err("reliakit-derive: `rename` needs a non-empty string literal".into()),
+        None => {
+            Err("reliakit-derive: `rename` must be a string literal, e.g. `rename = \"id\"`".into())
+        }
+    }
+}
+
+/// Parses the inner stream of one `#[...]` attribute. Returns `None` if it is
+/// not a `reliakit(...)` attribute (so other attributes are ignored), or a
+/// parsed [`FieldAttr`] / a reject message for a `reliakit(...)` one.
+fn field_reliakit_attr(stream: TokenStream) -> Option<Result<FieldAttr, String>> {
+    let mut it = stream.into_iter();
+    match it.next() {
+        Some(TokenTree::Ident(ident)) if ident.to_string() == "reliakit" => {}
+        _ => return None,
+    }
+    let inner = match it.next() {
+        Some(TokenTree::Group(group)) if group.delimiter() == Delimiter::Parenthesis => {
+            group.stream()
+        }
+        _ => {
+            return Some(Err(
+                "reliakit-derive: `#[reliakit(...)]` on a field must be a parenthesized list"
+                    .into(),
+            ));
+        }
+    };
+
+    let mut attr = FieldAttr::default();
+    for item in top_level_segments(inner) {
+        // Token-level extraction: the option name, and the rendered text of a
+        // `= "..."` value if one follows. The reject decisions are made on these
+        // plain values by `apply_field_option`.
+        let name = match item.first() {
+            None => continue, // empty item, e.g. a stray comma
+            Some(TokenTree::Ident(ident)) => ident.to_string(),
+            Some(_) => String::new(), // not an identifier: handled as unknown below
+        };
+        let value = match (item.get(1), item.get(2)) {
+            (Some(TokenTree::Punct(eq)), Some(TokenTree::Literal(lit))) if eq.as_char() == '=' => {
+                Some(lit.to_string())
+            }
+            _ => None,
+        };
+        if let Err(message) = apply_field_option(&mut attr, &name, value.as_deref()) {
+            return Some(Err(message));
+        }
+    }
+    Some(Ok(attr))
+}
+
+/// Applies one parsed `#[reliakit(...)]` option to `attr`. `name` is the option
+/// identifier and `value` is the rendered text of its `= "..."` argument, if any.
+/// Pure, so every reject decision (unknown option, a `rename` with no value, a
+/// bad `rename` literal) is unit-tested even though the token detection is not.
+fn apply_field_option(attr: &mut FieldAttr, name: &str, value: Option<&str>) -> Result<(), String> {
+    match name {
+        "skip" => {
+            attr.skip = true;
+            Ok(())
+        }
+        "rename" => match value {
+            Some(literal) => {
+                attr.rename = Some(parse_rename_value(literal)?);
+                Ok(())
+            }
+            None => Err("reliakit-derive: `rename` must be written `rename = \"...\"`".into()),
+        },
+        _ => Err("reliakit-derive: unknown `#[reliakit(...)]` field option \
+                  (expected `rename = \"...\"` or `skip`)"
+            .into()),
+    }
+}
+
+/// Collects the named fields of a struct body in declaration order, with any
+/// `#[reliakit(rename = "...")]` / `#[reliakit(skip)]` options. A malformed
+/// `reliakit` attribute is a reject message.
+fn named_fields(stream: TokenStream) -> Result<Vec<NamedField>, String> {
     let mut fields = Vec::new();
     for segment in top_level_segments(stream) {
+        // Field attributes are `#` followed by a bracketed group. The group is a
+        // single token tree, so the name scan below never looks inside it.
+        let mut attr = FieldAttr::default();
+        for window in segment.windows(2) {
+            if let (TokenTree::Punct(pound), TokenTree::Group(group)) = (&window[0], &window[1]) {
+                if pound.as_char() == '#' && group.delimiter() == Delimiter::Bracket {
+                    if let Some(parsed) = field_reliakit_attr(group.stream()) {
+                        let parsed = parsed?;
+                        attr.skip |= parsed.skip;
+                        if parsed.rename.is_some() {
+                            attr.rename = parsed.rename;
+                        }
+                    }
+                }
+            }
+        }
+
         // The field name is the first ident immediately followed by a `:`
         // (the field/type separator, which is an `Alone`-spaced colon).
         for window in segment.windows(2) {
             if let (TokenTree::Ident(ident), TokenTree::Punct(punct)) = (&window[0], &window[1]) {
                 if punct.as_char() == ':' && punct.spacing() == Spacing::Alone {
-                    fields.push(ident.to_string());
+                    fields.push(NamedField {
+                        name: ident.to_string(),
+                        rename: attr.rename,
+                        skip: attr.skip,
+                    });
                     break;
                 }
             }
         }
     }
-    fields
+    Ok(fields)
 }
 
 /// Counts the fields of a tuple body (non-empty top-level segments).
@@ -1056,6 +1243,63 @@ mod tests {
             shape: Ok(Shape::Unit),
             has_discriminant: false,
         }
+    }
+
+    /// A plain named field with no `#[reliakit(...)]` options.
+    fn named(name: &str) -> NamedField {
+        NamedField {
+            name: name.to_string(),
+            rename: None,
+            skip: false,
+        }
+    }
+
+    #[test]
+    fn rename_value_accepts_a_non_empty_string_literal() {
+        assert_eq!(parse_rename_value("\"id\"").unwrap(), "id");
+        // A renamed key may itself look like a keyword or contain spaces.
+        assert_eq!(parse_rename_value("\"r#type\"").unwrap(), "r#type");
+    }
+
+    #[test]
+    fn rename_value_rejects_empty_and_non_string_literals() {
+        assert!(
+            parse_rename_value("\"\"")
+                .unwrap_err()
+                .contains("non-empty")
+        );
+        // A bare integer literal is not a string.
+        assert!(
+            parse_rename_value("1")
+                .unwrap_err()
+                .contains("must be a string literal")
+        );
+    }
+
+    #[test]
+    fn field_option_applies_skip_and_rename() {
+        let mut attr = FieldAttr::default();
+        apply_field_option(&mut attr, "skip", None).unwrap();
+        assert!(attr.skip);
+        apply_field_option(&mut attr, "rename", Some("\"id\"")).unwrap();
+        assert_eq!(attr.rename.as_deref(), Some("id"));
+    }
+
+    #[test]
+    fn field_option_rejects_bad_options() {
+        let mut attr = FieldAttr::default();
+        // `rename` with no value.
+        assert!(
+            apply_field_option(&mut attr, "rename", None)
+                .unwrap_err()
+                .contains("must be written")
+        );
+        // An option that is neither `skip` nor `rename`.
+        assert!(
+            apply_field_option(&mut attr, "nope", None)
+                .unwrap_err()
+                .contains("unknown")
+        );
     }
 
     // `Parsed` deliberately has no `Debug`, so these avoid `unwrap`/`unwrap_err`.
@@ -1151,7 +1395,7 @@ mod tests {
             name: "S".to_string(),
             has_generics: false,
             saw_repr: false,
-            body: RawBody::Struct(Shape::Named(vec!["x".to_string()])),
+            body: RawBody::Struct(Shape::Named(vec![named("x")])),
             crate_root: None,
         };
         let parsed = ok_of(raw);
@@ -1171,7 +1415,7 @@ mod tests {
                 },
                 RawVariant {
                     name: "C".to_string(),
-                    shape: Ok(Shape::Named(vec!["id".to_string()])),
+                    shape: Ok(Shape::Named(vec![named("id")])),
                     has_discriminant: false,
                 },
             ],
@@ -1229,7 +1473,7 @@ mod tests {
 
     #[test]
     fn csv_named_struct_builds_methods() {
-        let body = Body::Struct(Shape::Named(vec!["id".to_string(), "r#type".to_string()]));
+        let body = Body::Struct(Shape::Named(vec![named("id"), named("r#type")]));
         let fields = csv_named_fields(&body, "CsvEncode").expect("named struct accepted");
         let enc = csv_encode_methods(fields);
         assert!(enc.contains("__header.push(\"id\")"));
