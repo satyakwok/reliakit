@@ -49,7 +49,6 @@ impl ManualClock {
 ///
 /// Overflowing the capacity panics with a clear message rather than
 /// silently dropping transitions — bump [`CAP`] if you hit it.
-
 const CAP: usize = 8;
 
 pub struct Log {
