@@ -1,0 +1,22 @@
+# cargo-mutants configuration.
+#
+# These exclusions silence proven-equivalent mutants in reliakit-derive's
+# field-token scanner (`named_fields`). Each flips a boolean AND to OR in a
+# condition that scans `proc_macro` token trees; neither can be killed by a test
+# over valid field syntax:
+#
+#  - the field-name scan (`':' && Alone` -> `||`): no valid field places an
+#    identifier immediately before an Alone-spaced, non-colon punct, so OR can
+#    never select a different token than AND. Strictly equivalent.
+#  - the attribute scan (`'#' && Bracket` -> `||`): OR additionally matches a
+#    non-`#` bracket, but the only bracket in a field is an array type `[T; N]`,
+#    whose inner tokens do not begin with `reliakit`, so the attribute parser
+#    returns None and does nothing. It would differ only for a field typed
+#    `[reliakit; N]`, i.e. an array of a type literally named `reliakit` --
+#    pathological, not real input.
+#
+# The scanner's behavior is covered by the integration tests (every supported
+# field shape) and the compile-fail harness. This narrow rule excludes only the
+# `&& -> ||` operator mutants in `named_fields`; every other mutant there is
+# still generated and must be caught.
+exclude_re = ['replace && with \|\| in named_fields']
