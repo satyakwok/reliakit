@@ -21,13 +21,15 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
   `Duration::ZERO`. Has `new`/`TryFrom<Duration>`/`Display`/`AsRef<Duration>`.
   (Both ship as `reliakit-primitives` 1.1.0.)
 
+## reliakit-derive 1.0.1 - 2026-06-19
+
 ### Fixed
 
-- `reliakit-derive`: tuple structs and tuple enum variants with a field whose
-  type holds a generic argument list (`Result<T, E>`, `HashMap<K, V>`, and the
-  like) are now counted correctly. Angle brackets are punctuation, not a token
-  group, so the comma inside `<...>` was read as a field separator and the
-  generated code referenced a field that does not exist.
+- Tuple structs and tuple enum variants with a field whose type holds a generic
+  argument list (`Result<T, E>`, `HashMap<K, V>`, and the like) are now counted
+  correctly. Angle brackets are punctuation, not a token group, so the comma
+  inside `<...>` was read as a field separator and the generated code referenced
+  a field that does not exist.
 
 ## 1.0.0 - 2026-06-15
 
