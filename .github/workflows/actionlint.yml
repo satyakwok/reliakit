@@ -1,0 +1,30 @@
+name: actionlint
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  actionlint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      # Lint the workflow files themselves: YAML, expression syntax, action
+      # references, and (via the runner's preinstalled shellcheck) the shell in
+      # every `run:` step. A pinned release tarball keeps this dependency-free of
+      # any third-party action.
+      - name: Run actionlint
+        run: |
+          curl -sSL https://github.com/rhysd/actionlint/releases/download/v1.7.7/actionlint_1.7.7_linux_amd64.tar.gz \
+            | tar xz actionlint
+          ./actionlint -color

@@ -54,6 +54,12 @@ jobs:
       - name: Test
         run: cargo test --workspace --all-features --locked
 
+      # Release profile disables debug overflow checks, so the saturating /
+      # fallible arithmetic must hold without them. Optimizations can also expose
+      # behavior the debug build hides.
+      - name: Test (release)
+        run: cargo test --workspace --all-features --release --locked
+
       - name: Clippy
         run: cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
 
@@ -152,11 +158,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
-      - name: Install Rust stable with no_std target
+      - name: Install Rust stable with no_std targets
         run: |
           rustup toolchain install stable --profile minimal
           rustup default stable
-          rustup target add thumbv7em-none-eabi
+          rustup target add thumbv7em-none-eabi riscv32imac-unknown-none-elf aarch64-unknown-none wasm32-unknown-unknown
           rustc --version
           cargo --version
 
@@ -172,25 +178,34 @@ jobs:
             ${{ runner.os }}-cargo-${{ github.job }}-
             ${{ runner.os }}-cargo-
 
-      # Check against a real bare-metal target with no std available, so a stray
-      # `std` dependency cannot slip through (the host target always has std).
-      - name: Check no_std (alloc only, bare-metal target)
+      # Check against real targets with no std available, so a stray `std`
+      # dependency cannot slip through (the host target always has std). Covers
+      # ARM, RISC-V, AArch64 bare-metal, and WebAssembly.
+      - name: Check no_std (alloc only, multiple targets)
         run: |
-          cargo check -p reliakit-primitives --no-default-features --features alloc --target thumbv7em-none-eabi --locked
-          cargo check -p reliakit-secret --no-default-features --features alloc --target thumbv7em-none-eabi --locked
-          cargo check -p reliakit-validate --no-default-features --features alloc --target thumbv7em-none-eabi --locked
-          cargo check -p reliakit-collections --no-default-features --features alloc --target thumbv7em-none-eabi --locked
-          cargo check -p reliakit-codec --no-default-features --features alloc --target thumbv7em-none-eabi --locked
-          # Featureless pure-core crates: building for the bare-metal target is
-          # itself the no_std proof (no features to disable).
-          cargo check -p reliakit-backoff --target thumbv7em-none-eabi --locked
-          cargo check -p reliakit-circuit --target thumbv7em-none-eabi --locked
-          cargo check -p reliakit-ratelimit --target thumbv7em-none-eabi --locked
-          cargo check -p reliakit-timeout --target thumbv7em-none-eabi --locked
-          # These default to `std`, so the default feature must be disabled.
-          cargo check -p reliakit-core --no-default-features --target thumbv7em-none-eabi --locked
-          cargo check -p reliakit-json --no-default-features --features canonical --target thumbv7em-none-eabi --locked
-          cargo check -p reliakit-retry --no-default-features --target thumbv7em-none-eabi --locked
+          for T in thumbv7em-none-eabi riscv32imac-unknown-none-elf aarch64-unknown-none wasm32-unknown-unknown; do
+            echo "::group::no_std check for $T"
+            cargo check -p reliakit-primitives --no-default-features --features alloc --target "$T" --locked
+            cargo check -p reliakit-secret --no-default-features --features alloc --target "$T" --locked
+            cargo check -p reliakit-validate --no-default-features --features alloc --target "$T" --locked
+            cargo check -p reliakit-collections --no-default-features --features alloc --target "$T" --locked
+            cargo check -p reliakit-codec --no-default-features --features alloc --target "$T" --locked
+            cargo check -p reliakit-csv --no-default-features --features alloc --target "$T" --locked
+            cargo check -p reliakit-health --no-default-features --features alloc --target "$T" --locked
+            # Featureless pure-core crates: building for the bare-metal target is
+            # itself the no_std proof (no features to disable).
+            cargo check -p reliakit-backoff --target "$T" --locked
+            cargo check -p reliakit-circuit --target "$T" --locked
+            cargo check -p reliakit-ratelimit --target "$T" --locked
+            cargo check -p reliakit-timeout --target "$T" --locked
+            cargo check -p reliakit-bulkhead --target "$T" --locked
+            # These default to `std`, so the default feature must be disabled.
+            cargo check -p reliakit-core --no-default-features --target "$T" --locked
+            cargo check -p reliakit-json --no-default-features --features canonical --target "$T" --locked
+            cargo check -p reliakit-retry --no-default-features --target "$T" --locked
+            cargo check -p reliakit-decide --no-default-features --target "$T" --locked
+            echo "::endgroup::"
+          done
 
   no-third-party-deps:
     name: Zero dependencies
