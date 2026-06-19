@@ -3,7 +3,7 @@
 //! A downstream crate that depends ONLY on the umbrella `reliakit` (not the individual
 //! `reliakit-csv`/`reliakit-json`/`reliakit-codec` crates) must be able to use the derives.
 //! Before the fix the generated code referenced `::reliakit_csv` etc., which only resolve
-//! when those crates are *direct* dependencies — so via the umbrella it failed to compile with
+//! when those crates are *direct* dependencies, so via the umbrella it failed to compile with
 //! `error[E0433]: failed to resolve: use of undeclared crate or module reliakit_csv`. Pointing
 //! the derive at the umbrella with `#[reliakit(crate = "reliakit")]` makes it emit
 //! `::reliakit::csv` / `::reliakit::codec` / `::reliakit::json` instead.
