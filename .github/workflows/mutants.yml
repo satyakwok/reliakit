@@ -1,0 +1,65 @@
+name: mutants
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  mutants:
+    name: mutants (changed lines)
+    runs-on: ubuntu-latest
+    # Surviving mutants flag a possible test gap worth a look, but they must not
+    # block a PR: equivalent mutants and timeouts produce unavoidable noise, so
+    # this job is advisory (continue-on-error) rather than a required gate.
+    continue-on-error: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          # Full history so the PR diff against the base branch can be computed.
+          fetch-depth: 0
+
+      - name: Install Rust stable
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+
+      - name: Cache Cargo
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ github.job }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-${{ github.job }}-
+            ${{ runner.os }}-cargo-
+
+      # Pinned prebuilt binary keeps this free of any third-party action.
+      - name: Install cargo-mutants
+        run: |
+          curl -sSL https://github.com/sourcefrog/cargo-mutants/releases/download/v27.1.0/cargo-mutants-x86_64-unknown-linux-gnu.tar.gz \
+            | tar xz -C ~/.cargo/bin cargo-mutants
+          cargo mutants --version
+
+      # On a PR, mutate only the changed lines: a full-workspace run is far too
+      # slow for per-PR feedback.
+      - name: Mutation-test changed lines
+        if: github.event_name == 'pull_request'
+        run: |
+          git diff "origin/${{ github.base_ref }}...HEAD" > pr.diff
+          cargo mutants --in-diff pr.diff --no-shuffle -j 2
+
+      # A manual dispatch runs the whole workspace for an on-demand full audit.
+      - name: Mutation-test the whole workspace
+        if: github.event_name == 'workflow_dispatch'
+        run: cargo mutants --no-shuffle -j 2

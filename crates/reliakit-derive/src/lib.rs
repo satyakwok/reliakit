@@ -108,6 +108,27 @@
 //! assert_eq!(csv, "id,name\r\n1,ada\r\n");
 //! assert_eq!(from_csv_str::<Row>(&csv).unwrap(), rows);
 //! ```
+//!
+//! # Deriving through the umbrella crate
+//!
+//! By default the generated code refers to the standalone crates (`::reliakit_csv`,
+//! `::reliakit_codec`, `::reliakit_json`), so those must be **direct** dependencies of the
+//! crate that uses the derives. If you instead depend only on the umbrella [`reliakit`] crate
+//! (which re-exports them as `reliakit::csv`, `reliakit::codec`, `reliakit::json`), add
+//! `#[reliakit(crate = "reliakit")]` so the derive resolves through it:
+//!
+//! ```ignore
+//! use reliakit::derive::{CsvDecode, CsvEncode};
+//!
+//! #[derive(CsvEncode, CsvDecode)]
+//! #[reliakit(crate = "reliakit")]
+//! struct Row { id: u32, name: String }
+//! ```
+//!
+//! The value is any path whose `csv`/`codec`/`json` submodules re-export the corresponding
+//! crates (the umbrella's layout). Omit the attribute to keep the standalone paths.
+//!
+//! [`reliakit`]: https://docs.rs/reliakit
 
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
@@ -118,7 +139,7 @@ use proc_macro::{Delimiter, Spacing, TokenStream, TokenTree};
 /// declaration order (for enums, the variant tag first).
 ///
 /// See the [crate] documentation for supported types and limitations.
-#[proc_macro_derive(CanonicalEncode)]
+#[proc_macro_derive(CanonicalEncode, attributes(reliakit))]
 pub fn derive_canonical_encode(input: TokenStream) -> TokenStream {
     match Parsed::from_input(input) {
         Ok(parsed) => parsed.canonical_encode_impl(),
@@ -130,7 +151,7 @@ pub fn derive_canonical_encode(input: TokenStream) -> TokenStream {
 /// declaration order (for enums, the variant tag first).
 ///
 /// See the [crate] documentation for supported types and limitations.
-#[proc_macro_derive(CanonicalDecode)]
+#[proc_macro_derive(CanonicalDecode, attributes(reliakit))]
 pub fn derive_canonical_decode(input: TokenStream) -> TokenStream {
     match Parsed::from_input(input) {
         Ok(parsed) => parsed.canonical_decode_impl(),
@@ -143,7 +164,7 @@ pub fn derive_canonical_decode(input: TokenStream) -> TokenStream {
 /// a unit struct becomes `null`.
 ///
 /// Enums are not supported yet. See the [crate] documentation.
-#[proc_macro_derive(JsonEncode)]
+#[proc_macro_derive(JsonEncode, attributes(reliakit))]
 pub fn derive_json_encode(input: TokenStream) -> TokenStream {
     match Parsed::from_input(input).and_then(|parsed| parsed.json_encode_impl()) {
         Ok(tokens) => tokens,
@@ -156,7 +177,7 @@ pub fn derive_json_encode(input: TokenStream) -> TokenStream {
 /// must be present; unknown object fields are ignored.
 ///
 /// Enums are not supported yet. See the [crate] documentation.
-#[proc_macro_derive(JsonDecode)]
+#[proc_macro_derive(JsonDecode, attributes(reliakit))]
 pub fn derive_json_decode(input: TokenStream) -> TokenStream {
     match Parsed::from_input(input).and_then(|parsed| parsed.json_decode_impl()) {
         Ok(tokens) => tokens,
@@ -171,7 +192,7 @@ pub fn derive_json_decode(input: TokenStream) -> TokenStream {
 /// Only structs with named fields are supported: CSV columns need names, so
 /// tuple structs, unit structs, and enums are rejected. See the [crate]
 /// documentation.
-#[proc_macro_derive(CsvEncode)]
+#[proc_macro_derive(CsvEncode, attributes(reliakit))]
 pub fn derive_csv_encode(input: TokenStream) -> TokenStream {
     match Parsed::from_input(input).and_then(|parsed| parsed.csv_encode_impl()) {
         Ok(tokens) => tokens,
@@ -184,7 +205,7 @@ pub fn derive_csv_encode(input: TokenStream) -> TokenStream {
 /// and each field must parse into its target type.
 ///
 /// Only structs with named fields are supported. See the [crate] documentation.
-#[proc_macro_derive(CsvDecode)]
+#[proc_macro_derive(CsvDecode, attributes(reliakit))]
 pub fn derive_csv_decode(input: TokenStream) -> TokenStream {
     match Parsed::from_input(input).and_then(|parsed| parsed.csv_decode_impl()) {
         Ok(tokens) => tokens,
@@ -228,6 +249,10 @@ enum Body {
 struct Parsed {
     name: String,
     body: Body,
+    /// Optional crate root from `#[reliakit(crate = "...")]`: when set, generated paths
+    /// resolve through that umbrella (`::<root>::csv`/`::<root>::codec`/`::<root>::json`)
+    /// instead of the standalone crates. `None` keeps the standalone paths (the default).
+    crate_root: Option<String>,
 }
 
 /// One enum variant as read from tokens, before validation.
@@ -253,6 +278,8 @@ struct Raw {
     has_generics: bool,
     saw_repr: bool,
     body: RawBody,
+    /// Value of `#[reliakit(crate = "...")]` if the item carried one.
+    crate_root: Option<String>,
 }
 
 impl Parsed {
@@ -267,15 +294,18 @@ impl Parsed {
             Body::Enum(variants) => enum_encode_statements(variants),
         };
 
-        format!(
-            "impl ::reliakit_codec::CanonicalEncode for {name} {{\n\
-             fn encode<__W: ::reliakit_codec::EncodeSink + ?Sized>(&self, __writer: &mut __W) \
-             -> ::core::result::Result<(), ::reliakit_codec::CodecError> {{\n\
-             {statements}\n\
-             ::core::result::Result::Ok(())\n\
-             }}\n\
-             }}",
-            name = self.name,
+        with_crate_root(
+            format!(
+                "impl ::reliakit_codec::CanonicalEncode for {name} {{\n\
+                 fn encode<__W: ::reliakit_codec::EncodeSink + ?Sized>(&self, __writer: &mut __W) \
+                 -> ::core::result::Result<(), ::reliakit_codec::CodecError> {{\n\
+                 {statements}\n\
+                 ::core::result::Result::Ok(())\n\
+                 }}\n\
+                 }}",
+                name = self.name,
+            ),
+            self.crate_root.as_deref(),
         )
         .parse()
         .expect("reliakit-derive generated invalid CanonicalEncode tokens")
@@ -287,14 +317,17 @@ impl Parsed {
             Body::Enum(variants) => enum_decode_value(&self.name, variants),
         };
 
-        format!(
-            "impl ::reliakit_codec::CanonicalDecode for {name} {{\n\
-             fn decode<__R: ::reliakit_codec::DecodeSource + ?Sized>(__reader: &mut __R) \
-             -> ::core::result::Result<Self, ::reliakit_codec::CodecError> {{\n\
-             {value}\n\
-             }}\n\
-             }}",
-            name = self.name,
+        with_crate_root(
+            format!(
+                "impl ::reliakit_codec::CanonicalDecode for {name} {{\n\
+                 fn decode<__R: ::reliakit_codec::DecodeSource + ?Sized>(__reader: &mut __R) \
+                 -> ::core::result::Result<Self, ::reliakit_codec::CodecError> {{\n\
+                 {value}\n\
+                 }}\n\
+                 }}",
+                name = self.name,
+            ),
+            self.crate_root.as_deref(),
         )
         .parse()
         .expect("reliakit-derive generated invalid CanonicalDecode tokens")
@@ -308,13 +341,16 @@ impl Parsed {
             }
         };
 
-        Ok(format!(
-            "impl ::reliakit_json::JsonEncode for {name} {{\n\
-             fn to_json_value(&self) -> ::reliakit_json::JsonValue {{\n\
-             {value}\n\
-             }}\n\
-             }}",
-            name = self.name,
+        Ok(with_crate_root(
+            format!(
+                "impl ::reliakit_json::JsonEncode for {name} {{\n\
+                 fn to_json_value(&self) -> ::reliakit_json::JsonValue {{\n\
+                 {value}\n\
+                 }}\n\
+                 }}",
+                name = self.name,
+            ),
+            self.crate_root.as_deref(),
         )
         .parse()
         .expect("reliakit-derive generated invalid JsonEncode tokens"))
@@ -328,14 +364,17 @@ impl Parsed {
             }
         };
 
-        Ok(format!(
-            "impl ::reliakit_json::JsonDecode for {name} {{\n\
-             fn from_json_value(__value: &::reliakit_json::JsonValue) \
-             -> ::core::result::Result<Self, ::reliakit_json::JsonDecodeError> {{\n\
-             {body}\n\
-             }}\n\
-             }}",
-            name = self.name,
+        Ok(with_crate_root(
+            format!(
+                "impl ::reliakit_json::JsonDecode for {name} {{\n\
+                 fn from_json_value(__value: &::reliakit_json::JsonValue) \
+                 -> ::core::result::Result<Self, ::reliakit_json::JsonDecodeError> {{\n\
+                 {body}\n\
+                 }}\n\
+                 }}",
+                name = self.name,
+            ),
+            self.crate_root.as_deref(),
         )
         .parse()
         .expect("reliakit-derive generated invalid JsonDecode tokens"))
@@ -344,9 +383,12 @@ impl Parsed {
     fn csv_encode_impl(&self) -> Result<TokenStream, String> {
         let fields = csv_named_fields(&self.body, "CsvEncode")?;
         let methods = csv_encode_methods(fields);
-        Ok(format!(
-            "impl ::reliakit_csv::CsvEncode for {name} {{\n{methods}\n}}",
-            name = self.name,
+        Ok(with_crate_root(
+            format!(
+                "impl ::reliakit_csv::CsvEncode for {name} {{\n{methods}\n}}",
+                name = self.name,
+            ),
+            self.crate_root.as_deref(),
         )
         .parse()
         .expect("reliakit-derive generated invalid CsvEncode tokens"))
@@ -355,9 +397,12 @@ impl Parsed {
     fn csv_decode_impl(&self) -> Result<TokenStream, String> {
         let fields = csv_named_fields(&self.body, "CsvDecode")?;
         let method = csv_decode_method(fields);
-        Ok(format!(
-            "impl ::reliakit_csv::CsvDecode for {name} {{\n{method}\n}}",
-            name = self.name,
+        Ok(with_crate_root(
+            format!(
+                "impl ::reliakit_csv::CsvDecode for {name} {{\n{method}\n}}",
+                name = self.name,
+            ),
+            self.crate_root.as_deref(),
         )
         .parse()
         .expect("reliakit-derive generated invalid CsvDecode tokens"))
@@ -523,6 +568,7 @@ fn validate(raw: Raw) -> Result<Parsed, String> {
             Ok(Parsed {
                 name: raw.name,
                 body: Body::Struct(shape),
+                crate_root: raw.crate_root,
             })
         }
         RawBody::Enum(raw_variants) => {
@@ -559,6 +605,7 @@ fn validate(raw: Raw) -> Result<Parsed, String> {
             Ok(Parsed {
                 name: raw.name,
                 body: Body::Enum(variants),
+                crate_root: raw.crate_root,
             })
         }
     }
@@ -573,6 +620,7 @@ fn classify(input: TokenStream) -> Result<Raw, String> {
     // `#[repr(...)]` so enums can reject it (struct behavior is unchanged).
     let mut idx = 0;
     let mut saw_repr = false;
+    let mut crate_root = None;
     let kind = loop {
         match tokens.get(idx) {
             Some(TokenTree::Ident(ident)) => match ident.to_string().as_str() {
@@ -584,6 +632,9 @@ fn classify(input: TokenStream) -> Result<Raw, String> {
             Some(TokenTree::Group(group)) if group.delimiter() == Delimiter::Bracket => {
                 if attr_is_repr(group.stream()) {
                     saw_repr = true;
+                }
+                if let Some(root) = attr_reliakit_crate(group.stream()) {
+                    crate_root = Some(root);
                 }
                 idx += 1;
             }
@@ -642,6 +693,7 @@ fn classify(input: TokenStream) -> Result<Raw, String> {
         has_generics,
         saw_repr,
         body,
+        crate_root,
     })
 }
 
@@ -849,6 +901,56 @@ fn attr_is_repr(stream: TokenStream) -> bool {
     matches!(stream.into_iter().next(), Some(TokenTree::Ident(ident)) if ident.to_string() == "repr")
 }
 
+/// Parses `reliakit(crate = "value")` from an attribute group's inner stream, returning the
+/// crate value. Any other attribute (or a malformed one) yields `None` and is ignored.
+fn attr_reliakit_crate(stream: TokenStream) -> Option<String> {
+    let mut it = stream.into_iter();
+    match it.next() {
+        Some(TokenTree::Ident(ident)) if ident.to_string() == "reliakit" => {}
+        _ => return None,
+    }
+    let inner = match it.next() {
+        Some(TokenTree::Group(group)) if group.delimiter() == Delimiter::Parenthesis => {
+            group.stream()
+        }
+        _ => return None,
+    };
+    let mut inner = inner.into_iter();
+    match inner.next() {
+        Some(TokenTree::Ident(ident)) if ident.to_string() == "crate" => {}
+        _ => return None,
+    }
+    match inner.next() {
+        Some(TokenTree::Punct(punct)) if punct.as_char() == '=' => {}
+        _ => return None,
+    }
+    match inner.next() {
+        // A string literal renders with surrounding quotes; trim exactly one pair.
+        Some(TokenTree::Literal(lit)) => {
+            let s = lit.to_string();
+            let trimmed = s
+                .strip_prefix('"')
+                .and_then(|s| s.strip_suffix('"'))
+                .unwrap_or(&s);
+            (!trimmed.is_empty()).then(|| trimmed.to_string())
+        }
+        _ => None,
+    }
+}
+
+/// Rewrite the standalone crate prefixes in generated code to resolve through an umbrella
+/// crate root, so a downstream crate that depends only on `reliakit` (not the individual
+/// crates) compiles. `None` leaves the standalone paths untouched (the default, unchanged).
+fn with_crate_root(code: String, root: Option<&str>) -> String {
+    match root {
+        None => code,
+        Some(r) => code
+            .replace("::reliakit_codec", &format!("::{r}::codec"))
+            .replace("::reliakit_csv", &format!("::{r}::csv"))
+            .replace("::reliakit_json", &format!("::{r}::json")),
+    }
+}
+
 /// Collects the names of named fields in declaration order.
 fn named_fields(stream: TokenStream) -> Vec<String> {
     let mut fields = Vec::new();
@@ -875,13 +977,28 @@ fn count_fields(stream: TokenStream) -> usize {
         .count()
 }
 
-/// Splits a token stream on top-level commas, dropping the commas.
+/// Splits a token stream on top-level commas, dropping the commas. Commas inside
+/// a delimited group are already hidden by the token tree, but angle brackets
+/// (`<...>`) are plain punctuation rather than a group, so a generic argument
+/// list like `Result<T, E>` keeps its comma at this level. Tracking the angle
+/// depth keeps that comma from being read as a field separator. A stray `>`
+/// (for example the one in a `->` return arrow at depth zero) saturates rather
+/// than underflowing.
 fn top_level_segments(stream: TokenStream) -> Vec<Vec<TokenTree>> {
     let mut segments = Vec::new();
     let mut current = Vec::new();
+    let mut angle_depth: usize = 0;
     for token in stream {
         match &token {
-            TokenTree::Punct(punct) if punct.as_char() == ',' => {
+            TokenTree::Punct(punct) if punct.as_char() == '<' => {
+                angle_depth += 1;
+                current.push(token);
+            }
+            TokenTree::Punct(punct) if punct.as_char() == '>' => {
+                angle_depth = angle_depth.saturating_sub(1);
+                current.push(token);
+            }
+            TokenTree::Punct(punct) if punct.as_char() == ',' && angle_depth == 0 => {
                 segments.push(core::mem::take(&mut current));
             }
             _ => current.push(token),
@@ -904,12 +1021,32 @@ fn compile_error(message: &str) -> TokenStream {
 mod tests {
     use super::*;
 
+    #[test]
+    fn with_crate_root_rewrites_only_with_a_root() {
+        let code = "impl ::reliakit_csv::CsvEncode for X { \
+                    fn header() -> ::reliakit_csv::__private::Vec {} } \
+                    ::reliakit_codec::CanonicalEncode ::reliakit_json::JsonEncode";
+        // No root → unchanged (the default, backward compatible).
+        assert_eq!(with_crate_root(code.to_string(), None), code);
+        // Root → standalone crate prefixes resolve through the umbrella's submodules.
+        let out = with_crate_root(code.to_string(), Some("reliakit"));
+        assert!(out.contains("::reliakit::csv::CsvEncode"));
+        assert!(out.contains("::reliakit::csv::__private::Vec"));
+        assert!(out.contains("::reliakit::codec::CanonicalEncode"));
+        assert!(out.contains("::reliakit::json::JsonEncode"));
+        // The standalone forms are gone.
+        assert!(!out.contains("::reliakit_csv"));
+        assert!(!out.contains("::reliakit_codec"));
+        assert!(!out.contains("::reliakit_json"));
+    }
+
     fn enum_raw(variants: Vec<RawVariant>, saw_repr: bool, has_generics: bool) -> Raw {
         Raw {
             name: "E".to_string(),
             has_generics,
             saw_repr,
             body: RawBody::Enum(variants),
+            crate_root: None,
         }
     }
 
@@ -943,6 +1080,7 @@ mod tests {
             has_generics: false,
             saw_repr: false,
             body: RawBody::Union,
+            crate_root: None,
         };
         assert!(err_of(raw).contains("does not support unions"));
     }
@@ -954,6 +1092,7 @@ mod tests {
             has_generics: true,
             saw_repr: false,
             body: RawBody::Struct(Shape::Unit),
+            crate_root: None,
         };
         assert!(err_of(raw).contains("does not support generic types yet"));
     }
@@ -1013,6 +1152,7 @@ mod tests {
             has_generics: false,
             saw_repr: false,
             body: RawBody::Struct(Shape::Named(vec!["x".to_string()])),
+            crate_root: None,
         };
         let parsed = ok_of(raw);
         assert_eq!(parsed.name, "S");

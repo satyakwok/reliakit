@@ -1,0 +1,54 @@
+name: changelog
+
+on:
+  pull_request:
+    # Re-run when a label is added or removed so the 'no-changelog' escape hatch
+    # takes effect (or stops applying) without another push.
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changelog:
+    name: changelog entry
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          # Full history so the PR diff against the base branch can be computed.
+          fetch-depth: 0
+
+      # A CHANGELOG entry is required only when the PR touches crate source (Rust
+      # or a crate manifest), since that is what users see. CI, docs, and
+      # test-only changes are exempt. The 'no-changelog' label is the deliberate
+      # escape hatch for a source change that is genuinely not user-facing. The
+      # job always runs (the skip is inside the step, not a job-level `if`) so a
+      # required status check never sticks on a "skipped" conclusion.
+      - name: Require a CHANGELOG entry for crate source changes
+        env:
+          SKIP_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'no-changelog') }}
+        run: |
+          if [ "$SKIP_LABEL" = "true" ]; then
+            echo "Skipped: the 'no-changelog' label is applied to this PR."
+            exit 0
+          fi
+          changed="$(git diff --name-only "origin/${{ github.base_ref }}...HEAD")"
+          if echo "$changed" | grep -qE '^crates/[^/]+/(src/|Cargo\.toml$)'; then
+            if echo "$changed" | grep -qx 'CHANGELOG.md'; then
+              echo "OK: crate source changed and CHANGELOG.md was updated."
+            else
+              echo "::error::This PR changes crate source but does not update CHANGELOG.md."
+              echo "Add an entry under '## Unreleased' (or a dated release section)."
+              echo "If the change is genuinely not user-facing, apply the 'no-changelog' label."
+              exit 1
+            fi
+          else
+            echo "OK: no crate source change, so a CHANGELOG entry is not required."
+          fi

@@ -139,3 +139,19 @@ required-features = ["json", "primitives"]
 name = "typed_csv"
 path = "examples/typed_csv.rs"
 required-features = ["csv", "derive"]
+
+[[example]]
+name = "intake_pipeline"
+path = "examples/intake_pipeline.rs"
+required-features = [
+    "csv",
+    "derive",
+    "primitives",
+    "validate",
+    "collections",
+    "codec",
+    "retry",
+    "backoff",
+    "circuit",
+    "health",
+]

@@ -29,7 +29,7 @@ jobs:
                   | select(.commit.verification.verified == false)
                   | "\(.sha[0:9])  \(.commit.message | split("\n")[0])  [\(.commit.verification.reason)]"')"
           if [ -n "$unverified" ]; then
-            echo "::error::These commits are not verified — sign your commits (see this workflow's header for docs):"
+            echo "::error::These commits are not verified. Sign your commits (see this workflow's header for docs):"
             echo "$unverified"
             exit 1
           fi

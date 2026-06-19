@@ -24,7 +24,46 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
   helper. Rejects NaN, infinity, and out-of-range values.
 - `reliakit-primitives`: `PositiveDuration`, a `Duration` that rejects
   `Duration::ZERO`. Has `new`/`TryFrom<Duration>`/`Display`/`AsRef<Duration>`.
-  (Both ship as `reliakit-primitives` 1.1.0.)
+- `reliakit-primitives`: `InlineStr<MIN, MAX>`, a stack-allocated bounded string
+  stored in a `[u8; MAX]` buffer with no heap allocation, so it works in `no_std`
+  without `alloc`. Bounds the byte length (not the character count like
+  `BoundedStr`) and is `Copy`. (All ship as `reliakit-primitives` 1.1.0.)
+- `reliakit-bulkhead`: `Bulkhead::try_acquire_observed` (and a `_one` variant)
+  plus an `Admission` enum: an opt-in hook that reports admitted-vs-rejected and
+  the free permits left after each decision, for metrics, leaving the existing
+  API unchanged. Allocation-free (ships as `reliakit-bulkhead` 1.1.0).
+- `reliakit`: an `intake_pipeline` example carrying one batch end to end: typed
+  CSV in, per-field validation, a bounded buffer that sheds when full, canonical
+  encoding for the wire, a resilient flush behind retry/backoff/circuit, and a
+  closing health report.
+
+## reliakit-derive 1.0.2 - 2026-06-19
+
+### Added
+
+- `#[reliakit(crate = "...")]` container attribute: point the derives at an umbrella
+  crate that re-exports `reliakit-csv`/`reliakit-codec`/`reliakit-json` as its `csv`/
+  `codec`/`json` submodules. The generated code then resolves through it (e.g.
+  `::reliakit::csv`) instead of the standalone crate paths.
+
+### Fixed
+
+- Deriving for a crate that depends only on the umbrella `reliakit` crate (not the
+  individual `reliakit-*` crates) no longer fails to compile with
+  `error[E0433]: use of undeclared crate or module reliakit_csv`. The generated paths
+  hard-coded the standalone crates, which only resolve as direct dependencies; add
+  `#[reliakit(crate = "reliakit")]` to resolve through the umbrella instead. Without the
+  attribute, behavior is unchanged (standalone paths), so this is backward compatible.
+
+## reliakit-derive 1.0.1 - 2026-06-19
+
+### Fixed
+
+- Tuple structs and tuple enum variants with a field whose type holds a generic
+  argument list (`Result<T, E>`, `HashMap<K, V>`, and the like) are now counted
+  correctly. Angle brackets are punctuation, not a token group, so the comma
+  inside `<...>` was read as a field separator and the generated code referenced
+  a field that does not exist.
 
 ## 1.0.0 - 2026-06-15
 

@@ -75,7 +75,7 @@ version = "1.0.0"
 
 [[package]]
 name = "reliakit-derive"
-version = "1.0.0"
+version = "1.0.2"
 dependencies = [
  "reliakit-codec",
  "reliakit-csv",

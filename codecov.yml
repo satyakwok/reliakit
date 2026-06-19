@@ -87,7 +87,7 @@ coverage:
       # reliakit-derive is a proc-macro crate. Its remaining uncovered lines are
       # the `compile_error!` branches for unsupported input (enums, unions,
       # generics), which can only be exercised by a compile-fail harness such as
-      # trybuild — a third-party dev-dependency the workspace forbids. The
+      # trybuild, a third-party dev-dependency the workspace forbids. The
       # coverable surface (every supported struct shape) is fully tested, so the
       # target reflects that structural ceiling.
       reliakit-derive:

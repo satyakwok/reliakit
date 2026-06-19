@@ -88,6 +88,8 @@ pub mod collections;
 pub mod duration;
 /// Shared primitive error type.
 pub mod error;
+/// Inline, stack-allocated bounded string primitive.
+pub mod inline;
 /// MAC address primitive.
 pub mod mac;
 /// IP network (CIDR) primitive.
@@ -112,6 +114,7 @@ pub use bounded::BoundedStr;
 pub use collections::NonEmptyVec;
 pub use duration::{HumanDuration, PositiveDuration};
 pub use error::{PrimitiveError, PrimitiveErrorKind, PrimitiveResult};
+pub use inline::InlineStr;
 pub use mac::MacAddress;
 pub use net::Cidr;
 #[cfg(feature = "alloc")]
