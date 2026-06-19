@@ -21,6 +21,24 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
   `Duration::ZERO`. Has `new`/`TryFrom<Duration>`/`Display`/`AsRef<Duration>`.
   (Both ship as `reliakit-primitives` 1.1.0.)
 
+## reliakit-derive 1.0.2 - 2026-06-19
+
+### Added
+
+- `#[reliakit(crate = "...")]` container attribute: point the derives at an umbrella
+  crate that re-exports `reliakit-csv`/`reliakit-codec`/`reliakit-json` as its `csv`/
+  `codec`/`json` submodules. The generated code then resolves through it (e.g.
+  `::reliakit::csv`) instead of the standalone crate paths.
+
+### Fixed
+
+- Deriving for a crate that depends only on the umbrella `reliakit` crate (not the
+  individual `reliakit-*` crates) no longer fails to compile with
+  `error[E0433]: use of undeclared crate or module reliakit_csv`. The generated paths
+  hard-coded the standalone crates, which only resolve as direct dependencies; add
+  `#[reliakit(crate = "reliakit")]` to resolve through the umbrella instead. Without the
+  attribute, behavior is unchanged (standalone paths), so this is backward compatible.
+
 ## reliakit-derive 1.0.1 - 2026-06-19
 
 ### Fixed
