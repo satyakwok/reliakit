@@ -252,8 +252,8 @@ jobs:
           '
 
       # Ground truth: the fully resolved dependency graph (Cargo.lock) must
-      # contain only reliakit crates. This catches any third-party package —
-      # including a transitive one — that the per-crate manifest scan above
+      # contain only reliakit crates. This catches any third-party package
+      # (including a transitive one) that the per-crate manifest scan above
       # cannot see. The umbrella crate is named `reliakit` (no suffix), so the
       # pattern accepts both `reliakit` and `reliakit-*`.
       - name: Assert the lockfile has no third-party packages

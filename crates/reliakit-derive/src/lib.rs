@@ -249,7 +249,7 @@ enum Body {
 struct Parsed {
     name: String,
     body: Body,
-    /// Optional crate root from `#[reliakit(crate = "...")]` — when set, generated paths
+    /// Optional crate root from `#[reliakit(crate = "...")]`: when set, generated paths
     /// resolve through that umbrella (`::<root>::csv`/`::<root>::codec`/`::<root>::json`)
     /// instead of the standalone crates. `None` keeps the standalone paths (the default).
     crate_root: Option<String>,
