@@ -23,6 +23,10 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
   stored in a `[u8; MAX]` buffer with no heap allocation, so it works in `no_std`
   without `alloc`. Bounds the byte length (not the character count like
   `BoundedStr`) and is `Copy`. (All ship as `reliakit-primitives` 1.1.0.)
+- `reliakit-bulkhead`: `Bulkhead::try_acquire_observed` (and a `_one` variant)
+  plus an `Admission` enum: an opt-in hook that reports admitted-vs-rejected and
+  the free permits left after each decision, for metrics, leaving the existing
+  API unchanged. Allocation-free (ships as `reliakit-bulkhead` 1.1.0).
 - `reliakit`: an `intake_pipeline` example carrying one batch end to end: typed
   CSV in, per-field validation, a bounded buffer that sheds when full, canonical
   encoding for the wire, a resilient flush behind retry/backoff/circuit, and a

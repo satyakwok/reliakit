@@ -58,6 +58,26 @@ pub struct Bulkhead {
     in_flight: usize,
 }
 
+/// The outcome of an acquire: whether the permits were taken.
+///
+/// Reported by [`Bulkhead::try_acquire_observed`]. It is a closed enum (not
+/// `#[non_exhaustive]`): an acquire either admits or rejects, so callers can
+/// match both arms exhaustively.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum Admission {
+    /// Room was available and the permits were reserved.
+    Admitted,
+    /// No room: the request was shed and nothing changed.
+    Rejected,
+}
+
+impl Admission {
+    /// Returns `true` if the permits were admitted.
+    pub const fn is_admitted(&self) -> bool {
+        matches!(self, Admission::Admitted)
+    }
+}
+
 impl Bulkhead {
     /// Creates a bulkhead allowing at most `capacity` concurrent permits.
     ///
@@ -118,6 +138,51 @@ impl Bulkhead {
     /// Tries to acquire a single permit. See [`try_acquire`](Self::try_acquire).
     pub fn try_acquire_one(&mut self) -> bool {
         self.try_acquire(1)
+    }
+
+    /// Like [`try_acquire`](Self::try_acquire), but reports the outcome through
+    /// `observe` before returning, for metrics without changing the result.
+    ///
+    /// `observe` receives the [`Admission`] (admitted vs rejected) and how many
+    /// permits remain [`available`](Self::available) *after* the decision, so a
+    /// caller can record both the outcome and the saturation in one place. It is
+    /// the only way to read that occupancy from inside the observer, since the
+    /// bulkhead is borrowed for the call. `observe` runs exactly once; the crate
+    /// still allocates nothing and logs nothing.
+    ///
+    /// ```
+    /// use reliakit_bulkhead::{Admission, Bulkhead};
+    ///
+    /// let mut bulkhead = Bulkhead::new(1);
+    /// let mut rejected = 0;
+    /// for _ in 0..3 {
+    ///     bulkhead.try_acquire_observed(1, |admission, _free| {
+    ///         if admission == Admission::Rejected {
+    ///             rejected += 1;
+    ///         }
+    ///     });
+    /// }
+    /// // The first acquire is admitted; the next two are shed (capacity 1).
+    /// assert_eq!(rejected, 2);
+    /// ```
+    pub fn try_acquire_observed(
+        &mut self,
+        permits: usize,
+        observe: impl FnOnce(Admission, usize),
+    ) -> bool {
+        let admitted = self.try_acquire(permits);
+        let admission = if admitted {
+            Admission::Admitted
+        } else {
+            Admission::Rejected
+        };
+        observe(admission, self.available());
+        admitted
+    }
+
+    /// A single-permit [`try_acquire_observed`](Self::try_acquire_observed).
+    pub fn try_acquire_one_observed(&mut self, observe: impl FnOnce(Admission, usize)) -> bool {
+        self.try_acquire_observed(1, observe)
     }
 
     /// Releases `permits` permits back to the bulkhead.
@@ -236,5 +301,58 @@ mod tests {
         assert!(b.is_full());
         assert_eq!(b.available(), 0);
         assert!(!b.try_acquire_one());
+    }
+
+    #[test]
+    fn observed_admit_reports_admitted_and_free_after() {
+        let mut b = Bulkhead::new(2);
+        let mut seen = None;
+        let ok = b.try_acquire_observed(1, |admission, free| seen = Some((admission, free)));
+        assert!(ok);
+        // Two capacity minus one taken leaves one free.
+        assert_eq!(seen, Some((Admission::Admitted, 1)));
+        assert_eq!(b.in_flight(), 1);
+    }
+
+    #[test]
+    fn observed_reject_reports_rejected_and_changes_nothing() {
+        let mut b = Bulkhead::new(1);
+        assert!(b.try_acquire_one());
+        let mut seen = None;
+        let ok = b.try_acquire_observed(1, |admission, free| seen = Some((admission, free)));
+        assert!(!ok);
+        assert_eq!(seen, Some((Admission::Rejected, 0)));
+        assert_eq!(b.in_flight(), 1);
+    }
+
+    #[test]
+    fn observed_runs_exactly_once_and_accumulates() {
+        let mut b = Bulkhead::new(1);
+        let mut calls = 0;
+        let mut rejects = 0;
+        for _ in 0..4 {
+            b.try_acquire_observed(1, |admission, _free| {
+                calls += 1;
+                if admission == Admission::Rejected {
+                    rejects += 1;
+                }
+            });
+        }
+        assert_eq!(calls, 4);
+        assert_eq!(rejects, 3);
+    }
+
+    #[test]
+    fn try_acquire_one_observed_delegates() {
+        let mut b = Bulkhead::new(1);
+        let mut seen = None;
+        assert!(b.try_acquire_one_observed(|admission, free| seen = Some((admission, free))));
+        assert_eq!(seen, Some((Admission::Admitted, 0)));
+    }
+
+    #[test]
+    fn admission_is_admitted() {
+        assert!(Admission::Admitted.is_admitted());
+        assert!(!Admission::Rejected.is_admitted());
     }
 }
