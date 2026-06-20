@@ -17,10 +17,14 @@ for you.
 | Retry a flaky call without a runtime | `reliakit-retry`, `reliakit-backoff` | [Retry with backoff](retry-with-backoff.md) |
 | Cap how fast a worker calls something | `reliakit-ratelimit` | [Rate-limit a worker](rate-limit-a-worker.md) |
 | Hash or sign data with a stable byte layout | `reliakit-codec` | [Deterministic encode/decode for signing](deterministic-codec-for-signing.md) |
+| Stop calling a dependency that is already failing | `reliakit-circuit` | [Circuit breaker for a flaky service](circuit-breaker-for-flaky-service.md) |
+| Give a whole operation a time budget | `reliakit-timeout` | [Bound an operation with a deadline](timeout-operation.md) |
+| Parse untrusted JSON strictly and bounded | `reliakit-json` | [Strict JSON at the boundary](strict-json-boundary.md) |
+| Import untrusted CSV with size caps | `reliakit-csv` | [CSV import with limits](csv-import-with-limits.md) |
 
-For the wider problem-to-crate map (circuit breaking, timeouts, health, strict
-JSON/CSV, decisions), see the root [README](../../README.md) sections "Which
-resilience block do I use?" and "Real-world use cases".
+For the remaining crates (health and readiness, graded decisions), see the root
+[README](../../README.md) sections "Which resilience block do I use?" and
+"Real-world use cases".
 
 ## How to read a recipe
 
