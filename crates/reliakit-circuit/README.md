@@ -110,6 +110,36 @@ use reliakit_circuit::CircuitBreaker;
 let breaker = CircuitBreaker::new(5, 10_000).with_success_threshold(3);
 ```
 
+## Observing state transitions (logging, metrics)
+
+To watch the breaker move between states without changing the basic calls, use
+`allow_observed`, `on_success_observed`, and `on_failure_observed`. They take
+the same arguments plus an `on_state_change: FnMut(State, State)` hook called
+on each actual transition, with the previous and new state:
+
+```rust
+use reliakit_circuit::{CircuitBreaker, State};
+
+let mut breaker = CircuitBreaker::new(5, 10_000);
+let mut on_change = |from: State, to: State| {
+    eprintln!("breaker: {from:?} -> {to:?}");
+};
+
+if breaker.allow_observed(now, &mut on_change) {
+    match call_remote() {
+        Ok(_)  => breaker.on_success_observed(&mut on_change),
+        Err(_) => breaker.on_failure_observed(now, &mut on_change),
+    }
+}
+```
+
+The hook fires only on real transitions (not on every call) and **allocates
+nothing**. The plain `allow` / `on_success` / `on_failure` methods are
+unchanged and pay nothing for this feature. The crate still does no logging
+itself; the hook is yours.
+
+`RollingBreaker` exposes the same `_observed` variants.
+
 See [`examples/basic.rs`](./examples/basic.rs) for a complete request loop that
 trips, rejects fast, recovers, and closes again.
 
@@ -120,10 +150,15 @@ trips, rejects fast, recovers, and closes again.
 | `CircuitBreaker::new(failure_threshold, cooldown)` | Construct a breaker (const fn). |
 | `.with_success_threshold(n)` | Successes needed in HalfOpen to close (default `1`). |
 | `allow(now) -> bool` | Whether a call may proceed; advances Open → HalfOpen when the cooldown elapses. |
+| `allow_observed(now, F)` | As `allow`, but calls `F(from, to)` on transition. |
 | `on_success()` | Record a successful call. |
+| `on_success_observed(F)` | As `on_success`, but calls `F(from, to)` on transition. |
 | `on_failure(now)` | Record a failed call. |
+| `on_failure_observed(now, F)` | As `on_failure`, but calls `F(from, to)` on transition. |
 | `state() -> State` | Current state (`Closed` / `Open` / `HalfOpen`). |
 | `trip(now)` / `reset()` | Force the breaker open or closed (e.g. from health signals). |
+| `trip_observed(now, F)` | As `trip`, but calls `F(from, to)` on transition. |
+| `reset_observed(F)` | As `reset`, but calls `F(from, to)` on transition. |
 
 ## Failure rate over a window: `RollingBreaker`
 
