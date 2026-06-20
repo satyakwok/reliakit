@@ -205,12 +205,7 @@ impl<const WINDOW: usize> RollingBreaker<WINDOW> {
     /// [`State::Open`] breaker to [`State::HalfOpen`] just like
     /// [`CircuitBreaker::allow`](crate::CircuitBreaker::allow).
     pub fn allow(&mut self, now: u64) -> bool {
-        if matches!(self.state, State::Open) && now.saturating_sub(self.opened_at) >= self.cooldown
-        {
-            self.state = State::HalfOpen;
-            self.successes = 0;
-        }
-        !matches!(self.state, State::Open)
+        self.allow_observed(now, |_, _| {})
     }
     /// Like [`Self::allow`], but invokes `on_state_change(from, to)` if this
     /// call causes a state transition (Open→HalfOpen when the cooldown elapses).
