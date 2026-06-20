@@ -21,10 +21,14 @@ for you.
 | Give a whole operation a time budget | `reliakit-timeout` | [Bound an operation with a deadline](timeout-operation.md) |
 | Parse untrusted JSON strictly and bounded | `reliakit-json` | [Strict JSON at the boundary](strict-json-boundary.md) |
 | Import untrusted CSV with size caps | `reliakit-csv` | [CSV import with limits](csv-import-with-limits.md) |
+| Cap concurrent in-flight work, shed when full | `reliakit-bulkhead` | [Limit concurrency with a bulkhead](limit-concurrency-with-a-bulkhead.md) |
+| Roll up dependency checks for a `/health` endpoint | `reliakit-health` | [Aggregate checks for a health endpoint](health-check-endpoint.md) |
+| Pick an option by weighing signals, with an explanation | `reliakit-decide` | [Make a graded, explainable decision](graded-explainable-decision.md) |
+| Keep a queue or cache from growing without limit | `reliakit-collections` | [Bound a buffer so it cannot grow without limit](bound-a-buffer.md) |
 
-For the remaining crates (health and readiness, graded decisions), see the root
-[README](../../README.md) sections "Which resilience block do I use?" and
-"Real-world use cases".
+For the remaining crates (`reliakit-core`'s clock abstraction, the `reliakit`
+umbrella), see the root [README](../../README.md) sections "Which resilience
+block do I use?" and "Real-world use cases".
 
 ## How to read a recipe
 
