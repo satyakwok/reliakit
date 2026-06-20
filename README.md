@@ -51,6 +51,10 @@ crate and the smallest correct example.
 | Stop calling a failing dependency | [`reliakit-circuit`](crates/reliakit-circuit) |
 | Give an operation a time budget | [`reliakit-timeout`](crates/reliakit-timeout) |
 | Parse strict, bounded JSON or CSV | [`reliakit-json`](crates/reliakit-json), [`reliakit-csv`](crates/reliakit-csv) |
+| Cap concurrent in-flight work | [`reliakit-bulkhead`](crates/reliakit-bulkhead) |
+| Aggregate checks for a health endpoint | [`reliakit-health`](crates/reliakit-health) |
+| Weigh signals into an explainable decision | [`reliakit-decide`](crates/reliakit-decide) |
+| Bound a queue, buffer, or cache | [`reliakit-collections`](crates/reliakit-collections) |
 
 For choosing between the resilience blocks, see
 [Which resilience block do I use?](#which-resilience-block-do-i-use) below.
