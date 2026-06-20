@@ -157,6 +157,8 @@ trips, rejects fast, recovers, and closes again.
 | `on_failure_observed(now, F)` | As `on_failure`, but calls `F(from, to)` on transition. |
 | `state() -> State` | Current state (`Closed` / `Open` / `HalfOpen`). |
 | `trip(now)` / `reset()` | Force the breaker open or closed (e.g. from health signals). |
+| `trip_observed(now, F)` | As `trip`, but calls `F(from, to)` on transition. |
+| `reset_observed(F)` | As `reset`, but calls `F(from, to)` on transition. |
 
 ## Failure rate over a window: `RollingBreaker`
 

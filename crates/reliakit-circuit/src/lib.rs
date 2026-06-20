@@ -281,18 +281,45 @@ impl CircuitBreaker {
     }
     /// Forces the breaker [`State::Open`] as of `now` (e.g. on a fatal signal).
     pub fn trip(&mut self, now: u64) {
+        self.trip_observed(now, |_, _| {});
+    }
+
+    /// Like [`Self::trip`], but invokes `on_state_change(from, to)` if this
+    /// call causes a state transition (any non-Open state → Open).
+    pub fn trip_observed<OnStateChange>(&mut self, now: u64, mut on_state_change: OnStateChange)
+    where
+        OnStateChange: FnMut(State, State),
+    {
+        let from_state = self.state;
         self.state = State::Open;
         self.opened_at = now;
         self.failures = 0;
         self.successes = 0;
+
+        if self.state != from_state {
+            on_state_change(from_state, self.state);
+        }
     }
 
-    /// Forces the breaker back to [`State::Closed`] and clears its counters.
+    /// Resets the breaker to [`State::Closed`] and clears all counters.
     pub fn reset(&mut self) {
+        self.reset_observed(|_, _| {});
+    }
+
+    /// Like [`Self::reset`], but invokes `on_state_change(from, to)` if this
+    /// call causes a state transition (any non-Closed state → Closed).
+    pub fn reset_observed<OnStateChange>(&mut self, mut on_state_change: OnStateChange)
+    where
+        OnStateChange: FnMut(State, State),
+    {
+        let from_state = self.state;
         self.state = State::Closed;
         self.failures = 0;
         self.successes = 0;
-        self.opened_at = 0;
+
+        if self.state != from_state {
+            on_state_change(from_state, self.state);
+        }
     }
 }
 
@@ -468,6 +495,53 @@ mod tests {
 
         use super::super::*;
         use crate::test_utils::{Log, ManualClock};
+
+        #[test]
+        fn trip_fires_from_closed() {
+            let mut b = CircuitBreaker::new(5, 100);
+            let mut log = Log::new();
+
+            b.trip_observed(0, |f, t| log.push((f, t))); // forced Closed→Open
+
+            assert_eq!(log.as_slice(), &[(State::Closed, State::Open)]);
+        }
+
+        #[test]
+        fn trip_no_op_when_already_open() {
+            let mut b = CircuitBreaker::new(5, 100);
+            let mut log = Log::new();
+            let mut record = |f, t| log.push((f, t));
+
+            b.trip_observed(0, &mut record); // Closed→Open
+            b.trip_observed(0, &mut record); // already Open, no transition
+
+            assert_eq!(log.as_slice(), &[(State::Closed, State::Open)]);
+        }
+
+        #[test]
+        fn reset_fires_from_open() {
+            let mut b = CircuitBreaker::new(5, 100);
+            let mut log = Log::new();
+            let mut record = |f, t| log.push((f, t));
+
+            b.trip_observed(0, &mut record); // Closed→Open
+            b.reset_observed(&mut record); // Open→Closed
+
+            assert_eq!(
+                log.as_slice(),
+                &[(State::Closed, State::Open), (State::Open, State::Closed),]
+            );
+        }
+
+        #[test]
+        fn reset_no_op_when_already_closed() {
+            let mut b = CircuitBreaker::new(5, 100);
+            let mut log = Log::new();
+
+            b.reset_observed(|f, t| log.push((f, t))); // already Closed, no transition
+
+            assert_eq!(log.as_slice(), &[]);
+        }
 
         #[test]
         fn closed_to_open_fires_on_threshold() {
