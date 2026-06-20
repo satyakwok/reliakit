@@ -48,6 +48,9 @@ crate and the smallest correct example.
 | Retry fallible operations | [`reliakit-retry`](crates/reliakit-retry), [`reliakit-backoff`](crates/reliakit-backoff) |
 | Limit how fast a worker runs | [`reliakit-ratelimit`](crates/reliakit-ratelimit) |
 | Encode data deterministically | [`reliakit-codec`](crates/reliakit-codec) |
+| Stop calling a failing dependency | [`reliakit-circuit`](crates/reliakit-circuit) |
+| Give an operation a time budget | [`reliakit-timeout`](crates/reliakit-timeout) |
+| Parse strict, bounded JSON or CSV | [`reliakit-json`](crates/reliakit-json), [`reliakit-csv`](crates/reliakit-csv) |
 
 For choosing between the resilience blocks, see
 [Which resilience block do I use?](#which-resilience-block-do-i-use) below.
