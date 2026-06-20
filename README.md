@@ -36,6 +36,25 @@ other `reliakit-*` crates; a CI check fails the build if any third-party
 dependency appears), `#![forbid(unsafe_code)]`, and usable on its own. You adopt
 **one crate at a time**, not a framework.
 
+## Start here
+
+Have a problem in mind? The [cookbook](docs/cookbook/README.md) maps it to a
+crate and the smallest correct example.
+
+| Problem | Use |
+|---|---|
+| Validate external input | [`reliakit-primitives`](crates/reliakit-primitives), [`reliakit-validate`](crates/reliakit-validate) |
+| Keep secrets out of logs | [`reliakit-secret`](crates/reliakit-secret) |
+| Retry fallible operations | [`reliakit-retry`](crates/reliakit-retry), [`reliakit-backoff`](crates/reliakit-backoff) |
+| Limit how fast a worker runs | [`reliakit-ratelimit`](crates/reliakit-ratelimit) |
+| Encode data deterministically | [`reliakit-codec`](crates/reliakit-codec) |
+| Stop calling a failing dependency | [`reliakit-circuit`](crates/reliakit-circuit) |
+| Give an operation a time budget | [`reliakit-timeout`](crates/reliakit-timeout) |
+| Parse strict, bounded JSON or CSV | [`reliakit-json`](crates/reliakit-json), [`reliakit-csv`](crates/reliakit-csv) |
+
+For choosing between the resilience blocks, see
+[Which resilience block do I use?](#which-resilience-block-do-i-use) below.
+
 ## 30-second example
 
 Retry a flaky operation with backoff, with no runtime, no sleeping, no third-party

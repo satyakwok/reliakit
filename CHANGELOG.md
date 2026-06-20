@@ -32,6 +32,18 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
   plus an `Admission` enum: an opt-in hook that reports admitted-vs-rejected and
   the free permits left after each decision, for metrics, leaving the existing
   API unchanged. Allocation-free (ships as `reliakit-bulkhead` 1.1.0).
+- `reliakit-retry`: `RetryPolicy::with_budget(Duration)` (and `budget()`): an
+  optional cap on the cumulative backoff delay between attempts. The drivers stop
+  with `Exhausted` once the next wait would exceed it, independent of
+  `max_attempts`. It bounds the backoff the policy computes, not wall-clock time
+  (the crate reads no clock). Existing drivers are unchanged when no budget is
+  set. Allocation-free, `no_std` (ships as `reliakit-retry` 1.1.0).
+- `reliakit-derive`: `#[reliakit(rename = "...")]` and `#[reliakit(skip)]` field
+  attributes for the JSON and CSV derives: `rename` sets the object key / CSV
+  header, and `skip` omits the field on encode and fills `Default::default()` on
+  decode. The canonical codec ignores both (positional, names irrelevant), so its
+  wire format is unchanged. Parsed by hand, no new dependencies (ships as
+  `reliakit-derive` 1.1.0).
 - `reliakit`: an `intake_pipeline` example carrying one batch end to end: typed
   CSV in, per-field validation, a bounded buffer that sheds when full, canonical
   encoding for the wire, a resilient flush behind retry/backoff/circuit, and a
