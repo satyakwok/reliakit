@@ -60,7 +60,7 @@ Enable only the building blocks you need:
 
 ```toml
 [dependencies]
-reliakit = { version = "1.0", features = ["ratelimit", "secret"] }
+reliakit = { version = "1.1", features = ["ratelimit", "secret"] }
 ```
 
 ```rust
@@ -72,14 +72,14 @@ use reliakit::secret::Secret;
 
 ```toml
 [dependencies]
-reliakit = { version = "1.0", default-features = false, features = ["alloc", "primitives"] }
+reliakit = { version = "1.1", default-features = false, features = ["alloc", "primitives"] }
 ```
 
 Everything at once:
 
 ```toml
 [dependencies]
-reliakit = { version = "1.0", features = ["full"] }
+reliakit = { version = "1.1", features = ["full"] }
 ```
 
 ## Examples
