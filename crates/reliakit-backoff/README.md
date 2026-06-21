@@ -44,7 +44,7 @@ opinionated executor, combine it with your runtime's timer.
 
 ```toml
 [dependencies]
-reliakit-backoff = "1.0"
+reliakit-backoff = "1.1"
 ```
 
 This crate is `no_std` and has no feature flags; it depends only on `core`.
