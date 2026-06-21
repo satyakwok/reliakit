@@ -33,23 +33,57 @@ independently.
    cargo publish -p <crate> --dry-run --locked
    ```
 6. **Open a PR, let CI pass, and merge** to `main`.
-7. **Tag and push** from the merge commit:
+7. **Tag and push** a signed tag from the merge commit:
    ```sh
-   git tag -a <crate>-v<version> -m "<crate> <version>"
+   git tag -s <crate>-v<version> -m "<crate> <version>"
    git push origin <crate>-v<version>
    ```
-   The tag triggers `.github/workflows/publish.yml`, which authenticates via
-   OIDC and runs `cargo publish`. The job is idempotent: if the version is
-   already on crates.io it skips.
-8. **Create the GitHub release** for the tag with notes drawn from the changelog.
+   The tag fires two workflows automatically:
+   - `.github/workflows/publish.yml` authenticates via OIDC and runs
+     `cargo publish`. It is idempotent: if the version is already on crates.io
+     it skips.
+   - `.github/workflows/release.yml` creates the GitHub release, taking the body
+     from the matching `## <crate> <version>` section of `CHANGELOG.md` (falling
+     back to a link if no section is found).
+8. **Confirm both succeeded:** the crate shows the new version on crates.io and
+   the GitHub release exists. There is no manual release step.
 
 ## Dependency order
 
-Publish leaf crates before dependents, because `cargo publish` verifies that a
-dependency's version already exists on crates.io. The only intra-workspace build
-dependency today is **`reliakit-codec` → `reliakit-primitives`** (optional), so
-publish `reliakit-primitives` first if both are being released. All other
-intra-workspace references are dev-dependencies and do not constrain order.
+Publish a crate's dependencies before the crate itself, because `cargo publish`
+checks that each dependency requirement is already satisfiable on crates.io. The
+runtime intra-workspace dependencies are:
+
+- `reliakit-retry` → `reliakit-backoff`
+- `reliakit-codec` → `reliakit-primitives` (optional `primitives` feature)
+- `reliakit-json` → `reliakit-primitives`, `reliakit-validate` (optional)
+- `reliakit-circuit` / `reliakit-ratelimit` / `reliakit-timeout` →
+  `reliakit-core` (optional `core` feature)
+- the `reliakit` umbrella re-exports every crate
+
+All other intra-workspace references are dev-dependencies and do not constrain
+order. Because every dependent declares a `"1"` requirement, an additive release
+of a dependency does not force its dependents to re-release: they pick up the new
+minor through `cargo update`. Only a breaking (major) release forces the
+dependents to update and move together.
+
+## Releasing several crates at once
+
+For a coordinated release (a milestone), bump and changelog every crate in one
+PR, merge it, then push the tags **leaf-first, in batches of at most three**.
+Pushing more than three tags in a single `git push` does not trigger the Publish
+workflow, so split them and wait for each batch to finish before the next:
+
+```sh
+git tag -s reliakit-primitives-v1.1.0 -m "reliakit-primitives 1.1.0"
+git tag -s reliakit-backoff-v1.1.0    -m "reliakit-backoff 1.1.0"
+git tag -s reliakit-bulkhead-v1.1.0   -m "reliakit-bulkhead 1.1.0"
+git push origin reliakit-primitives-v1.1.0 reliakit-backoff-v1.1.0 reliakit-bulkhead-v1.1.0
+# wait for these three to publish, then push the next batch
+```
+
+Only the changed crates are released; an unchanged crate, including the
+`reliakit` umbrella, needs no re-release.
 
 ## First publish of a new crate
 
