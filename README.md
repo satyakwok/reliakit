@@ -305,7 +305,7 @@ pieces you want:
 
 ```toml
 [dependencies]
-reliakit = { version = "1.0", features = ["ratelimit", "secret"] }
+reliakit = { version = "1.1", features = ["ratelimit", "secret"] }
 ```
 
 ```rust

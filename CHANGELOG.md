@@ -8,12 +8,14 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 
 ## Unreleased
 
+## reliakit 1.1.0 - 2026-06-21
+
 ### Added
 
-- `reliakit`: an `intake_pipeline` example carrying one batch end to end: typed
-  CSV in, per-field validation, a bounded buffer that sheds when full, canonical
-  encoding for the wire, a resilient flush behind retry/backoff/circuit, and a
-  closing health report.
+- An end-to-end `intake_pipeline` example: typed CSV in, per-field validation, a
+  bounded buffer that sheds when full, canonical encoding for the wire, a
+  resilient flush behind retry/backoff/circuit, and a closing health report. The
+  re-exported crates pick up their 1.1 additions through this release.
 
 ## reliakit-backoff 1.1.0 - 2026-06-20
 
