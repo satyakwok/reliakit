@@ -145,6 +145,25 @@ impl<K: PartialEq, V, const MIN: usize, const MAX: usize> BoundedMap<K, V, MIN, 
         Ok(Some(value))
     }
 
+    /// Retains only the entries for which `op` returns `true` on the `key` , `value`.
+    ///
+    /// Counts survivors first; if keeping them would leave fewer than `MIN`
+    /// entries, returns [`CollectionError::TooFew`] and leaves the map unchanged.
+    /// *Note: The closure `op` is evaluated twice per element to guarantee atomicity.*
+    pub fn retain<F>(&mut self, op: F) -> CollectionResult<()>
+    where
+        F: Fn(&K, &V) -> bool,
+    {
+        let actual = self.0.iter().filter(|entry| op(&entry.0, &entry.1)).count();
+
+        if actual < MIN {
+            return Err(CollectionError::TooFew { min: MIN, actual });
+        }
+
+        self.0.retain(|entry| op(&entry.0, &entry.1));
+        Ok(())
+    }
+
     /// Returns a reference to the value for `key`, or `None` if absent.
     pub fn get(&self, key: &K) -> Option<&V> {
         self.0
@@ -164,6 +183,17 @@ impl<K: PartialEq, V, const MIN: usize, const MAX: usize> BoundedMap<K, V, MIN, 
     /// Returns `true` if the map contains `key`.
     pub fn contains_key(&self, key: &K) -> bool {
         self.0.iter().any(|entry| &entry.0 == key)
+    }
+}
+
+/// `drain` is only available when `MIN == 0`. With `MIN > 0`, draining
+/// would always violate the bounds, so the operation is excluded by the
+/// type system entirely.
+impl<K, V, const MAX: usize> BoundedMap<K, V, 0, MAX> {
+    /// Removes all entries from the map and returns them as a `Vec<(K, V)>`,
+    /// preserving insertion order. The map's allocation is retained.
+    pub fn drain(&mut self) -> Vec<(K, V)> {
+        self.0.drain(..).collect()
     }
 }
 
@@ -345,5 +375,134 @@ mod tests {
     fn min_max_len_constants() {
         assert_eq!(BoundedMap::<&str, i32, 2, 8>::min_len(), 2);
         assert_eq!(BoundedMap::<&str, i32, 2, 8>::max_len(), 8);
+    }
+
+    #[cfg(test)]
+    mod map_retain_tests {
+        use super::*;
+
+        // ---- Happy path -------------------------------------------------------
+
+        #[test]
+        fn map_retain_succeeds_above_min() {
+            let mut m: BoundedMap<&str, i32, 2, 10> =
+                BoundedMap::new(vec![("a", 1), ("b", 2), ("c", 3), ("d", 4)]).unwrap();
+            m.retain(|_k, v| *v >= 2).unwrap();
+            assert_eq!(m.as_slice(), &[("b", 2), ("c", 3), ("d", 4)]);
+        }
+
+        #[test]
+        fn map_retain_succeeds_at_min_boundary() {
+            // Boundary: predicate keeps exactly MIN entries.
+            let mut m: BoundedMap<&str, i32, 2, 10> =
+                BoundedMap::new(vec![("a", 1), ("b", 2), ("c", 3)]).unwrap();
+            m.retain(|_k, v| *v >= 2).unwrap();
+            assert_eq!(m.as_slice(), &[("b", 2), ("c", 3)]);
+        }
+
+        #[test]
+        fn map_retain_can_filter_by_key() {
+            // Predicate uses only the key — proves key is accessible.
+            let mut m: BoundedMap<&str, i32, 1, 10> =
+                BoundedMap::new(vec![("apple", 1), ("banana", 2), ("apricot", 3)]).unwrap();
+            m.retain(|k, _v| k.starts_with('a')).unwrap();
+            assert_eq!(m.as_slice(), &[("apple", 1), ("apricot", 3)]);
+        }
+
+        #[test]
+        fn map_retain_can_filter_by_both_key_and_value() {
+            // Predicate uses both — proves both are accessible.
+            let mut m: BoundedMap<&str, i32, 1, 10> =
+                BoundedMap::new(vec![("a", 1), ("b", 2), ("c", 3), ("d", 4)]).unwrap();
+            m.retain(|k, v| k != &"b" && *v >= 2).unwrap();
+            assert_eq!(m.as_slice(), &[("c", 3), ("d", 4)]);
+        }
+
+        #[test]
+        fn map_retain_with_always_true_predicate_is_noop() {
+            let mut m: BoundedMap<&str, i32, 1, 10> =
+                BoundedMap::new(vec![("a", 1), ("b", 2)]).unwrap();
+            m.retain(|_, _| true).unwrap();
+            assert_eq!(m.as_slice(), &[("a", 1), ("b", 2)]);
+        }
+
+        // ---- Failure path -----------------------------------------------------
+
+        #[test]
+        fn map_retain_fails_below_min() {
+            let mut m: BoundedMap<&str, i32, 2, 10> =
+                BoundedMap::new(vec![("a", 1), ("b", 2), ("c", 3)]).unwrap();
+            let result = m.retain(|_, v| *v == 1);
+            assert!(matches!(
+                result,
+                Err(CollectionError::TooFew { min: 2, actual: 1 })
+            ));
+            assert_eq!(
+                m.as_slice(),
+                &[("a", 1), ("b", 2), ("c", 3)],
+                "map unchanged after failed retain"
+            );
+        }
+
+        #[test]
+        fn map_retain_fails_when_predicate_keeps_nothing() {
+            let mut m: BoundedMap<&str, i32, 1, 10> =
+                BoundedMap::new(vec![("a", 1), ("b", 2)]).unwrap();
+            let result = m.retain(|_, _| false);
+            assert!(matches!(
+                result,
+                Err(CollectionError::TooFew { min: 1, actual: 0 })
+            ));
+            assert_eq!(m.as_slice(), &[("a", 1), ("b", 2)]);
+        }
+    }
+
+    #[cfg(test)]
+    mod map_drain_tests {
+        use super::*;
+
+        #[test]
+        fn map_drain_returns_all_entries_and_empties() {
+            let mut m: BoundedMap<&str, i32, 0, 10> =
+                BoundedMap::new(vec![("a", 1), ("b", 2), ("c", 3)]).unwrap();
+            let drained = m.drain();
+            assert_eq!(drained, vec![("a", 1), ("b", 2), ("c", 3)]);
+            assert!(m.is_empty());
+        }
+
+        #[test]
+        fn map_drain_preserves_insertion_order() {
+            // Insertion order should be respected in the drained Vec.
+            let mut m: BoundedMap<&str, i32, 0, 10> = BoundedMap::new(vec![]).unwrap();
+            m.insert("z", 1).unwrap();
+            m.insert("a", 2).unwrap();
+            m.insert("m", 3).unwrap();
+
+            let drained = m.drain();
+            assert_eq!(drained, vec![("z", 1), ("a", 2), ("m", 3)]);
+        }
+
+        #[test]
+        fn map_drain_on_empty_map_returns_empty_vec() {
+            let mut m: BoundedMap<&str, i32, 0, 10> = BoundedMap::new(vec![]).unwrap();
+            let drained = m.drain();
+            assert!(drained.is_empty());
+            assert!(m.is_empty());
+        }
+
+        #[test]
+        fn map_drain_can_be_called_multiple_times() {
+            // After drain, the map is reusable — can be filled and drained again.
+            let mut m: BoundedMap<&str, i32, 0, 10> = BoundedMap::new(vec![("a", 1)]).unwrap();
+
+            let first = m.drain();
+            assert_eq!(first, vec![("a", 1)]);
+            assert!(m.is_empty());
+
+            m.insert("b", 2).unwrap();
+            let second = m.drain();
+            assert_eq!(second, vec![("b", 2)]);
+            assert!(m.is_empty());
+        }
     }
 }
