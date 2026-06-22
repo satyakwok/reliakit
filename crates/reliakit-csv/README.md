@@ -156,8 +156,8 @@ Rust `1.85` and newer. No nightly features are used.
 
 ## Status
 
-Pre-1.0. The API is small and the wire format is fixed; the crate may receive
-backward-compatible refinements before a `1.0` release.
+Published to crates.io at `1.0`. The API is small and the wire format is fixed;
+the crate may receive backward-compatible additions.
 
 ## License
 
