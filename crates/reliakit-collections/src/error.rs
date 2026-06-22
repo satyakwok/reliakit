@@ -29,6 +29,15 @@ pub enum CollectionError {
     ZeroCapacity,
     /// A duplicate key or element was supplied where uniqueness is required.
     Duplicate,
+    /// The provided range is invalid for this operation (e.g. end exceeds the collection's length).
+    InvalidRange {
+        /// The starting index of the requested range.
+        start: usize,
+        /// The ending index (exclusive) of the requested range.
+        end: usize,
+        /// The actual total length of the container.
+        len: usize,
+    },
 }
 
 /// Result alias for bounded collection operations.
@@ -54,6 +63,11 @@ impl fmt::Display for CollectionError {
             }
             Self::ZeroCapacity => write!(f, "capacity must be greater than zero"),
             Self::Duplicate => write!(f, "collection contains a duplicate key or element"),
+            Self::InvalidRange { start, end, len } => write!(
+                f,
+                "invalid range {}..{} for collection of length {}",
+                start, end, len
+            ),
         }
     }
 }

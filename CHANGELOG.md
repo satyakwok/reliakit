@@ -8,6 +8,16 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 
 ## Unreleased
 
+### Added
+
+- `reliakit-collections`: `retain` methods across all bounded collections that 
+  atomically pre-validate size constraints to prevent dropping below `MIN`.
+- `reliakit-collections`: `drain` capabilities with strict guardrails: `BoundedVec` 
+  gains panic-free, overflow-safe range validation, while `BoundedSet`/`BoundedMap` 
+  expose all-or-nothing draining restricted to `MIN == 0` configurations at compile time.
+- `reliakit-collections`: `CollectionError::InvalidRange` to report malformed index bounds 
+  gracefully.
+
 ## reliakit 1.1.0 - 2026-06-21
 
 ### Added
