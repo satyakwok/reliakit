@@ -98,7 +98,7 @@ together:
 ```toml
 [dependencies]
 reliakit-codec = "1.0"
-reliakit-derive = "1.0"
+reliakit-derive = "1.1"
 ```
 
 ```rust

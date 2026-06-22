@@ -73,14 +73,14 @@ host, but it is not a complete URL parser.
 
 ```toml
 [dependencies]
-reliakit-primitives = "1.0"
+reliakit-primitives = "1.1"
 ```
 
 For `no_std` environments:
 
 ```toml
 [dependencies]
-reliakit-primitives = { version = "1.0", default-features = false, features = ["alloc"] }
+reliakit-primitives = { version = "1.1", default-features = false, features = ["alloc"] }
 ```
 
 ## Examples
@@ -237,7 +237,7 @@ Enabling `alloc` adds the owned, allocation-backed types: `Slug`, `Email`,
 The default `std` build enables `alloc` for normal application use:
 
 ```toml
-reliakit-primitives = { version = "1.0", default-features = false, features = ["alloc"] }
+reliakit-primitives = { version = "1.1", default-features = false, features = ["alloc"] }
 ```
 
 ## Safety
@@ -251,8 +251,7 @@ Rust `1.85` and newer. No nightly features are used.
 ## Status
 
 Active. The crate is published for real use and follows normal Rust crate
-versioning. APIs may still receive compatible refinements before a `1.0`
-release.
+versioning. APIs may still receive backward-compatible additions.
 
 ## Contributing
 

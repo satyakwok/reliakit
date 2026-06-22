@@ -49,7 +49,7 @@ compose.
 
 ```toml
 [dependencies]
-reliakit-bulkhead = "1.0"
+reliakit-bulkhead = "1.1"
 ```
 
 This crate is `no_std` and has no feature flags; it depends only on `core`.
@@ -97,8 +97,8 @@ Rust `1.85` and newer. No nightly features are used.
 
 ## Status
 
-Pre-1.0. The API is small and stable; it may receive backward-compatible
-refinements before a `1.0` release.
+Published to crates.io at `1.1`. The API is small and stable; it may receive backward-compatible
+additions.
 
 ## License
 

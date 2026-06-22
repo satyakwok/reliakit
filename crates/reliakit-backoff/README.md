@@ -44,7 +44,7 @@ opinionated executor, combine it with your runtime's timer.
 
 ```toml
 [dependencies]
-reliakit-backoff = "1.0"
+reliakit-backoff = "1.1"
 ```
 
 This crate is `no_std` and has no feature flags; it depends only on `core`.
@@ -115,7 +115,7 @@ Rust `1.85` and newer. No nightly features are used.
 
 ## Status
 
-Published to crates.io at `1.0`. The API is small and stable; further changes
+Published to crates.io at `1.1`. The API is small and stable; further changes
 will be additive under semver.
 
 ## License
