@@ -72,7 +72,7 @@ breaker simply stays open rather than panicking.
 
 ```toml
 [dependencies]
-reliakit-circuit = "1.0"
+reliakit-circuit = "1.1"
 ```
 
 This crate is `#![no_std]` with no required dependencies. It has one optional
@@ -237,7 +237,7 @@ Rust `1.85` and newer. No nightly features are used.
 
 ## Status
 
-Published to crates.io at `1.0`. The state machine is stable; further changes
+Published to crates.io at `1.1`. The state machine is stable; further changes
 will be additive under semver.
 
 ## License
