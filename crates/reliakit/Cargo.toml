@@ -141,6 +141,11 @@ path = "examples/typed_csv.rs"
 required-features = ["csv", "derive"]
 
 [[example]]
+name = "embedded_no_std"
+path = "examples/embedded_no_std.rs"
+required-features = ["core", "backoff", "circuit"]
+
+[[example]]
 name = "intake_pipeline"
 path = "examples/intake_pipeline.rs"
 required-features = [
