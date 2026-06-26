@@ -49,14 +49,14 @@ no opinion about how you wait.
 
 ```toml
 [dependencies]
-reliakit-retry = "1.0"
+reliakit-retry = "1.1"
 ```
 
 For `no_std` (pure `core`, no `std::error::Error` impl):
 
 ```toml
 [dependencies]
-reliakit-retry = { version = "1.0", default-features = false }
+reliakit-retry = { version = "1.1", default-features = false }
 ```
 
 ## Basic sync example
@@ -192,8 +192,8 @@ This crate is `#![forbid(unsafe_code)]`.
 
 ## Status
 
-Pre-1.0. The API is small and stable; it may receive backward-compatible
-refinements before a `1.0` release. Minimum supported Rust version: `1.85`.
+Published to crates.io at `1.1`. The API is small and stable; it may receive backward-compatible
+additions. Minimum supported Rust version: `1.85`.
 
 ## License
 

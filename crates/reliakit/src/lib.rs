@@ -12,7 +12,7 @@
 //! Add it and pick the pieces you want:
 //!
 //! ```toml
-//! reliakit = { version = "1.0", features = ["ratelimit", "secret"] }
+//! reliakit = { version = "1.1", features = ["ratelimit", "secret"] }
 //! ```
 //!
 //! ```
@@ -31,7 +31,7 @@
 //! owned storage:
 //!
 //! ```toml
-//! reliakit = { version = "1.0", default-features = false, features = ["alloc", "primitives"] }
+//! reliakit = { version = "1.1", default-features = false, features = ["alloc", "primitives"] }
 //! ```
 //!
 //! # Features
@@ -106,6 +106,31 @@ pub use reliakit_timeout as timeout;
 #[cfg(feature = "json")]
 pub use reliakit_json as json;
 
+/// The derive macros, re-exported from [`reliakit_derive`].
+///
+/// When you derive **through this umbrella crate** (rather than depending on the
+/// standalone `reliakit-csv` / `reliakit-codec` / `reliakit-json` crates
+/// directly), add `#[reliakit(crate = "reliakit")]` to the type. The generated
+/// code then resolves through `reliakit::csv` / `reliakit::codec` /
+/// `reliakit::json`. Without the attribute the generated code names the
+/// standalone crates (`::reliakit_csv`, ...), which only resolve when those
+/// crates are direct dependencies, so an umbrella-only build fails with
+/// `error[E0433]: use of undeclared crate or module reliakit_csv`.
+///
+/// ```ignore
+/// use reliakit::derive::{CsvDecode, CsvEncode};
+///
+/// #[derive(CsvEncode, CsvDecode)]
+/// #[reliakit(crate = "reliakit")]
+/// struct Row {
+///     id: u32,
+///     name: String,
+/// }
+/// ```
+///
+/// See [`reliakit_derive`] for the full explanation. The derive cannot detect
+/// this automatically: a proc-macro cannot see whether the format crates are
+/// direct or transitive dependencies, so the path root is given explicitly.
 #[cfg(feature = "derive")]
 pub use reliakit_derive as derive;
 

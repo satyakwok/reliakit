@@ -10,23 +10,82 @@ workspace tag such as `vMAJOR.MINOR.PATCH` or a crate-specific tag such as
 
 ### Added
 
-- `reliakit-backoff`: `Backoff::fibonacci(base)`: a Fibonacci backoff schedule
-  where attempt `n` waits `base * fib(n)` (`1, 1, 2, 3, 5, 8, ...`), growth
-  between linear and exponential. Saturating and bounded like the other
-  strategies (ships as `reliakit-backoff` 1.1.0).
-- `reliakit-primitives`: `Probability`, a finite `f64` in `0.0..=1.0` for rates,
-  weights, and sampling. Has `new`/`TryFrom<f64>`/`Display` and a `complement`
-  helper. Rejects NaN, infinity, and out-of-range values.
-- `reliakit-primitives`: `PositiveDuration`, a `Duration` that rejects
-  `Duration::ZERO`. Has `new`/`TryFrom<Duration>`/`Display`/`AsRef<Duration>`.
-- `reliakit-primitives`: `InlineStr<MIN, MAX>`, a stack-allocated bounded string
-  stored in a `[u8; MAX]` buffer with no heap allocation, so it works in `no_std`
-  without `alloc`. Bounds the byte length (not the character count like
-  `BoundedStr`) and is `Copy`. (All ship as `reliakit-primitives` 1.1.0.)
-- `reliakit`: an `intake_pipeline` example carrying one batch end to end: typed
-  CSV in, per-field validation, a bounded buffer that sheds when full, canonical
-  encoding for the wire, a resilient flush behind retry/backoff/circuit, and a
-  closing health report.
+- `reliakit-collections`: `retain` methods across all bounded collections that 
+  atomically pre-validate size constraints to prevent dropping below `MIN`.
+- `reliakit-collections`: `drain` capabilities with strict guardrails: `BoundedVec` 
+  gains panic-free, overflow-safe range validation, while `BoundedSet`/`BoundedMap` 
+  expose all-or-nothing draining restricted to `MIN == 0` configurations at compile time.
+- `reliakit-collections`: `CollectionError::InvalidRange` to report malformed index bounds 
+  gracefully.
+
+## reliakit 1.1.0 - 2026-06-21
+
+### Added
+
+- An end-to-end `intake_pipeline` example: typed CSV in, per-field validation, a
+  bounded buffer that sheds when full, canonical encoding for the wire, a
+  resilient flush behind retry/backoff/circuit, and a closing health report. The
+  re-exported crates pick up their 1.1 additions through this release.
+
+## reliakit-backoff 1.1.0 - 2026-06-20
+
+### Added
+
+- `Backoff::fibonacci(base)`: a Fibonacci backoff schedule where attempt `n` waits
+  `base * fib(n)` (`1, 1, 2, 3, 5, 8, ...`), growth between linear and
+  exponential. Saturating and bounded like the other strategies.
+
+## reliakit-bulkhead 1.1.0 - 2026-06-20
+
+### Added
+
+- `Bulkhead::try_acquire_observed` (and a `_one` variant) plus an `Admission`
+  enum: an opt-in hook that reports admitted-vs-rejected and the free permits left
+  after each decision, for metrics, leaving the existing API unchanged.
+  Allocation-free.
+
+## reliakit-circuit 1.1.0 - 2026-06-20
+
+### Added
+
+- `allow_observed`, `on_success_observed`, `on_failure_observed`, `trip_observed`,
+  and `reset_observed` on both `CircuitBreaker` and `RollingBreaker`, which take an
+  `on_state_change(from, to)` hook called only on actual state transitions for
+  logging or metrics. The existing methods are unchanged and delegate to these
+  with a no-op hook. Allocation-free, `no_std`, zero-dependency.
+
+## reliakit-derive 1.1.0 - 2026-06-20
+
+### Added
+
+- `#[reliakit(rename = "...")]` and `#[reliakit(skip)]` field attributes for the
+  JSON and CSV derives: `rename` sets the object key / CSV header, and `skip`
+  omits the field on encode and fills `Default::default()` on decode. The
+  canonical codec ignores both (positional, names irrelevant), so its wire format
+  is unchanged. Parsed by hand, no new dependencies.
+
+## reliakit-primitives 1.1.0 - 2026-06-20
+
+### Added
+
+- `Probability`, a finite `f64` in `0.0..=1.0` for rates, weights, and sampling.
+  Has `new`/`TryFrom<f64>`/`Display` and a `complement` helper. Rejects NaN,
+  infinity, and out-of-range values.
+- `PositiveDuration`, a `Duration` that rejects `Duration::ZERO`. Has
+  `new`/`TryFrom<Duration>`/`Display`/`AsRef<Duration>`.
+- `InlineStr<MIN, MAX>`, a stack-allocated bounded string stored in a `[u8; MAX]`
+  buffer with no heap allocation, so it works in `no_std` without `alloc`. Bounds
+  the byte length (not the character count like `BoundedStr`) and is `Copy`.
+
+## reliakit-retry 1.1.0 - 2026-06-20
+
+### Added
+
+- `RetryPolicy::with_budget(Duration)` (and `budget()`): an optional cap on the
+  cumulative backoff delay between attempts. The drivers stop with `Exhausted`
+  once the next wait would exceed it, independent of `max_attempts`. It bounds the
+  backoff the policy computes, not wall-clock time (the crate reads no clock).
+  Existing drivers are unchanged when no budget is set. Allocation-free, `no_std`.
 
 ## reliakit-derive 1.0.2 - 2026-06-19
 

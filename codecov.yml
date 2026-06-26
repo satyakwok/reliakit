@@ -85,11 +85,14 @@ coverage:
         flags:
           - reliakit-decide
       # reliakit-derive is a proc-macro crate. Its remaining uncovered lines are
-      # the `compile_error!` branches for unsupported input (enums, unions,
-      # generics), which can only be exercised by a compile-fail harness such as
-      # trybuild, a third-party dev-dependency the workspace forbids. The
-      # coverable surface (every supported struct shape) is fully tested, so the
-      # target reflects that structural ceiling.
+      # the reject branches for unsupported or malformed input (enums, unions,
+      # generics, and malformed `#[reliakit(...)]` field attributes), which fail
+      # the build and so can only be exercised by the compile-fail harness, where
+      # the proc-macro runs in an uninstrumented subprocess. Decisions that can be
+      # made on plain data are factored into pure, unit-tested helpers; what
+      # remains is token-level detection that needs a `proc_macro::TokenStream`,
+      # which cannot be constructed outside a real macro expansion. The target
+      # reflects that structural ceiling.
       reliakit-derive:
         target: 85%
         threshold: 1%
@@ -99,8 +102,14 @@ coverage:
       default:
         target: 90%
         threshold: 1%
-      # See the project note above: the proc-macro error branches are not
-      # coverable without a forbidden third-party harness.
+        # reliakit-derive is judged by its own patch status below, at the lower
+        # target its proc-macro structural ceiling allows. Exclude it here so the
+        # strict default does not also fire on a target it structurally cannot meet.
+        paths:
+          - "!crates/reliakit-derive/**"
+      # See the project note above: the proc-macro reject branches are not
+      # coverable without running the macro in an uninstrumented compile-fail
+      # subprocess.
       reliakit-derive:
         target: 85%
         threshold: 1%

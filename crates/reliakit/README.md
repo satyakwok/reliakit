@@ -60,7 +60,7 @@ Enable only the building blocks you need:
 
 ```toml
 [dependencies]
-reliakit = { version = "1.0", features = ["ratelimit", "secret"] }
+reliakit = { version = "1.1", features = ["ratelimit", "secret"] }
 ```
 
 ```rust
@@ -72,14 +72,14 @@ use reliakit::secret::Secret;
 
 ```toml
 [dependencies]
-reliakit = { version = "1.0", default-features = false, features = ["alloc", "primitives"] }
+reliakit = { version = "1.1", default-features = false, features = ["alloc", "primitives"] }
 ```
 
 Everything at once:
 
 ```toml
 [dependencies]
-reliakit = { version = "1.0", features = ["full"] }
+reliakit = { version = "1.1", features = ["full"] }
 ```
 
 ## Examples
@@ -172,9 +172,9 @@ Rust `1.85` and newer. No nightly features are used.
 
 ## Status
 
-Pre-1.0. A thin re-export layer over the `reliakit-*` building blocks; its public
-surface is the set of feature flags, which may gain backward-compatible additions
-before a 1.0 release.
+Published to crates.io at `1.1`. A thin re-export layer over the `reliakit-*`
+building blocks; its public surface is the set of feature flags, which may gain
+backward-compatible additions.
 
 ## License
 

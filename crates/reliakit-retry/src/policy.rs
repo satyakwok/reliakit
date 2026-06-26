@@ -15,10 +15,16 @@ use reliakit_backoff::Backoff;
 /// for delay values; the attempt count is governed solely by `max_attempts`, so
 /// the two limits never fight. If the backoff yields no delay for a given retry
 /// index, [`Duration::ZERO`] is used.
+///
+/// An optional backoff budget, set with [`with_budget`](Self::with_budget), caps
+/// the cumulative delay spent waiting between attempts, stopping early once the
+/// next wait would exceed it, independent of `max_attempts`. There is none by
+/// default.
 #[derive(Debug, Clone, Copy)]
 pub struct RetryPolicy {
     max_attempts: u32,
     backoff: Backoff,
+    budget: Option<Duration>,
 }
 
 impl RetryPolicy {
@@ -34,6 +40,7 @@ impl RetryPolicy {
         Some(Self {
             max_attempts,
             backoff,
+            budget: None,
         })
     }
 
@@ -45,7 +52,30 @@ impl RetryPolicy {
         Self {
             max_attempts: 1,
             backoff,
+            budget: None,
         }
+    }
+
+    /// Sets a total backoff budget: a cap on the cumulative delay spent waiting
+    /// between attempts. Returns a new policy; the original is unchanged.
+    ///
+    /// Once the next wait would push the cumulative backoff past `budget`, the
+    /// drivers stop and report [`RetryError::Exhausted`](crate::RetryError) instead
+    /// of waiting again, even if `max_attempts` is not yet reached. The budget
+    /// bounds the **backoff time the policy computes**, not wall-clock time or how
+    /// long each attempt runs: this crate reads no clock, so it can only account
+    /// for the delays it produces. By default there is no budget.
+    pub const fn with_budget(self, budget: Duration) -> Self {
+        Self {
+            max_attempts: self.max_attempts,
+            backoff: self.backoff,
+            budget: Some(budget),
+        }
+    }
+
+    /// The total backoff budget, if one is set. See [`with_budget`](Self::with_budget).
+    pub const fn budget(&self) -> Option<Duration> {
+        self.budget
     }
 
     /// The maximum number of attempts (always `>= 1`).

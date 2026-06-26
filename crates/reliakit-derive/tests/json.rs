@@ -122,3 +122,67 @@ fn wrong_shape_is_a_decode_error() {
     let err = from_json_str::<Pair>(r#"{"0":1}"#).unwrap_err();
     assert!(matches!(err, JsonFromStrError::Decode(_)));
 }
+
+#[derive(Debug, PartialEq, JsonEncode, JsonDecode)]
+struct Attributed {
+    // The trailing comma exercises the attribute parser's empty-item handling.
+    #[reliakit(rename = "id")]
+    identifier: u32,
+    #[reliakit(skip)]
+    cached: u8,
+    name: String,
+}
+
+#[test]
+fn rename_changes_the_object_key_and_skip_omits_the_field() {
+    let value = Attributed {
+        identifier: 7,
+        cached: 99,
+        name: "x".into(),
+    };
+    // `identifier` is written as `id`; `cached` is omitted entirely.
+    assert_eq!(to_json_string(&value), r#"{"id":7,"name":"x"}"#);
+}
+
+#[test]
+fn skip_defaults_on_decode_and_rename_round_trips() {
+    // The input has no `cached` key; it decodes to `u8::default()` (0).
+    let parsed: Attributed = from_json_str(r#"{"id":7,"name":"x"}"#).unwrap();
+    assert_eq!(
+        parsed,
+        Attributed {
+            identifier: 7,
+            cached: 0,
+            name: "x".into(),
+        }
+    );
+
+    // A full round-trip: the skipped value is lost (re-defaults to 0), the rest
+    // survives under the renamed key.
+    let value = Attributed {
+        identifier: 3,
+        cached: 42,
+        name: "y".into(),
+    };
+    let restored: Attributed = from_json_str(&to_json_string(&value)).unwrap();
+    assert_eq!(
+        restored,
+        Attributed {
+            identifier: 3,
+            cached: 0,
+            name: "y".into(),
+        }
+    );
+}
+
+#[test]
+fn an_unknown_renamed_key_is_a_missing_field_error() {
+    // The wire key is `id`; the original field name `identifier` is not accepted.
+    let err = from_json_str::<Attributed>(r#"{"identifier":7,"name":"x"}"#).unwrap_err();
+    match err {
+        JsonFromStrError::Decode(error) => {
+            assert_eq!(error.kind(), JsonDecodeErrorKind::MissingField)
+        }
+        other => panic!("expected a missing-field decode error, got {other:?}"),
+    }
+}

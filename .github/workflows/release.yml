@@ -3,10 +3,10 @@ name: Release
 on:
   push:
     tags:
-      - "reliakit-primitives-v*"
-      - "reliakit-secret-v*"
-      - "reliakit-validate-v*"
-      - "reliakit-collections-v*"
+      # Every crate-specific release tag (`reliakit-<crate>-v<version>`) and the
+      # umbrella's own tag (`reliakit-v<version>`).
+      - "reliakit-*-v*"
+      - "reliakit-v*"
 
 # Least privilege at the top level; the release job opts into the write access
 # it needs. This workflow does not publish to crates.io.
@@ -36,7 +36,7 @@ jobs:
           cargo --version
 
       - name: Cache Cargo
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6.0.0
         with:
           path: |
             ~/.cargo/registry
@@ -50,7 +50,24 @@ jobs:
       - name: Run tests
         run: cargo test --workspace --all-features --locked
 
+      - name: Extract release notes from CHANGELOG
+        id: notes
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          version="${tag##*-v}"
+          crate="${tag%-v*}"
+          awk -v crate="$crate" -v ver="$version" '
+            index($0, "## " crate " " ver " ") == 1 { flag = 1; next }
+            flag && /^## / { flag = 0 }
+            flag { print }
+          ' CHANGELOG.md > RELEASE_NOTES.md
+          if ! grep -q "[^[:space:]]" RELEASE_NOTES.md; then
+            printf "See [CHANGELOG.md](CHANGELOG.md) for details.\n" > RELEASE_NOTES.md
+          fi
+          echo "name=$crate $version" >> "$GITHUB_OUTPUT"
+
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3
+        uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3
         with:
-          generate_release_notes: true
+          name: ${{ steps.notes.outputs.name }}
+          body_path: RELEASE_NOTES.md

@@ -129,9 +129,39 @@ impl<T: PartialEq, const MIN: usize, const MAX: usize> BoundedSet<T, MIN, MAX> {
         Ok(true)
     }
 
+    /// Retains only the elements for which `op` returns `true`.
+    ///
+    /// Counts survivors first; if keeping them would leave fewer than `MIN`
+    /// elements, returns [`CollectionError::TooFew`] and leaves the set unchanged.
+    /// *Note: The closure `op` is evaluated twice per element to guarantee atomicity.*
+    pub fn retain<F>(&mut self, op: F) -> CollectionResult<()>
+    where
+        F: Fn(&T) -> bool,
+    {
+        let actual = self.0.iter().filter(|v| op(v)).count();
+
+        if actual < MIN {
+            return Err(CollectionError::TooFew { min: MIN, actual });
+        }
+
+        self.0.retain(op);
+        Ok(())
+    }
+
     /// Returns `true` if the set contains `item`.
     pub fn contains(&self, item: &T) -> bool {
         self.0.contains(item)
+    }
+}
+
+/// `drain` is only available when `MIN == 0`. With `MIN > 0`, draining
+/// would always violate the bounds, so the operation is excluded by the
+/// type system entirely.
+impl<T, const MAX: usize> BoundedSet<T, 0, MAX> {
+    /// Removes all elements from the set and returns them as a `Vec<T>`,
+    /// preserving insertion order. The set's allocation is retained.
+    pub fn drain(&mut self) -> Vec<T> {
+        self.0.drain(..).collect()
     }
 }
 
@@ -297,5 +327,50 @@ mod tests {
     fn min_max_len_constants() {
         assert_eq!(BoundedSet::<i32, 2, 8>::min_len(), 2);
         assert_eq!(BoundedSet::<i32, 2, 8>::max_len(), 8);
+    }
+
+    #[test]
+    fn set_retain_succeeds_above_min() {
+        let mut s: BoundedSet<i32, 2, 10> = BoundedSet::new(vec![1, 2, 3, 4]).unwrap();
+        s.retain(|x| *x >= 2).unwrap();
+        assert_eq!(s.as_slice(), &[2, 3, 4]);
+    }
+
+    #[test]
+    fn set_retain_succeeds_at_min_boundary() {
+        let mut s: BoundedSet<i32, 2, 10> = BoundedSet::new(vec![1, 2, 3]).unwrap();
+        s.retain(|x| *x >= 2).unwrap();
+        assert_eq!(s.as_slice(), &[2, 3]);
+    }
+
+    #[test]
+    fn set_retain_fails_below_min() {
+        let mut s: BoundedSet<i32, 2, 10> = BoundedSet::new(vec![1, 2, 3]).unwrap();
+        let result = s.retain(|x| *x == 1);
+        assert!(matches!(
+            result,
+            Err(CollectionError::TooFew { min: 2, actual: 1 })
+        ));
+        assert_eq!(
+            s.as_slice(),
+            &[1, 2, 3],
+            "set unchanged after failed retain"
+        );
+    }
+
+    #[test]
+    fn set_drain_returns_all_elements_and_empties() {
+        let mut s: BoundedSet<i32, 0, 10> = BoundedSet::new(vec![1, 2, 3]).unwrap();
+        let drained = s.drain();
+        assert_eq!(drained, vec![1, 2, 3]);
+        assert!(s.is_empty());
+    }
+
+    #[test]
+    fn set_drain_on_empty_set_returns_empty_vec() {
+        let mut s: BoundedSet<i32, 0, 10> = BoundedSet::new(vec![]).unwrap();
+        let drained = s.drain();
+        assert!(drained.is_empty());
+        assert!(s.is_empty());
     }
 }

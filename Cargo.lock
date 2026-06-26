@@ -4,7 +4,7 @@ version = 4
 
 [[package]]
 name = "reliakit"
-version = "1.0.0"
+version = "1.1.0"
 dependencies = [
  "reliakit-backoff",
  "reliakit-bulkhead",
@@ -27,7 +27,7 @@ dependencies = [
 
 [[package]]
 name = "reliakit-backoff"
-version = "1.0.0"
+version = "1.1.0"
 
 [[package]]
 name = "reliakit-benches"
@@ -39,11 +39,11 @@ dependencies = [
 
 [[package]]
 name = "reliakit-bulkhead"
-version = "1.0.0"
+version = "1.1.0"
 
 [[package]]
 name = "reliakit-circuit"
-version = "1.0.0"
+version = "1.1.0"
 dependencies = [
  "reliakit-backoff",
  "reliakit-core",
@@ -75,7 +75,7 @@ version = "1.0.0"
 
 [[package]]
 name = "reliakit-derive"
-version = "1.0.2"
+version = "1.1.0"
 dependencies = [
  "reliakit-codec",
  "reliakit-csv",
@@ -111,7 +111,7 @@ dependencies = [
 
 [[package]]
 name = "reliakit-retry"
-version = "1.0.0"
+version = "1.1.0"
 dependencies = [
  "reliakit-backoff",
 ]
