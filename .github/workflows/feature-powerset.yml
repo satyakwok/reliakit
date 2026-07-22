@@ -44,7 +44,7 @@ jobs:
             ${{ runner.os }}-cargo-
 
       - name: Install cargo-hack
-        uses: taiki-e/install-action@50414676f9f5d50a65992c6dd2ed02641263226c # v2.82.10
+        uses: taiki-e/install-action@c44f6b046f1c29ae5918b1e0bfdbb2f1813836fd # v2.84.1
         with:
           tool: cargo-hack
 
